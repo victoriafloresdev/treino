@@ -1,3 +1,12 @@
 treino-backup-*.json
+bem-estar-*.json
 dados-iniciais*.json
 .DS_Store
+
+# contexto e dados pessoais: nunca versionar
+privado/
+CLAUDE.local.md
+
+# testes
+node_modules/
+tests/output/
