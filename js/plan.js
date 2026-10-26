@@ -35,8 +35,8 @@ export const PLAN = [
    "16"
   ],
   "time": [
-   "~40 min",
-   "50–55 min"
+   "~42 min",
+   "52–57 min"
   ],
   "cardio": "Manhã: caminhada moderada",
   "items": [
@@ -187,8 +187,7 @@ export const PLAN = [
     ]
    },
    {
-    "n": "5a",
-    "group": "5",
+    "n": "5",
     "id": "ia5",
     "name": "Panturrilha em pé na máquina",
     "img": "Standing_Calf_Raises",
@@ -198,7 +197,7 @@ export const PLAN = [
     ],
     "reps": "10–15",
     "rir": "1–2",
-    "rest": "Sem descanso: vá para o 5b",
+    "rest": "60 s",
     "prim": [
      "calves"
     ],
@@ -216,15 +215,14 @@ export const PLAN = [
     ],
     "alt": "Panturrilha no leg press ou no Smith.",
     "q": "panturrilha em pé máquina execução",
-    "restSec": 0,
+    "restSec": 60,
     "frames": [
      0,
      1
     ]
    },
    {
-    "n": "5b",
-    "group": "5",
+    "n": "6",
     "id": "ia6",
     "name": "Abdominal na máquina",
     "img": "Ab_Crunch_Machine",
@@ -234,7 +232,7 @@ export const PLAN = [
     ],
     "reps": "10–15",
     "rir": "1–2",
-    "rest": "60–90 s depois do par",
+    "rest": "60 s",
     "prim": [
      "abs"
     ],
@@ -253,7 +251,7 @@ export const PLAN = [
     ],
     "alt": "Abdominal na polia alta, ajoelhada, com corda.",
     "q": "abdominal máquina execução",
-    "restSec": 75,
+    "restSec": 60,
     "frames": [
      0,
      1
@@ -274,8 +272,8 @@ export const PLAN = [
    "17"
   ],
   "time": [
-   "~42 min",
-   "52–57 min"
+   "~44 min",
+   "54–59 min"
   ],
   "cardio": "Manhã: caminhada leve",
   "items": [
@@ -475,8 +473,7 @@ export const PLAN = [
     ]
    },
    {
-    "n": "6a",
-    "group": "6",
+    "n": "6",
     "id": "sa6",
     "name": "Rosca na polia baixa (barra)",
     "img": "Standing_Biceps_Cable_Curl",
@@ -486,7 +483,7 @@ export const PLAN = [
     ],
     "reps": "10–15",
     "rir": "1–2",
-    "rest": "Sem descanso: vá para o 6b",
+    "rest": "60 s",
     "prim": [
      "biceps"
     ],
@@ -505,15 +502,14 @@ export const PLAN = [
     ],
     "alt": "Rosca com halteres.",
     "q": "rosca bíceps polia baixa barra execução",
-    "restSec": 0,
+    "restSec": 60,
     "frames": [
      0,
      1
     ]
    },
    {
-    "n": "6b",
-    "group": "6",
+    "n": "7",
     "id": "sa7",
     "name": "Tríceps na polia alta (corda)",
     "img": "Triceps_Pushdown_-_Rope_Attachment",
@@ -523,7 +519,7 @@ export const PLAN = [
     ],
     "reps": "10–15",
     "rir": "1–2",
-    "rest": "60–90 s depois do par",
+    "rest": "60 s",
     "prim": [
      "triceps"
     ],
@@ -540,7 +536,7 @@ export const PLAN = [
     ],
     "alt": "Tríceps na barra reta.",
     "q": "tríceps corda polia execução",
-    "restSec": 75,
+    "restSec": 60,
     "frames": [
      0,
      1
@@ -561,8 +557,8 @@ export const PLAN = [
    "17"
   ],
   "time": [
-   "~40 min",
-   "50–55 min"
+   "~43 min",
+   "53–58 min"
   ],
   "cardio": "Manhã: caminhada moderada",
   "items": [
@@ -717,8 +713,7 @@ export const PLAN = [
     ]
    },
    {
-    "n": "5a",
-    "group": "5",
+    "n": "5",
     "id": "ib5",
     "name": "Panturrilha sentada (máquina)",
     "img": "Seated_Calf_Raise",
@@ -728,7 +723,7 @@ export const PLAN = [
     ],
     "reps": "12–15",
     "rir": "1–2",
-    "rest": "Sem descanso: vá para o 5b",
+    "rest": "60 s",
     "prim": [
      "calves"
     ],
@@ -744,15 +739,14 @@ export const PLAN = [
     ],
     "alt": "Panturrilha no leg press.",
     "q": "panturrilha sentada máquina execução",
-    "restSec": 0,
+    "restSec": 60,
     "frames": [
      0,
      1
     ]
    },
    {
-    "n": "5b",
-    "group": "5",
+    "n": "6",
     "id": "ib6",
     "name": "Prancha frontal",
     "img": "Plank",
@@ -766,7 +760,7 @@ export const PLAN = [
     ],
     "reps": "20–40 s",
     "rir": "Pare ao perder o alinhamento",
-    "rest": "60 s depois do par",
+    "rest": "60 s",
     "prim": [
      "abs"
     ],
@@ -804,8 +798,8 @@ export const PLAN = [
    "18"
   ],
   "time": [
-   "~42 min",
-   "53–58 min"
+   "~44 min",
+   "55–60 min"
   ],
   "cardio": "Manhã: caminhada leve",
   "items": [
@@ -1001,8 +995,7 @@ export const PLAN = [
     ]
    },
    {
-    "n": "6a",
-    "group": "6",
+    "n": "6",
     "id": "sb6",
     "name": "Tríceps na polia alta (barra V)",
     "img": "Triceps_Pushdown_-_V-Bar_Attachment",
@@ -1012,7 +1005,7 @@ export const PLAN = [
     ],
     "reps": "10–15",
     "rir": "1–2",
-    "rest": "Sem descanso: vá para o 6b",
+    "rest": "60 s",
     "prim": [
      "triceps"
     ],
@@ -1029,15 +1022,14 @@ export const PLAN = [
     ],
     "alt": "Tríceps na máquina.",
     "q": "tríceps polia barra v execução",
-    "restSec": 0,
+    "restSec": 60,
     "frames": [
      0,
      1
     ]
    },
    {
-    "n": "6b",
-    "group": "6",
+    "n": "7",
     "id": "sb7",
     "name": "Rosca martelo na polia (corda)",
     "img": "Cable_Hammer_Curls_-_Rope_Attachment",
@@ -1047,7 +1039,7 @@ export const PLAN = [
     ],
     "reps": "10–15",
     "rir": "1–2",
-    "rest": "60–90 s depois do par",
+    "rest": "60 s",
     "prim": [
      "biceps",
      "forearms"
@@ -1065,7 +1057,7 @@ export const PLAN = [
     ],
     "alt": "Rosca martelo com halteres.",
     "q": "rosca martelo corda polia execução",
-    "restSec": 75,
+    "restSec": 60,
     "frames": [
      0,
      1

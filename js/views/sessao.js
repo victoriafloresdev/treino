@@ -23,17 +23,13 @@ export async function viewSessao(planId) {
   if (!S.open.size || ![...S.open].some(id => pl.items.some(i => i.id === id))) {
     S.open = new Set();
     const firstPending = pl.items.find(it => doneCount(it) < it.sets[S.phase]);
-    if (firstPending) openWithPartner(firstPending.id);
+    if (firstPending) S.open.add(firstPending.id);
   }
   setBar(pl.name, phaseLabel(p), 'treino');
   renderSessao();
 }
 export const setsOf = exId => S.sets.filter(s => s.exId === exId).sort((a, b) => a.setIndex - b.setIndex);
 export const doneCount = it => setsOf(it.id).length;
-export function openWithPartner(id) {
-  const it = S.plan.items.find(i => i.id === id); S.open.add(id);
-  if (it && it.group) S.plan.items.filter(i => i.group === it.group).forEach(i => S.open.add(i.id));
-}
 
 export function renderSessao() {
   const pl = S.plan, ph = S.phase;
@@ -46,10 +42,7 @@ export function renderSessao() {
     ${S.session?.finishedAt ? `<p class="small" style="color:var(--ok);font-weight:700">✓ Finalizado às ${new Date(S.session.finishedAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}. Você ainda pode adicionar séries.</p>` : ''}
     <details class="warm"><summary>Aquecimento (5–8 min)</summary>
       <p>3–5 min de bicicleta ou elíptico leve. No primeiro exercício, 2 séries leves: ~50% da carga × 10 e ~75% × 5. Aquecimento não conta como série, então não registre.</p></details>`;
-  let lastGroup = null;
   pl.items.forEach(it => {
-    if (it.group && it.group !== lastGroup) html += `<div class="ss-label">Superset: alterne ${pl.items.filter(i => i.group === it.group).map(i => i.n).join(' e ')}, descanse depois do par</div>`;
-    lastGroup = it.group || null;
     html += `<div class="ex ${S.open.has(it.id) ? 'open' : ''} ${doneCount(it) >= it.sets[ph] ? 'done' : ''}" id="ex-${it.id}">${exCardInner(it)}</div>`;
   });
   html += `<div style="margin:22px 0 8px"><button class="btn solid block" data-act="finish" ${S.sets.length ? '' : 'disabled style="opacity:.5"'}>${S.session?.finishedAt ? 'Atualizar e ver resumo' : 'Finalizar treino'}</button></div>`;
@@ -78,7 +71,7 @@ export function exCardInner(it) {
         ${fr[0] !== fr[1] ? `<img class="f2" src="img/ex/${it.img}-${fr[1]}.jpg" alt="" loading="lazy">` : ''}</div>
       <dl class="ex-meta">
         <div><dt>Séries</dt><dd>${target}</dd></div><div><dt>Reps</dt><dd>${esc(it.reps)}</dd></div>
-        <div><dt>RIR</dt><dd>${esc(rirFor(it, ph).replace('Pare ao perder o alinhamento', 'técnica'))}</dd></div><div><dt>Descanso</dt><dd>${it.restSec === 0 ? 'vá ao par' : esc(/depois do par/.test(it.rest) ? it.rest.replace(' depois do par', '') : it.rest.replace('90 s–2 min', '1,5–2 min'))}</dd></div>
+        <div><dt>RIR</dt><dd>${esc(rirFor(it, ph).replace('Pare ao perder o alinhamento', 'técnica'))}</dd></div><div><dt>Descanso</dt><dd>${esc(it.rest.replace('90 s–2 min', '1,5–2 min'))}</dd></div>
       </dl>
       ${lastTxt}
       ${sug ? `<div class="suggest">${esc(sug)}</div>` : ''}
@@ -136,25 +129,17 @@ export async function saveSet(exId) {
   S.sets.push(row);
   if (S.extra === exId) S.extra = null;
 
-  // próximo passo: descanso ou parceiro do superset
-  const partner = it.group ? S.plan.items.find(i => i.group === it.group && i.id !== it.id) : null;
+  // próximo passo: descanso; ao terminar o exercício, abre o próximo pendente
   const target = it.sets[S.phase];
-  if (doneCount(it) >= target && !it.group) {
+  if (doneCount(it) >= target) {
     S.open.delete(it.id);
     const nxt = S.plan.items.find(i => doneCount(i) < i.sets[S.phase]);
-    if (nxt) openWithPartner(nxt.id);
+    if (nxt) S.open.add(nxt.id);
   }
-  if (it.group && partner && it.restSec === 0) {
-    toast(`Agora: ${partner.n} ${partner.name}`);
-  } else if (it.restSec) {
+  if (it.restSec) {
     const nxtLabel = doneCount(it) < target ? `${it.name}, série ${doneCount(it) + 1}` :
       (S.plan.items.find(i => doneCount(i) < i.sets[S.phase])?.name || 'fim do treino');
     startTimer(it.restSec, `Descanso · próximo: ${nxtLabel}`);
-  }
-  if (it.group && doneCount(it) >= target && partner && doneCount(partner) >= partner.sets[S.phase]) {
-    S.open.delete(it.id); S.open.delete(partner.id);
-    const nxt = S.plan.items.find(i => doneCount(i) < i.sets[S.phase]);
-    if (nxt) openWithPartner(nxt.id);
   }
   const y = window.scrollY;
   renderSessao();
