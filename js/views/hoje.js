@@ -58,7 +58,7 @@ export async function viewHoje() {
     <div class="card">
       <div class="spread"><h3>Peso</h3><span class="small muted">Média de 7 dias: <b>${w7 ? fmtN(w7) + ' kg' : '–'}</b></span></div>
       ${weighedToday ? `<p class="small" style="color:var(--ok);font-weight:700;margin:4px 0 0">✓ Hoje: ${fmtN(weighedToday.weight)} kg</p>` :
-      `<div class="row" style="margin-top:6px"><label class="f" style="flex:1">Peso de hoje (kg)<input id="wQuick" inputmode="decimal" placeholder="75,0"></label>
+      `<div class="row" style="margin-top:6px"><label class="f" style="flex:1">Peso de hoje (kg)<input id="wQuick" inputmode="decimal" placeholder="0,0"></label>
          <button class="btn solid" style="align-self:flex-end" data-act="saveWeight">Salvar</button></div>
        <p class="small muted" style="margin:8px 0 0">Pese-se de manhã, depois do banheiro e antes de comer. A média semanal é o que importa.</p>`}
     </div>`;

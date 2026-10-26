@@ -15,7 +15,7 @@ export async function viewCorpo() {
     <div class="card"><h2>Peso e cintura</h2>
       <div class="grid2" style="margin-top:10px">
         <label class="f">Data<input type="date" id="bDate" value="${today}"></label>
-        <label class="f">Peso (kg)<input id="bW" inputmode="decimal" placeholder="75,0"></label>
+        <label class="f">Peso (kg)<input id="bW" inputmode="decimal" placeholder="0,0"></label>
         <label class="f">Cintura (cm)<input id="bWaist" inputmode="decimal" placeholder="opcional"></label>
         <label class="f">Observação<input id="bNote" placeholder="opcional"></label>
       </div>

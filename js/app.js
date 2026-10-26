@@ -8,7 +8,7 @@ import { S, viewSessao, setsOf, renderSessao, saveSet, finishSession, howSheet }
 import { viewProgresso } from './views/progresso.js';
 import { viewCorpo } from './views/corpo.js';
 import { viewMais, viewGuia, cardioForm, segVal, exportData, importFile } from './views/mais.js';
-import { db } from './db.js';
+import { db, STORES } from './db.js';
 
 /* ================= eventos ================= */
 document.addEventListener('click', async e => {
@@ -72,7 +72,7 @@ document.addEventListener('click', async e => {
   if (act === 'wipe') {
     if (!confirm('Apagar TODOS os dados deste aparelho?')) return;
     if (!confirm('Tem certeza? Isso não pode ser desfeito.')) return;
-    for (const s of ['sessions', 'sets', 'body', 'comps', 'cardio', 'settings']) await db.clear(s);
+    for (const s of STORES) await db.clear(s);
     toast('Dados apagados.'); location.hash = 'hoje'; route();
   }
 });

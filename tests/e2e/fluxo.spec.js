@@ -39,15 +39,15 @@ test('registrar treino, cardio, corpo, exportar e importar', async ({ page }) =>
   await expect(page.locator('main')).toContainText('32 min de caminhada');
 
   // peso rápido
-  await page.locator('#wQuick').fill('74,8');
+  await page.locator('#wQuick').fill('81,6');
   await page.getByRole('button', { name: 'Salvar', exact: true }).click();
-  await expect(page.locator('main')).toContainText('Hoje: 74,8 kg');
+  await expect(page.locator('main')).toContainText('Hoje: 81,6 kg');
 
   // corpo
   await page.goto('/index.html#corpo');
   await page.locator('#bWaist').fill('81');
   await page.getByRole('button', { name: 'Salvar medida' }).click();
-  await page.locator('#cW').fill('74,8');
+  await page.locator('#cW').fill('81,6');
   await page.locator('#cFat').fill('33');
   await page.getByRole('button', { name: 'Salvar avaliação' }).click();
   await expect(page.locator('main')).toContainText('Dobras cutâneas');

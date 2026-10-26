@@ -30,10 +30,10 @@ export async function seed(page) {
         for (let i = 0; i < 2; i++)
           await db.add('sets', { sessionId: sid, date, planId: 'inferior-a', exId, setIndex: i, kg, reps: 10 + i, secs: null, effort: i ? 'dificil' : 'medio', rir: 1, ts: Date.now() });
       await db.add('cardio', { date, type: 'caminhada', minutes: 30, effort: 'moderado', note: 'canela ok, inclinação 5% e uma observação bem comprida para testar quebra' });
-      await db.add('body', { date, weight: 75 - w * 0.4, waist: 80, note: '' });
+      await db.add('body', { date, weight: 82 - w * 0.4, waist: 88, note: '' });
     }
-    await db.add('comps', { date: d(80), method: 'Dobras cutâneas', weight: 74.35, fatPct: 31.25, fatKg: 23.23, leanKg: 51.12, muscleKg: null, visceral: null, note: 'Pollock 7 dobras' });
-    await db.add('comps', { date: d(40), method: 'Bioimpedância', weight: 75, fatPct: 33.1, fatKg: 24.8, leanKg: 50.2, muscleKg: 27, visceral: 6, note: 'aparelho da academia' });
+    await db.add('comps', { date: d(80), method: 'Dobras cutâneas', weight: 83.15, fatPct: 24.5, fatKg: 20.37, leanKg: 62.78, muscleKg: null, visceral: null, note: 'Pollock 7 dobras' });
+    await db.add('comps', { date: d(40), method: 'Bioimpedância', weight: 82.5, fatPct: 23.4, fatKg: 19.31, leanKg: 63.19, muscleKg: 35.2, visceral: 7, note: 'aparelho da academia' });
   });
 }
 
