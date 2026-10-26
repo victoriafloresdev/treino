@@ -7,11 +7,9 @@ test('abre offline depois do primeiro carregamento', async ({ page, context }) =
   await page.goto('/index.html#hoje');
   await page.waitForSelector('main > *');
   // espera o service worker instalar e guardar todos os arquivos
-  await page.evaluate(async () => {
-    const reg = await navigator.serviceWorker.ready;
-    if (!navigator.serviceWorker.controller) await new Promise(r => navigator.serviceWorker.addEventListener('controllerchange', r, { once: true }));
-    return reg.active.state;
-  });
+  // quando o service worker assume, o app recarrega sozinho; por isso a checagem é repetida
+  await expect.poll(() => page.evaluate(() => !!navigator.serviceWorker.controller).catch(() => false), { timeout: 30000 }).toBe(true);
+  await page.waitForSelector('main > *');
 
   await context.setOffline(true);
   for (const r of ['hoje', 'treino', 'treino/inferior-b', 'progresso', 'corpo', 'mais', 'guia']) {

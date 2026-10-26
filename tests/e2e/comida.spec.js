@@ -188,3 +188,31 @@ test('trocar de tela rápido: a última tela aberta é a que fica', async ({ pag
   await expect(page.locator('main')).not.toContainText('Algo deu errado');
   expect(errors).toEqual([]);
 });
+
+test('aviso na tela Hoje para importar o perfil, uma vez só, e o perfil vai no backup', async ({ page }, info) => {
+  const errors = watchErrors(page);
+  await open(page, 'hoje');
+  await expect(page.locator('.profile-ask')).toBeVisible();
+  const file = info.outputPath('perfil.json');
+  writeFileSync(file, JSON.stringify({ tipo: 'perfil-saude', versao: 1, nome: 'Fulana', remedio: { rotulo: 'Lembrete de teste', sub: '', hora: '06h00', h: 6 } }));
+  await page.locator('#profileFileHoje').setInputFiles(file);
+  await expect(page.locator('#hojeGreet')).toContainText('Fulana');
+  await expect(page.locator('.profile-ask')).toHaveCount(0);
+  // vai no backup e volta ao restaurar
+  const backup = await page.evaluate(async () => { const { db } = await import('/js/db.js'); return db.exportAll(); });
+  expect(backup.profile.map(p => p.nome)).toEqual(['Fulana']);
+  await page.evaluate(async b => { const { db, STORES } = await import('/js/db.js'); for (const s of STORES) await db.clear(s); await db.importAll(b, 'replace'); }, backup);
+  await page.reload();
+  await expect(page.locator('#hojeGreet')).toContainText('Fulana');
+  expect(errors).toEqual([]);
+});
+
+test('"Agora não" esconde o aviso do perfil', async ({ page }) => {
+  await open(page, 'hoje');
+  await page.getByRole('button', { name: 'Agora não' }).click();
+  await expect(page.locator('.profile-ask')).toHaveCount(0);
+  await page.reload();
+  await expect(page.locator('.profile-ask')).toHaveCount(0);
+  await page.goto('/index.html#mais');
+  await expect(page.locator('main')).toContainText('Nenhum perfil importado');
+});

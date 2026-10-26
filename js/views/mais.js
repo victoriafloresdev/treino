@@ -5,7 +5,7 @@ import { app, main, setBar, toast, openSheet, on, onChange } from '../ui.js';
 import { db } from '../db.js';
 import { DAYS, DAY_IDS } from '../data/nutricao.js';
 import { WD, weekModelFromPlan } from '../daytype.js';
-import { getModel, setModel, getProfile, importProfile, removeProfile } from '../days.js';
+import { getModel, setModel, getProfile, importProfileFile, removeProfile } from '../days.js';
 
 export const VERSION = '1.0.0';
 
@@ -55,11 +55,7 @@ export async function viewMais() {
       <p class="small muted" style="margin:4px 0 12px">Remove treinos, medidas e ajustes deste aparelho. Exporte antes.</p>
       <button class="btn danger" data-act="wipe">Apagar todos os dados</button></div>`;
   $('#importFile').onchange = e => importFile(e.target.files[0]);
-  $('#profileFile').onchange = async e => {
-    const f = e.target.files[0]; if (!f) return;
-    try { await importProfile(JSON.parse(await f.text())); toast('Perfil de saúde importado.'); app.route(); }
-    catch (err) { toast(err instanceof SyntaxError ? 'Arquivo inválido: não é um JSON.' : err.message, 4000); }
-  };
+  $('#profileFile').onchange = async e => { if (await importProfileFile(e.target.files[0])) app.route(); };
 }
 
 export function viewGuia() {

@@ -5,6 +5,7 @@ import { DAYS, OPTS, SLOTS, DEFAULT_BUILD, PSY } from './data/nutricao.js';
 import { mealOf, totals, add, ZERO, visible, countedMeals } from './nutri.js';
 import { resolveDay, weekModelFromPlan } from './daytype.js';
 import { todayStr, addDays, weekStart } from './util.js';
+import { toast } from './ui.js';
 
 export const mealUid = (date, slot) => `meal:${date}:${slot}`;
 const dayUid = date => `day:${date}`;
@@ -118,3 +119,9 @@ export async function importProfile(data) {
   await db.put('profile', { uid: 'profile:main', ...rest, versao: versao || 1, importedAt: new Date().toISOString() });
 }
 export const removeProfile = () => db.del('profile', 'profile:main');
+// lê o arquivo escolhido e importa; devolve true se deu certo (mensagens pelo toast)
+export async function importProfileFile(file) {
+  if (!file) return false;
+  try { await importProfile(JSON.parse(await file.text())); toast('Perfil de saúde importado.'); return true; }
+  catch (err) { toast(err instanceof SyntaxError ? 'Arquivo inválido: não é um JSON.' : err.message, 4000); return false; }
+}

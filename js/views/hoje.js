@@ -8,7 +8,7 @@ import { WEEK } from '../plan.js';
 import { DAYS, DAY_IDS, OPTS, PROT, CARB, MOLHO, PSY, TARGET_P, FAT_RANGE, FIBER_RANGE } from '../data/nutricao.js';
 import { mealOf, included, status, deficit, waterGoalCups, fmt, fmt1, noteOf } from '../nutri.js';
 import { SOURCES } from '../daytype.js';
-import { dayInfo, chooseOption, chooseBuild, setIncluded, toggleDone, setPsy, setWater, setOverride, setSkip } from '../days.js';
+import { dayInfo, chooseOption, chooseBuild, setIncluded, toggleDone, setPsy, setWater, setOverride, setSkip, getProfile, importProfileFile } from '../days.js';
 import { habitsOf } from '../habitos.js';
 import { plateSVG, updatePlate } from '../ui/plate.js';
 
@@ -34,6 +34,7 @@ export async function viewHoje() {
   const lastBackup = await db.setting('lastBackup');
   const all = await loadAll();
   const needBackup = all.sets.length > 0 && (!lastBackup || (parseDate(today) - parseDate(lastBackup)) / 864e5 > 14);
+  const askProfile = !(await getProfile()) && !(await db.setting('profilePromptHidden'));
   H.ctx = { p, all };
 
   if (tok !== app.seq) return;
@@ -45,6 +46,10 @@ export async function viewHoje() {
        <div class="form-actions"><button class="btn solid block" data-act="setStart">Salvar data de início</button></div></div>` : ''}
     ${p.week >= 8 ? `<div class="banner"><b>Semana ${p.week}:</b> hora de revisar a ficha. Veja aderência e progressão na aba Progresso.</div>` : ''}
     ${needBackup ? `<div class="banner"><b>Faça um backup.</b> Seus dados ficam só neste celular. <a href="#mais">Exportar agora</a></div>` : ''}
+    ${askProfile ? `<div class="card profile-ask"><h3>Importe seu perfil de saúde</h3>
+      <p class="small muted">Ele traz o lembrete do remédio, as suas notas e as dicas pessoais. Fica só neste celular e vai junto nos backups. É uma vez só.</p>
+      <div class="row"><label class="btn solid" style="cursor:pointer">Importar perfil de saúde<input type="file" id="profileFileHoje" accept="application/json,.json" hidden></label>
+        <button class="btn" type="button" data-act="profileLater">Agora não</button></div></div>` : ''}
     <div class="hoje-grid">
       <section class="h-day" id="hojeDay" aria-label="Tipo de dia"></section>
       <section class="h-now" id="hojeNow" aria-label="Agora"></section>
@@ -56,6 +61,8 @@ export async function viewHoje() {
       <section class="h-timeline" aria-label="Linha do tempo"><ol class="timeline" id="hojeTimeline"></ol></section>
       <section class="h-peso card" id="hojePeso" aria-label="Peso"></section>
     </div>`;
+  const pf = document.getElementById('profileFileHoje');
+  if (pf) pf.onchange = async e => { if (await importProfileFile(e.target.files[0])) app.route(); };
   await refresh();
 }
 
@@ -266,6 +273,7 @@ document.addEventListener('toggle', e => {
 
 on({
   daySheet,
+  async profileLater() { await db.setSetting('profilePromptHidden', true); toast('Você pode importar depois em Mais.'); app.route(); },
   async dayAuto() { await setOverride(todayStr(), null); closeSheet(); await refresh(); },
   async skip(el) { await setSkip(todayStr(), el.dataset.kind, el.dataset.v === '1'); closeSheet(); await refresh(); toast(el.dataset.v === '1' ? 'Dia ajustado.' : 'Desfeito.'); },
   async psy() { await setPsy(todayStr(), !H.info.st.psy); await refresh(); },
