@@ -33,18 +33,18 @@ test('registrar treino, cardio, corpo, exportar e importar', async ({ page }) =>
   await page.locator('#sheet').getByRole('link', { name: 'Voltar para Hoje' }).click();
 
   // cardio
-  await page.getByRole('button', { name: 'Registrar cardio' }).click();
+  await page.locator('.h-timeline').getByRole('button', { name: 'Registrar cardio' }).click();
   await page.locator('#kMin').fill('32');
   await page.getByRole('button', { name: 'Salvar cardio' }).click();
-  await expect(page.locator('main')).toContainText('32 min de caminhada');
+  await expect(page.locator('.h-timeline')).toContainText('32 min de caminhada');
 
   // peso rápido
   await page.locator('#wQuick').fill('81,6');
-  await page.getByRole('button', { name: 'Salvar', exact: true }).click();
+  await page.getByRole('button', { name: 'Salvar peso' }).click();
   await expect(page.locator('main')).toContainText('Hoje: 81,6 kg');
 
   // corpo
-  await page.goto('/index.html#corpo');
+  await page.goto('/index.html#progresso/corpo');
   await page.locator('#bWaist').fill('81');
   await page.getByRole('button', { name: 'Salvar medida' }).click();
   await page.locator('#cW').fill('81,6');

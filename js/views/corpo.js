@@ -1,17 +1,22 @@
 // Tela Corpo: peso, cintura e composição.
 import { esc, todayStr, fmtShort, fmtN } from '../util.js';
 import { program, phaseLabel, loadAll } from '../training.js';
-import { main, setBar } from '../ui.js';
+import { app, main, setBar, subTabs } from '../ui.js';
+import { PROG_TABS } from './progresso.js';
 
 /* ================= tela: Corpo ================= */
 export async function viewCorpo() {
+  // descarta o desenho se outra tela foi aberta enquanto este esperava o banco
+  const tok = app.seq;
   const p = await program();
-  setBar('Corpo', phaseLabel(p));
+  if (tok !== app.seq) return;
+  setBar('Progresso', phaseLabel(p));
   const all = await loadAll();
   const today = todayStr();
   const body = [...all.body].sort((a, b) => a.date < b.date ? 1 : -1);
   const comps = [...all.comps].sort((a, b) => a.date < b.date ? 1 : -1);
-  main.innerHTML = `
+  if (tok !== app.seq) return;
+  main.innerHTML = subTabs('progresso', PROG_TABS, 'corpo') + `
     <div class="card"><h2>Peso e cintura</h2>
       <div class="grid2" style="margin-top:10px">
         <label class="f">Data<input type="date" id="bDate" value="${today}"></label>

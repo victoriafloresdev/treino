@@ -1,13 +1,18 @@
 // Tela Progresso: indicadores e gráficos.
 import { $, esc, pad2, todayStr, parseDate, addDays, weekStart, fmtShort, fmtN } from '../util.js';
 import { e1rm, ITEMS, itemById, planById, EFFORT, isTimed, program, phaseLabel, loadAll, weeklyMuscleSets, avg7 } from '../training.js';
-import { main, setBar, cssVar, destroyCharts, mkChart, destroyChartOn } from '../ui.js';
+import { app, main, setBar, cssVar, destroyCharts, mkChart, destroyChartOn, subTabs } from '../ui.js';
+
+export const PROG_TABS = [['graficos', 'Gráficos'], ['corpo', 'Corpo']];
 import { S } from './sessao.js';
 import { MUSCLES } from '../plan.js';
 
 /* ================= tela: Progresso ================= */
 export async function viewProgresso() {
+  // descarta o desenho se outra tela foi aberta enquanto este esperava o banco
+  const tok = app.seq;
   const p = await program();
+  if (tok !== app.seq) return;
   setBar('Progresso', phaseLabel(p));
   const all = await loadAll();
   const today = todayStr(), ws = weekStart(today);
@@ -21,7 +26,8 @@ export async function viewProgresso() {
   const exWithData = ITEMS.filter((it, i, arr) => arr.findIndex(x => x.id === it.id) === i && all.sets.some(s => s.exId === it.id));
   const selEx = S.progEx && exWithData.some(i => i.id === S.progEx) ? S.progEx : exWithData[0]?.id;
 
-  main.innerHTML = `
+  if (tok !== app.seq) return;
+  main.innerHTML = subTabs('progresso', PROG_TABS, 'graficos') + `
     <div class="kpis">
       <div class="kpi"><div class="v">${perWeek[7]}<span style="font-size:20px">/4</span></div><div class="l">treinos nesta semana</div></div>
       <div class="kpi"><div class="v">${Math.round(100 * last4 / 16)}%</div><div class="l">aderência em 4 semanas</div></div>
@@ -51,11 +57,11 @@ export async function viewProgresso() {
 
     <h2 class="section-title">Peso</h2>
     <div class="card">${all.body.some(b => b.weight != null) ? `<div class="chart-wrap"><canvas id="cWeight"></canvas></div>
-      <p class="small muted" style="margin:8px 0 0">A linha da média de 7 dias é a que vale: o peso diário oscila 1–2 kg com água e sal.</p>` : `<p class="empty">Registre seu peso na aba Hoje ou em Corpo.</p>`}</div>
+      <p class="small muted" style="margin:8px 0 0">A linha da média de 7 dias é a que vale: o peso diário oscila 1–2 kg com água e sal.</p>` : `<p class="empty">Registre seu peso na tela Hoje ou em Progresso › Corpo.</p>`}</div>
 
     <h2 class="section-title">Composição corporal</h2>
     <div class="card">${all.comps.length ? `<div class="chart-wrap"><canvas id="cComp"></canvas></div>
-      <p class="small muted" style="margin:8px 0 0">Compare apenas avaliações do mesmo método. Dobras e bioimpedância dão números diferentes para o mesmo corpo.</p>` : `<p class="empty">Adicione avaliações (dobras ou bioimpedância) na aba Corpo.</p>`}</div>
+      <p class="small muted" style="margin:8px 0 0">Compare apenas avaliações do mesmo método. Dobras e bioimpedância dão números diferentes para o mesmo corpo.</p>` : `<p class="empty">Adicione avaliações (dobras ou bioimpedância) em Progresso › Corpo.</p>`}</div>
 
     <h2 class="section-title">Cardio</h2>
     <div class="card"><div class="chart-wrap"><canvas id="cCardio"></canvas></div></div>`;

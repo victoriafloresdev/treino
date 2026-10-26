@@ -1,8 +1,10 @@
 // Ponto de entrada: eventos globais, rotas e service worker.
 import { $, $$, esc, todayStr, num } from './util.js';
 import { itemById } from './training.js';
-import { app, main, toast, closeSheet, destroyCharts } from './ui.js';
-import { viewHoje } from './views/hoje.js';
+import { app, main, toast, closeSheet, destroyCharts, actions } from './ui.js';
+import { viewHoje, applyDayColor } from './views/hoje.js';
+import { viewComida } from './views/comida.js';
+import { dayInfo } from './days.js';
 import { viewTreinoLista } from './views/treino.js';
 import { S, viewSessao, setsOf, renderSessao, saveSet, finishSession, howSheet } from './views/sessao.js';
 import { viewProgresso } from './views/progresso.js';
@@ -46,6 +48,7 @@ document.addEventListener('click', async e => {
 
   const act = t.closest('[data-act]')?.dataset.act;
   if (!act) return;
+  if (actions[act]) { await actions[act](t.closest('[data-act]'), e); return; }
   if (act === 'setStart') { const v = $('#startDate').value; if (!v) return; await db.setSetting('startDate', v); toast('Data de início salva.'); route(); }
   if (act === 'saveWeight') { const w = num($('#wQuick').value); if (!w) { toast('Informe o peso.'); return; }
     await db.add('body', { date: todayStr(), weight: w, waist: null, note: '' }); toast('Peso salvo.'); route(); }
@@ -79,19 +82,27 @@ document.addEventListener('click', async e => {
 
 /* ================= rotas ================= */
 async function route() {
+  const my = ++app.seq;
   closeSheet(); destroyCharts();
   const [r, arg] = (location.hash.slice(1) || 'hoje').split('/');
-  $$('.nav a').forEach(a => a.setAttribute('aria-current', a.dataset.r === (r === 'guia' ? 'mais' : r) ? 'page' : 'false'));
+  // endereço antigo da aba Corpo
+  if (r === 'corpo') { location.replace('#progresso/corpo'); return; }
+  const tab = { guia: 'mais' }[r] || r;
+  $$('.nav a').forEach(a => a.setAttribute('aria-current', a.dataset.r === tab ? 'page' : 'false'));
+  // a cor de destaque segue o tipo de hoje em todas as telas
+  if (r !== 'hoje' && r !== 'comida') dayInfo().then(i => applyDayColor(i.type)).catch(() => {});
   try {
     if (r === 'treino' && arg) await viewSessao(arg);
     else if (r === 'treino') await viewTreinoLista();
+    else if (r === 'comida') await viewComida(arg);
+    else if (r === 'progresso' && arg === 'corpo') await viewCorpo();
     else if (r === 'progresso') await viewProgresso();
-    else if (r === 'corpo') await viewCorpo();
     else if (r === 'mais') await viewMais();
     else if (r === 'guia') viewGuia();
     else await viewHoje();
   } catch (err) {
     console.error(err);
+    if (my !== app.seq) return;
     main.innerHTML = `<div class="card"><h2>Algo deu errado</h2><p class="muted">${esc(err.message)}</p><p class="small muted">Recarregue o app. Se persistir, exporte um backup em Mais.</p></div>`;
   }
 }

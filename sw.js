@@ -1,9 +1,10 @@
 // Service worker: guarda o app em cache para funcionar offline.
 // Sempre que mudar qualquer arquivo do app, aumente o número da versão abaixo.
-const CACHE = 'treino-v5';
+const CACHE = 'treino-v7';
 const ASSETS = [
   './',
   './css/app.css',
+  './css/comida.css',
   './fonts/archivo.woff2',
   './icons/apple-touch-icon.png',
   './icons/icon-192.png',
@@ -61,12 +62,19 @@ const ASSETS = [
   './img/ex/Wide-Grip_Lat_Pulldown-1.jpg',
   './index.html',
   './js/app.js',
+  './js/data/nutricao.js',
+  './js/days.js',
+  './js/daytype.js',
+  './js/habitos.js',
+  './js/nutri.js',
+  './js/ui/plate.js',
   './js/bodymap.js',
   './js/db.js',
   './js/plan.js',
   './js/training.js',
   './js/ui.js',
   './js/util.js',
+  './js/views/comida.js',
   './js/views/corpo.js',
   './js/views/hoje.js',
   './js/views/mais.js',

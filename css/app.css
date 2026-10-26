@@ -10,8 +10,19 @@
   --easy:#0B7A72; --mid:#2E3DA3; --hard:#E0315B;
   --lower:#0B7A72; --upper:#3443B8; --warn:#8A5200; --warn-bg:#FFF2DB; --ok:#0B7A72;
   --nav-h:62px;
+  /* macros (cores fixas) e prato-relógio */
+  --p:#E0526A; --c:#E39A1E; --g:#7D9D29; --f:#2F8C80;
+  --plate:#FFFFFF; --rim:#E6E9F0; --ring:#EEF1F6; --sleep:#CBD5EC; --water:#2F86C2;
+  /* tipos de dia: A tomate, B abóbora, C açaí, D brócolis */
+  --day-A:#D9442E; --day-B:#E07B12; --day-C:#7A4BB0; --day-D:#2E8B57;
+  --day:var(--accent);
   color-scheme:light;
 }
+/* O tipo de dia muda a cor de destaque da página inteira. --accent é a versão escura (texto e botão, contraste AA). */
+html[data-day="A"]{--day:var(--day-A);--accent:#A9301C;--tint:#FCE5E0}
+html[data-day="B"]{--day:var(--day-B);--accent:#985006;--tint:#FDEBD5}
+html[data-day="C"]{--day:var(--day-C);--accent:#5D338F;--tint:#EFE6F9}
+html[data-day="D"]{--day:var(--day-D);--accent:#1E6A40;--tint:#DDF2E5}
 @media (prefers-color-scheme:dark){
   :root{
     --bg:#0E1320; --surface:#161D2D; --surface2:#1B2337; --ink:#E7EBF4; --muted:#9BA6BD; --line:#29324A;
@@ -19,8 +30,15 @@
     --prim:#FF5A80; --sec:#82384C; --body:#283149; --body2:#36415D;
     --easy:#41C5B7; --mid:#93A0FF; --hard:#FF5A80;
     --lower:#41C5B7; --upper:#93A0FF; --warn:#FFC266; --warn-bg:#2E2412; --ok:#41C5B7;
+    --p:#F27389; --c:#F2B045; --g:#A4C34E; --f:#4FB8A9;
+    --plate:#1C2436; --rim:#212A40; --ring:#262F47; --sleep:#34405E; --water:#6BB8EE;
+    --day-A:#FF8470; --day-B:#FFAB57; --day-C:#BB97F1; --day-D:#62CF91;
     color-scheme:dark;
   }
+  html[data-day="A"]{--accent:var(--day-A);--tint:#3B221E}
+  html[data-day="B"]{--accent:var(--day-B);--tint:#3B2B17}
+  html[data-day="C"]{--accent:var(--day-C);--tint:#2C2340}
+  html[data-day="D"]{--accent:var(--day-D);--tint:#183325}
 }
 *,*::before,*::after{box-sizing:border-box}
 html,body{margin:0;background:var(--bg);color:var(--ink)}
@@ -234,3 +252,16 @@ table.t th{font-size:12px;color:var(--muted);font-weight:600;border-top:0}
 .tbl table:not(.t) th{background:var(--tint);border-top:0}
 
 @media (min-width:700px){ .kpis{grid-template-columns:repeat(4,minmax(0,1fr))} }
+.sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+
+/* desktop: abas no topo */
+@media (min-width:900px){
+  :root{--nav-h:0px}
+  body{padding-top:56px}
+  .nav{top:0;bottom:auto;height:56px;display:flex;justify-content:center;gap:4px;border-top:0;border-bottom:1px solid var(--line);padding:0 16px}
+  .nav a{flex-direction:row;gap:8px;height:56px;padding:0 16px;font-size:15px}
+  .nav a svg{width:20px;height:20px}
+  .appbar{top:56px}
+  main{max-width:1120px;padding-bottom:60px}
+  .appbar{max-width:1120px;margin:0 auto}
+}

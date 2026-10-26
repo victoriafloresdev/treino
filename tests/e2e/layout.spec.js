@@ -4,14 +4,21 @@ import { SIZES, SCHEMES, watchErrors, seed, findOverflow } from './helpers.js';
 // Telas e estados que precisam caber na largura do celular.
 const SCREENS = [
   { name: 'hoje', hash: 'hoje' },
+  { name: 'hoje-almoco', hash: 'hoje', run: async p => { await p.locator('#meal-almoco > summary').click(); } },
+  { name: 'hoje-jantar', hash: 'hoje', run: async p => { await p.locator('#meal-jantar > summary').click(); } },
+  { name: 'hoje-mudar-dia', hash: 'hoje', sheet: '[data-act="daySheet"]' },
   { name: 'treino', hash: 'treino' },
   { name: 'sessao', hash: 'treino/inferior-a', open: true },
   { name: 'sessao-timer', hash: 'treino/inferior-a', open: true, timer: true },
+  { name: 'comida-semana', hash: 'comida/semana' },
+  { name: 'comida-trocas', hash: 'comida/trocas', run: async p => { await p.locator('#cK').fill('180'); await p.locator('#cP').fill('22'); } },
+  { name: 'comida-livre', hash: 'comida/livre', run: async p => { await p.locator('label:has(input[name="lvStrat"][value="diluir"])').click(); } },
+  { name: 'comida-dicas', hash: 'comida/dicas', run: async p => { await p.evaluate(() => document.querySelectorAll('details.tip').forEach(d => { d.open = true; })); } },
   { name: 'progresso', hash: 'progresso' },
-  { name: 'corpo', hash: 'corpo' },
+  { name: 'corpo', hash: 'progresso/corpo' },
   { name: 'mais', hash: 'mais' },
   { name: 'guia', hash: 'guia' },
-  { name: 'cardio-form', hash: 'hoje', sheet: '[data-act="cardioForm"]' },
+  { name: 'cardio-form', hash: 'hoje', sheet: '.h-now [data-act="cardioForm"], .h-timeline [data-act="cardioForm"]' },
   { name: 'como-fazer', hash: 'treino/inferior-a', sheet: '[data-how]' }
 ];
 
@@ -29,6 +36,7 @@ for (const size of SIZES) for (const scheme of SCHEMES) {
         if (sc.open) await page.locator('.ex').first().evaluate(el => el.classList.add('open'));
         if (sc.timer) await page.evaluate(() => document.getElementById('timer').classList.add('on'));
         if (sc.sheet) { await page.locator(sc.sheet).first().click(); await page.waitForSelector('#sheet.on'); }
+        if (sc.run) await sc.run(page);
         await page.waitForTimeout(150);
         const bad = await findOverflow(page);
         if (bad.length) problems[sc.name] = bad;

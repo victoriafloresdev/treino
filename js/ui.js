@@ -2,7 +2,24 @@
 import { $, pad2 } from './util.js';
 
 // O app.js preenche app.route; as telas chamam app.route() para redesenhar.
-export const app = { route: () => {} };
+// app.seq conta as navegações: uma tela que termina de carregar depois de outra ter sido aberta não desenha nada.
+export const app = { route: () => {}, seq: 0 };
+
+// Cada tela registra os próprios botões (data-act) e campos (data-on): o app.js só despacha.
+export const actions = {};
+export const changes = {};
+export function on(map) { Object.assign(actions, map); }
+
+// Sub-abas de uma seção (ex.: Comida › Semana), como controle segmentado de links.
+export function subTabs(base, tabs, cur) {
+  return `<nav class="subtabs" aria-label="Partes da seção">${tabs.map(([id, label]) =>
+    `<a href="#${base}/${id}" ${id === cur ? 'aria-current="page"' : ''}>${label}</a>`).join('')}</nav>`;
+}
+export function onChange(map) { Object.assign(changes, map); }
+document.addEventListener('change', e => {
+  const el = e.target.closest('[data-on]');
+  if (el && changes[el.dataset.on]) changes[el.dataset.on](el, e);
+});
 
 /* ================= UI básica ================= */
 export const main = $('#main');

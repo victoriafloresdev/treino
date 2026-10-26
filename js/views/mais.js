@@ -1,22 +1,44 @@
 // Telas Mais e Guia, formulários, exportar e importar.
 import { $, esc, todayStr, fmtShort } from '../util.js';
 import { program, phaseLabel } from '../training.js';
-import { app, main, setBar, toast, openSheet } from '../ui.js';
+import { app, main, setBar, toast, openSheet, on, onChange } from '../ui.js';
 import { db } from '../db.js';
+import { DAYS, DAY_IDS } from '../data/nutricao.js';
+import { WD, weekModelFromPlan } from '../daytype.js';
+import { getModel, setModel, getProfile, importProfile, removeProfile } from '../days.js';
 
 export const VERSION = '1.0.0';
 
 /* ================= tela: Mais / Guia ================= */
 export async function viewMais() {
+  // descarta o desenho se outra tela foi aberta enquanto este esperava o banco
+  const tok = app.seq;
   const p = await program();
+  if (tok !== app.seq) return;
   setBar('Mais', phaseLabel(p));
   const lastBackup = await db.setting('lastBackup');
   const standalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+  const model = await getModel(), fromPlan = weekModelFromPlan(), profile = await getProfile();
+  if (tok !== app.seq) return;
   main.innerHTML = `
     <div class="card"><h2>Programa</h2>
       <label class="f" style="margin-top:8px">Data de início<input type="date" id="startDate" value="${p.start || todayStr()}"></label>
       <div class="form-actions"><button class="btn block" data-act="setStart">Salvar data de início</button></div>
       <p class="small muted" style="margin:10px 0 0">${p.start ? `Você está na semana ${p.week}. Semanas 1–2: 2 séries por exercício e RIR 3–4.` : 'Defina a data para o app calcular a semana e a fase.'}</p>
+    </div>
+    <div class="card"><h2>Semana modelo</h2>
+      <p class="small muted" style="margin:4px 0 10px">O tipo previsto de cada dia da semana. Vem da ficha de treino: musculação seg, ter, qui e sex; cardio de segunda a sábado.</p>
+      <div class="week">${WD.map((w, i) => `<div class="wk-row"><div class="wk-d"><b>${w}</b></div>
+        <fieldset class="wk-opts" data-on="modelDay" data-i="${i}"><legend class="sr">Tipo previsto de ${w}</legend>
+          ${DAY_IDS.map(t => `<label style="--wk:var(--day-${t})"><input type="radio" name="model-${i}" value="${t}" ${t === model[i] ? 'checked' : ''} aria-label="${esc(DAYS[t].name)}"><span aria-hidden="true">${DAYS[t].e}</span></label>`).join('')}
+        </fieldset><div class="wk-k"><small>${esc(DAYS[model[i]].short)}</small></div></div>`).join('')}</div>
+      ${model.join() !== fromPlan.join() ? `<div class="form-actions"><button class="btn block" type="button" data-act="modelReset">Voltar ao modelo da ficha</button></div>` : ''}
+    </div>
+    <div class="card"><h2>Perfil de saúde</h2>
+      <p class="small muted" style="margin:4px 0 10px">Textos pessoais (remédio, pontos dos exames, metas) ficam só neste aparelho, num arquivo que você importa. Sem ele, o app mostra textos genéricos.</p>
+      <p style="margin:0 0 10px">${profile ? `✓ Perfil importado em ${fmtShort(profile.importedAt.slice(0, 10))}.` : 'Nenhum perfil importado.'}</p>
+      <div class="row"><label class="btn ${profile ? '' : 'solid'}" style="cursor:pointer">Importar perfil de saúde<input type="file" id="profileFile" accept="application/json,.json" hidden></label>
+        ${profile ? '<button class="btn danger" type="button" data-act="profileRemove">Remover perfil</button>' : ''}</div>
     </div>
     <a class="card" href="#guia" style="display:block;text-decoration:none;color:inherit"><h2>Guia rápido ›</h2><p class="muted" style="margin:0">RIR, quando subir a carga, cardio e quando parar.</p></a>
     <div class="card"><h2>Backup</h2>
@@ -33,6 +55,11 @@ export async function viewMais() {
       <p class="small muted" style="margin:4px 0 12px">Remove treinos, medidas e ajustes deste aparelho. Exporte antes.</p>
       <button class="btn danger" data-act="wipe">Apagar todos os dados</button></div>`;
   $('#importFile').onchange = e => importFile(e.target.files[0]);
+  $('#profileFile').onchange = async e => {
+    const f = e.target.files[0]; if (!f) return;
+    try { await importProfile(JSON.parse(await f.text())); toast('Perfil de saúde importado.'); app.route(); }
+    catch (err) { toast(err instanceof SyntaxError ? 'Arquivo inválido: não é um JSON.' : err.message, 4000); }
+  };
 }
 
 export function viewGuia() {
@@ -110,3 +137,11 @@ export async function importFile(f) {
       <button class="btn" data-imp="merge">Juntar com os dados atuais</button></div>`);
   importFile.pending = data;
 }
+
+on({
+  async modelReset() { await setModel(weekModelFromPlan()); toast('Modelo da ficha restaurado.'); app.route(); },
+  async profileRemove() { if (!confirm('Remover o perfil de saúde deste aparelho?')) return; await removeProfile(); toast('Perfil removido.'); app.route(); }
+});
+onChange({
+  async modelDay(el, e) { const m = await getModel(); m[Number(el.dataset.i)] = e.target.value; await setModel(m); app.route(); }
+});

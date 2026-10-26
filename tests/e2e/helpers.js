@@ -32,6 +32,11 @@ export async function seed(page) {
       await db.add('cardio', { date, type: 'caminhada', minutes: 30, effort: 'moderado', note: 'canela ok, inclinação 5% e uma observação bem comprida para testar quebra' });
       await db.add('body', { date, weight: 82 - w * 0.4, waist: 88, note: '' });
     }
+    // perfil fictício, só para exercitar os textos que vêm do perfil
+    await db.put('profile', { uid: 'profile:main', nome: 'Teste', importedAt: new Date().toISOString(),
+      remedio: { rotulo: 'Remédio de teste com água', sub: 'Texto de exemplo de um lembrete com várias palavras.', hora: '06h00', h: 6, e: '💊' },
+      textos: { 'nota.carneVermelha': 'Nota pessoal de teste.', 'dica.medico.pontos': '<ul><li>Ponto de teste um</li><li>Ponto de teste dois</li></ul>' },
+      dicas: { remedio: { e: '💊', title: 'Remédio de teste', small: 'Exemplo', html: '<p>Texto de exemplo.</p>' } } });
     await db.add('comps', { date: d(80), method: 'Dobras cutâneas', weight: 83.15, fatPct: 24.5, fatKg: 20.37, leanKg: 62.78, muscleKg: null, visceral: null, note: 'Pollock 7 dobras' });
     await db.add('comps', { date: d(40), method: 'Bioimpedância', weight: 82.5, fatPct: 23.4, fatKg: 19.31, leanKg: 63.19, muscleKg: 35.2, visceral: 7, note: 'aparelho da academia' });
   });
@@ -50,6 +55,8 @@ export async function findOverflow(page) {
       const cs = getComputedStyle(el);
       if (cs.display === 'none' || cs.visibility === 'hidden') continue;
       if (el.closest('svg') && el.tagName.toLowerCase() !== 'svg') continue;
+      // texto só para leitor de tela: é cortado de propósito
+      if (el.closest('.sr')) continue;
       const r = el.getBoundingClientRect();
       if (r.width === 0 || r.height === 0) continue;
       if (cs.position === 'fixed') {
@@ -73,7 +80,7 @@ export async function findOverflow(page) {
     for (let n = walker.nextNode(); n; n = walker.nextNode()) {
       if (!n.textContent.trim()) continue;
       const host = n.parentElement;
-      if (!host || host.closest('svg, script, style') || host.closest(SCROLL_X)) continue;
+      if (!host || host.closest('svg, script, style, .sr') || host.closest(SCROLL_X)) continue;
       const hcs = getComputedStyle(host);
       if (hcs.display === 'none' || hcs.visibility === 'hidden' || hcs.textOverflow === 'ellipsis') continue;
       const box = host.getBoundingClientRect();

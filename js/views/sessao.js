@@ -1,7 +1,7 @@
 // Sessão de treino: registro série por série.
 import { $, esc, todayStr, fmtShort, fmtLong, num, fmtN } from '../util.js';
 import { e1rm, planById, EFFORT, isTimed, range, rirFor, program, phaseLabel, loadAll, lastSetsFor, suggestion } from '../training.js';
-import { main, setBar, toast, openSheet, unlockAudio, startTimer } from '../ui.js';
+import { app, main, setBar, toast, openSheet, unlockAudio, startTimer } from '../ui.js';
 import { db } from '../db.js';
 import { MUSCLES } from '../plan.js';
 import { bodyMap } from '../bodymap.js';
@@ -10,6 +10,8 @@ import { bodyMap } from '../bodymap.js';
 export const S = { plan: null, session: null, sets: [], last: {}, open: new Set(), phase: 0 };
 
 export async function viewSessao(planId) {
+  // descarta o desenho se outra tela foi aberta enquanto este esperava o banco
+  const tok = app.seq;
   const pl = planById(planId);
   if (!pl) { location.hash = 'treino'; return; }
   const p = await program();
@@ -25,7 +27,9 @@ export async function viewSessao(planId) {
     const firstPending = pl.items.find(it => doneCount(it) < it.sets[S.phase]);
     if (firstPending) S.open.add(firstPending.id);
   }
+  if (tok !== app.seq) return;
   setBar(pl.name, phaseLabel(p), 'treino');
+  if (tok !== app.seq) return;
   renderSessao();
 }
 export const setsOf = exId => S.sets.filter(s => s.exId === exId).sort((a, b) => a.setIndex - b.setIndex);
