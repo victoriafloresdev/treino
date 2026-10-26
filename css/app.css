@@ -24,14 +24,20 @@
 }
 *,*::before,*::after{box-sizing:border-box}
 html,body{margin:0;background:var(--bg);color:var(--ink)}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 body{font-family:"Archivo",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:16px;line-height:1.45;
   -webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent;overscroll-behavior-y:none}
 button,input,select,textarea{font:inherit;color:inherit}
 a{color:var(--accent)}
 :focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 img{max-width:100%;display:block}
+/* textos longos quebram em vez de vazar da caixa */
+main,.sheet,.toast,.timer{overflow-wrap:anywhere}
+/* em tabela, quebrar no meio da palavra deixa as colunas ilegíveis */
+table{overflow-wrap:normal}
 
 /* app bar */
+.appbar>*{min-width:0}
 .appbar{position:sticky;top:0;z-index:20;background:var(--bg);padding:calc(env(safe-area-inset-top,0px) + 10px) 18px 10px;
   display:flex;align-items:flex-end;justify-content:space-between;gap:12px;border-bottom:1px solid transparent}
 .appbar.scrolled{border-bottom-color:var(--line)}
@@ -40,6 +46,8 @@ img{max-width:100%;display:block}
 .appbar .back{border:0;background:none;color:var(--accent);font-weight:700;padding:0;margin-bottom:4px;cursor:pointer}
 
 main{max-width:680px;margin:0 auto;padding:6px 16px calc(var(--nav-h) + env(safe-area-inset-bottom,0px) + 90px)}
+/* com o cronômetro aberto, o fim da página não fica escondido atrás dele */
+body.timer-on main{padding-bottom:calc(var(--nav-h) + env(safe-area-inset-bottom,0px) + 170px)}
 
 /* nav */
 .nav{position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--surface);border-top:1px solid var(--line);
@@ -57,6 +65,7 @@ main{max-width:680px;margin:0 auto;padding:6px 16px calc(var(--nav-h) + env(safe
 .small{font-size:14px}
 .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .spread{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.row>*,.spread>*,.grid2>*,.grid3>*,.kpis>*{min-width:0}
 .section-title{font-stretch:78%;font-weight:800;font-size:20px;margin:26px 0 4px}
 .hero-day{font-size:15px;color:var(--muted);margin:4px 0 0}
 .big-workout{border:0;color:#fff;background:var(--upper);border-radius:16px;padding:18px;margin:14px 0}
@@ -79,7 +88,7 @@ main{max-width:680px;margin:0 auto;padding:6px 16px calc(var(--nav-h) + env(safe
 .chip.next{border-color:var(--accent);color:var(--accent)}
 
 .kpis{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:12px 0}
-.kpi{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+.kpi{min-width:0;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
 .kpi .v{font-stretch:72%;font-weight:850;font-size:34px;line-height:1}
 .kpi .l{font-size:13px;color:var(--muted);margin-top:4px}
 .kpi .d{font-size:13px;font-weight:700;margin-top:2px}
@@ -88,13 +97,16 @@ main{max-width:680px;margin:0 auto;padding:6px 16px calc(var(--nav-h) + env(safe
 .banner b{color:var(--warn)}
 
 /* forms */
-label.f{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--muted);font-weight:600}
-.f input,.f select,.f textarea{font-size:18px;padding:10px 12px;border:1.5px solid var(--line);border-radius:10px;background:var(--surface2);color:var(--ink);width:100%;min-height:46px}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--muted);font-weight:600;min-width:0}
+.f input,.f select,.f textarea{font-size:18px;padding:10px 12px;border:1.5px solid var(--line);border-radius:10px;background:var(--surface2);color:var(--ink);width:100%;max-width:100%;min-width:0;box-sizing:border-box;min-height:46px}
+/* no iOS o campo de data tem largura mínima própria e passa da coluna */
+.f input[type=date]{-webkit-appearance:none;appearance:none;display:block;line-height:1.3}
+.f input[type=date]::-webkit-date-and-time-value{text-align:left;margin:0}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;align-items:end}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
 .form-actions{margin-top:12px}
-.seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;background:var(--surface2);border:1.5px solid var(--line);border-radius:12px;padding:3px;gap:3px}
-.seg button{border:0;background:transparent;border-radius:9px;min-height:40px;font-weight:700;font-size:14px;color:var(--muted);cursor:pointer}
+.seg{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);background:var(--surface2);border:1.5px solid var(--line);border-radius:12px;padding:3px;gap:3px}
+.seg button{min-width:0;padding:0 4px;border:0;background:transparent;border-radius:9px;min-height:40px;font-weight:700;font-size:14px;color:var(--muted);cursor:pointer}
 .seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
 
 /* workout */
@@ -125,7 +137,12 @@ details.warm p{margin:0 0 12px;font-size:15px}
 @keyframes swap{0%{opacity:0}50%{opacity:1}}
 @media (prefers-reduced-motion:reduce){.media img.f2{animation:none;opacity:0}}
 .ex-meta{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border:1px solid var(--line);border-radius:10px;margin:0 0 10px}
-.ex-meta div{padding:6px 8px;border-left:1px solid var(--line)} .ex-meta div:first-child{border-left:0}
+.ex-meta div{min-width:0;padding:6px 8px;border-left:1px solid var(--line)} .ex-meta div:first-child{border-left:0}
+@media (max-width:380px){
+  .ex-meta{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .ex-meta div:nth-child(3){border-left:0}
+  .ex-meta div:nth-child(n+3){border-top:1px solid var(--line)}
+}
 .ex-meta dt{font-size:11.5px;color:var(--muted)} .ex-meta dd{margin:0;font-weight:800;font-size:15px;line-height:1.2}
 .last{font-size:14px;color:var(--muted);margin:0 0 6px}
 .last b{color:var(--ink)}
@@ -134,17 +151,18 @@ details.warm p{margin:0 0 12px;font-size:15px}
 
 .set{border-top:1px solid var(--line);padding:10px 0}
 .set-h{display:flex;justify-content:space-between;align-items:center;font-size:13px;font-weight:700;color:var(--muted);margin-bottom:6px}
-.set-in{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.set-in{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:8px}
 .set-in.single{grid-template-columns:1fr}
-.set-in input{font-size:20px;font-weight:700;padding:8px 10px;border:1.5px solid var(--line);border-radius:10px;background:var(--surface2);color:var(--ink);width:100%;min-height:48px;text-align:center}
-.set-in label{font-size:12px;color:var(--muted);font-weight:600;display:flex;flex-direction:column;gap:3px}
-.effort{display:grid;grid-template-columns:repeat(3,1fr) 64px;gap:6px}
-.effort button{min-height:46px;border-radius:10px;border:1.5px solid var(--line);background:var(--surface2);font-weight:700;font-size:14px;cursor:pointer;color:var(--ink)}
+.set-in input{box-sizing:border-box;min-width:0;font-size:20px;font-weight:700;padding:8px 10px;border:1.5px solid var(--line);border-radius:10px;background:var(--surface2);color:var(--ink);width:100%;min-height:48px;text-align:center}
+.set-in label{min-width:0;font-size:12px;color:var(--muted);font-weight:600;display:flex;flex-direction:column;gap:3px}
+.effort{display:grid;grid-template-columns:repeat(3,minmax(0,1fr)) minmax(48px,64px);gap:6px}
+.effort button{min-width:0;padding:0 4px;min-height:46px;border-radius:10px;border:1.5px solid var(--line);background:var(--surface2);font-weight:700;font-size:14px;cursor:pointer;color:var(--ink)}
 .effort button[data-e="facil"][aria-pressed="true"]{background:var(--easy);border-color:var(--easy);color:var(--surface)}
 .effort button[data-e="medio"][aria-pressed="true"]{background:var(--mid);border-color:var(--mid);color:var(--surface)}
 .effort button[data-e="dificil"][aria-pressed="true"]{background:var(--hard);border-color:var(--hard);color:var(--surface)}
 .effort .save{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-size:20px}
 .set.saved{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.set.saved>*{min-width:0}
 .set.saved .sv{font-weight:800;font-size:17px}
 .set.saved .tag{font-size:12px;font-weight:800;padding:3px 8px;border-radius:999px;color:var(--surface)}
 .tag.facil{background:var(--easy)} .tag.medio{background:var(--mid)} .tag.dificil{background:var(--hard)} .tag.none{background:var(--muted)}
@@ -152,7 +170,7 @@ details.warm p{margin:0 0 12px;font-size:15px}
 .add-set{border:0;background:none;color:var(--accent);font-weight:700;padding:8px 0;cursor:pointer}
 
 /* timer */
-.timer{position:fixed;left:10px;right:10px;bottom:calc(var(--nav-h) + env(safe-area-inset-bottom,0px) + 10px);z-index:25;
+.timer{position:fixed;left:max(10px,env(safe-area-inset-left,0px));right:max(10px,env(safe-area-inset-right,0px));bottom:calc(var(--nav-h) + env(safe-area-inset-bottom,0px) + 10px);z-index:25;
   background:var(--ink);color:var(--bg);border-radius:16px;padding:10px 12px 10px 16px;display:none;align-items:center;gap:10px;
   max-width:660px;margin:0 auto;box-shadow:0 8px 24px rgba(0,0,0,.25)}
 .timer.on{display:flex}
@@ -184,25 +202,36 @@ details.warm p{margin:0 0 12px;font-size:15px}
 /* progress */
 .chart-wrap{position:relative;height:220px}
 .bars{display:flex;flex-direction:column;gap:8px;margin-top:8px}
-.bar{display:grid;grid-template-columns:128px 1fr 54px;gap:8px;align-items:center;font-size:14px}
+.bar{display:grid;grid-template-columns:minmax(0,8rem) minmax(0,1fr) auto;gap:8px;align-items:center;font-size:14px}
+.bar>span:first-child{min-width:0;line-height:1.2}
 .bar .track{height:12px;background:var(--line);border-radius:6px;position:relative;overflow:hidden}
 .bar .fill{position:absolute;left:0;top:0;bottom:0;background:var(--accent);border-radius:6px}
 .bar .fill.full{background:var(--ok)}
 .bar .num{text-align:right;font-weight:700;font-variant-numeric:tabular-nums}
-table.t{width:100%;border-collapse:collapse;font-size:14px}
+table.t{width:100%;border-collapse:collapse;font-size:14px;overflow-wrap:normal}
+/* números e datas não quebram; se a tabela não couber, o .tbl em volta rola */
+table.t th,table.t td{white-space:nowrap}
+table.t td.wrap{white-space:normal;min-width:6.5em}
 table.t th,table.t td{text-align:left;padding:7px 4px;border-top:1px solid var(--line)}
 table.t th{font-size:12px;color:var(--muted);font-weight:600;border-top:0}
 .del{border:0;background:none;color:var(--muted);text-decoration:underline;cursor:pointer;font-size:13px}
+.del.x{text-decoration:none;font-size:16px;min-width:44px;min-height:44px;padding:0}
+/* lista em duas linhas, para registros com muitos campos (no lugar de tabela larga) */
+.rows{list-style:none;margin:0;padding:0}
+.rows li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;padding:8px 0;border-top:1px solid var(--line)}
+.rows li:first-child{border-top:0}
+.rows li>div{min-width:0;display:flex;flex-direction:column;gap:2px}
 .empty{color:var(--muted);font-size:15px;padding:8px 0}
 
-.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(var(--nav-h) + env(safe-area-inset-bottom,0px) + 80px);z-index:50;
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(var(--nav-h) + env(safe-area-inset-bottom,0px) + 80px);width:max-content;z-index:50;
   background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:999px;font-weight:700;font-size:14px;display:none;max-width:90vw;text-align:center}
 .toast.on{display:block}
 
 .guide h3{font-stretch:80%;font-weight:800;font-size:20px;margin:22px 0 6px}
-.tbl{overflow-x:auto}
-.tbl table{border-collapse:collapse;width:100%;min-width:440px;background:var(--surface);border:1px solid var(--line);font-size:14px}
-.tbl th,.tbl td{text-align:left;padding:8px 10px;border-top:1px solid var(--line);vertical-align:top}
-.tbl th{background:var(--tint);border-top:0}
+.tbl{overflow-x:auto;max-width:100%;-webkit-overflow-scrolling:touch}
+/* tabelas do guia: quebram linha em vez de exigir largura mínima; o .tbl rola se ainda faltar espaço */
+.tbl table:not(.t){border-collapse:collapse;width:100%;background:var(--surface);border:1px solid var(--line);font-size:14px}
+.tbl table:not(.t) th,.tbl table:not(.t) td{text-align:left;padding:8px 10px;border-top:1px solid var(--line);vertical-align:top}
+.tbl table:not(.t) th{background:var(--tint);border-top:0}
 
 @media (min-width:700px){ .kpis{grid-template-columns:repeat(4,minmax(0,1fr))} }

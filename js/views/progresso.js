@@ -115,7 +115,7 @@ export function drawEx(exId, all) {
     : [{ label: 'Maior carga (kg)', data: pts.map(p => p.maxKg), borderColor: accent, backgroundColor: accent, tension: .25 },
        { label: 'Força estimada, 1RM (kg)', data: pts.map(p => p.e1), borderColor: prim, backgroundColor: prim, borderDash: [5, 4], tension: .25 }];
   mkChart($('#cEx'), { type: 'line', data: { labels: pts.map(p => fmtShort(p.date)), datasets: ds } });
-  $('#exTable').innerHTML = `<table class="t"><thead><tr><th>Data</th><th>${isTimed(it) ? 'Tempo' : 'Carga'}</th><th>Reps por série</th><th>Dificuldade</th></tr></thead><tbody>
-    ${pts.slice(-6).reverse().map(p => `<tr><td>${fmtShort(p.date)}</td><td>${isTimed(it) ? p.secs + ' s' : fmtN(p.maxKg) + ' kg'}</td><td>${esc(p.reps)}</td><td>${esc(p.eff)}</td></tr>`).join('')}</tbody></table>
+  $('#exTable').innerHTML = `<div class="tbl"><table class="t"><thead><tr><th>Data</th><th>${isTimed(it) ? 'Tempo' : 'Carga'}</th><th>Reps por série</th><th>Dificuldade</th></tr></thead><tbody>
+    ${pts.slice(-6).reverse().map(p => `<tr><td>${fmtShort(p.date)}</td><td>${isTimed(it) ? p.secs + ' s' : fmtN(p.maxKg) + ' kg'}</td><td>${esc(p.reps)}</td><td>${esc(p.eff)}</td></tr>`).join('')}</tbody></table></div>
     <p class="small muted">Dificuldade: F = fácil, M = médio, D = difícil.</p>`;
 }

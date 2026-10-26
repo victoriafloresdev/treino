@@ -73,7 +73,7 @@ export function startTimer(sec, label) {
   const el = $('#timer');
   timer.end = Date.now() + sec * 1000;
   $('#timerLabel').textContent = label;
-  el.classList.add('on'); el.classList.remove('end');
+  el.classList.add('on'); el.classList.remove('end'); document.body.classList.add('timer-on');
   clearInterval(timer.int);
   const tick = () => {
     const left = Math.max(0, Math.round((timer.end - Date.now()) / 1000));
@@ -82,7 +82,7 @@ export function startTimer(sec, label) {
       clearInterval(timer.int);
       el.classList.add('end'); $('#timerLabel').textContent = 'Descanso terminado: próxima série';
       beep(); if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
-      setTimeout(() => { if (el.classList.contains('end')) el.classList.remove('on'); }, 8000);
+      setTimeout(() => { if (el.classList.contains('end')) { el.classList.remove('on'); document.body.classList.remove('timer-on'); } }, 8000);
     }
   };
   tick(); timer.int = setInterval(tick, 250);
@@ -92,4 +92,4 @@ $('#timerPlus').onclick = () => {
   const label = $('#timer').classList.contains('end') ? 'Descanso extra' : $('#timerLabel').textContent;
   startTimer(left + 15, label);
 };
-$('#timerSkip').onclick = () => { clearInterval(timer.int); $('#timer').classList.remove('on', 'end'); };
+$('#timerSkip').onclick = () => { clearInterval(timer.int); $('#timer').classList.remove('on', 'end'); document.body.classList.remove('timer-on'); };

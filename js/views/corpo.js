@@ -30,8 +30,8 @@ export async function viewCorpo() {
         <label class="f">Data<input type="date" id="cDate" value="${today}"></label>
         <label class="f">Peso (kg)<input id="cW" inputmode="decimal"></label>
         <label class="f">% de gordura<input id="cFat" inputmode="decimal"></label>
-        <label class="f">Massa de gordura (kg)<input id="cFatKg" inputmode="decimal" placeholder="calcula sozinho"></label>
-        <label class="f">Massa livre de gordura (kg)<input id="cLean" inputmode="decimal" placeholder="calcula sozinho"></label>
+        <label class="f">Massa de gordura (kg)<input id="cFatKg" inputmode="decimal" placeholder="automático"></label>
+        <label class="f">Massa livre de gordura (kg)<input id="cLean" inputmode="decimal" placeholder="automático"></label>
         <label class="f">Massa muscular (kg)<input id="cMus" inputmode="decimal" placeholder="bioimpedância"></label>
         <label class="f">Gordura visceral<input id="cVis" inputmode="decimal" placeholder="bioimpedância"></label>
         <label class="f">Observação<input id="cNote" placeholder="local, aparelho"></label>
@@ -40,9 +40,11 @@ export async function viewCorpo() {
     </div>
 
     <h2 class="section-title">Avaliações</h2>
-    <div class="card">${comps.length ? `<div class="tbl" style="margin:0"><table class="t"><thead><tr><th>Data</th><th>Método</th><th>Peso</th><th>% gord.</th><th>MLG</th><th></th></tr></thead><tbody>
-      ${comps.map(c => `<tr><td>${fmtShort(c.date)}/${c.date.slice(2, 4)}</td><td>${esc(c.method)}</td><td>${fmtN(c.weight)}</td><td>${fmtN(c.fatPct)}</td><td>${fmtN(c.leanKg)}</td><td><button class="del" data-del="comps:${c.id}">apagar</button></td></tr>`).join('')}
-      </tbody></table></div><p class="small muted">MLG = massa livre de gordura (kg).</p>` : `<p class="empty">Nenhuma avaliação ainda.</p>`}</div>
+    <div class="card">${comps.length ? `<ul class="rows">
+      ${comps.map(c => `<li><div><b>${fmtShort(c.date)}/${c.date.slice(2, 4)} · ${esc(c.method)}</b>
+          <span class="small muted">${[c.fatPct != null ? fmtN(c.fatPct) + '% de gordura' : '', c.leanKg != null ? 'MLG ' + fmtN(c.leanKg) + ' kg' : '', c.weight != null ? fmtN(c.weight) + ' kg' : ''].filter(Boolean).join(' · ')}</span></div>
+        <button class="del x" data-del="comps:${c.id}" aria-label="Apagar avaliação de ${fmtShort(c.date)}" title="Apagar">✕</button></li>`).join('')}
+      </ul><p class="small muted">MLG = massa livre de gordura.</p>` : `<p class="empty">Nenhuma avaliação ainda.</p>`}</div>
 
     <h2 class="section-title">Histórico de peso</h2>
     <div class="card">${body.length ? `<table class="t"><thead><tr><th>Data</th><th>Peso</th><th>Cintura</th><th></th></tr></thead><tbody>
