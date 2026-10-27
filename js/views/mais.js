@@ -1,6 +1,6 @@
 // Telas Mais e Guia, formulários, exportar e importar.
 import { $, esc, todayStr, fmtShort } from '../util.js';
-import { program, phaseLabel } from '../training.js';
+import { program, phaseLabel, workoutOrder, DEFAULT_ORDER, planById } from '../training.js';
 import { app, main, setBar, toast, openSheet, on, onChange } from '../ui.js';
 import { db } from '../db.js';
 import { DAYS, DAY_IDS } from '../data/nutricao.js';
@@ -21,7 +21,7 @@ export async function viewMais() {
   setBar('Mais', phaseLabel(p));
   const lastBackup = await db.setting('lastBackup');
   const standalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
-  const model = await getModel(), fromPlan = weekModelFromPlan(), profile = await getProfile();
+  const model = await getModel(), fromPlan = weekModelFromPlan(), profile = await getProfile(), order = await workoutOrder();
   if (tok !== app.seq) return;
   const ap = getAppearance();
   main.innerHTML = `
@@ -41,8 +41,15 @@ export async function viewMais() {
       <div class="form-actions"><button class="btn block" data-act="setStart">Salvar data de início</button></div>
       <p class="small muted" style="margin:10px 0 0">${p.start ? `Você está na semana ${p.week}. Semanas 1–2: 2 séries por exercício e RIR 3–4.` : 'Defina a data para o app calcular a semana e a fase.'}</p>
     </div>
+    <div class="card"><h2>Ordem dos treinos</h2>
+      <p class="small muted" style="margin:4px 0 10px">O treino sugerido é o seguinte ao último que você fez, nesta ordem.</p>
+      <ol class="order">${order.map((id, i) => `<li><span class="num">${i + 1}</span><b>${esc(planById(id).name)}</b>
+        <button class="icon-btn" type="button" data-act="orderMove" data-i="${i}" data-d="-1" aria-label="Subir ${esc(planById(id).name)}" ${i ? '' : 'disabled'}>${icon('caret-up')}</button>
+        <button class="icon-btn" type="button" data-act="orderMove" data-i="${i}" data-d="1" aria-label="Descer ${esc(planById(id).name)}" ${i < order.length - 1 ? '' : 'disabled'}>${icon('caret-down')}</button></li>`).join('')}</ol>
+      ${order.join() !== DEFAULT_ORDER.join() ? `<div class="form-actions"><button class="btn block" type="button" data-act="orderReset">Voltar à ordem padrão</button></div>` : ''}
+    </div>
     <div class="card"><h2>Semana modelo</h2>
-      <p class="small muted" style="margin:4px 0 10px">O tipo previsto de cada dia da semana. Vem da ficha de treino: musculação seg, ter, qui e sex; cardio de segunda a sábado.</p>
+      <p class="small muted" style="margin:4px 0 10px">O tipo previsto de cada dia da semana: musculação de segunda a quinta, cardio de segunda a sábado. Treinou em outro dia? O tipo se ajusta pelo registro.</p>
       <div class="week">${WD.map((w, i) => `<div class="wk-row"><div class="wk-d"><b>${w}</b></div>
         <fieldset class="wk-opts" data-on="modelDay" data-i="${i}"><legend class="sr">Tipo previsto de ${w}</legend>
           ${DAY_IDS.map(t => `<label style="--wk:var(--day-${t})"><input type="radio" name="model-${i}" value="${t}" ${t === model[i] ? 'checked' : ''} aria-label="${esc(DAYS[t].name)}"><span aria-hidden="true">${icon(DAY_ICON[t])}</span></label>`).join('')}
@@ -84,10 +91,11 @@ export function viewGuia() {
    <tr><td>5–8</td><td>RIR 1–3 (médio a difícil)</td><td>RIR 1–2; a última série pode ir a 0–1</td></tr></tbody></table></div>
   <h3>Quando subir a carga</h3>
   <div class="tbl"><table><thead><tr><th>Situação</th><th>O que fazer</th></tr></thead><tbody>
-   <tr><td>Todas as séries no topo da faixa, sem marcar difícil</td><td>Subir carga no menor salto do aparelho</td></tr>
-   <tr><td>Dentro da faixa, repetições subindo</td><td>Manter a carga</td></tr>
-   <tr><td>Alguma série abaixo do mínimo ou técnica quebrando</td><td>Reduzir 5–10%</td></tr>
-   <tr><td>Duas sessões sem progresso, com sono e alimentação normais</td><td>Manter mais uma sessão; se seguir travado, reduzir 5–10%</td></tr></tbody></table></div>
+   <tr><td>Fácil (da semana 3 em diante)</td><td>Subir no menor salto do aparelho</td></tr>
+   <tr><td>Médio</td><td>Manter a carga; depois de dois treinos seguidos em Médio com a mesma carga, subir</td></tr>
+   <tr><td>Difícil</td><td>Manter até ficar Médio</td></tr>
+   <tr><td>Técnica quebrando ou abaixo do mínimo da faixa</td><td>Reduzir 5–10%</td></tr></tbody></table></div>
+  <p>Você registra uma carga e uma dificuldade por exercício, e elas valem para todas as séries do dia. Nas semanas 1–2, Fácil é o esperado: mantenha a carga.</p>
   <h3>Cardio da manhã</h3>
   <div class="tbl"><table><thead><tr><th>Semanas</th><th>Quarta e sábado (~30 min)</th><th>Outros dias</th></tr></thead><tbody>
    <tr><td>1–2</td><td>Caminhada rápida com inclinação de 3–6%</td><td>Caminhada 25–30 min</td></tr>
@@ -143,6 +151,13 @@ export async function importFile(f) {
 }
 
 on({
+  async orderMove(el) {
+    const o = [...await workoutOrder()], i = Number(el.dataset.i), j = i + Number(el.dataset.d);
+    if (j < 0 || j >= o.length) return;
+    [o[i], o[j]] = [o[j], o[i]];
+    await db.setSetting('workoutOrder', o); app.route();
+  },
+  async orderReset() { await db.setSetting('workoutOrder', DEFAULT_ORDER); toast('Ordem padrão restaurada.'); app.route(); },
   async modelReset() { await setModel(weekModelFromPlan()); toast('Modelo da ficha restaurado.'); app.route(); },
   async profileRemove() { if (!confirm('Remover o perfil de saúde deste aparelho?')) return; await removeProfile(); toast('Perfil removido.'); app.route(); }
 });

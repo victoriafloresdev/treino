@@ -54,8 +54,9 @@ test('tendência por exercício e nota de recuperação', async ({ page }) => {
   await expect(page.locator('.rows.trends')).toContainText('ficando mais difícil');
   await expect(page.locator('main .callout').first()).toContainText('3 exercícios ficaram mais difíceis nesta semana');
   await page.goto('/index.html#treino/inferior-a');
-  await page.locator('#ex-ia1 .ex-top').click();
-  await expect(page.locator('#ex-ia1 .trend')).toContainText('Tendência: ficando mais difícil');
+  if (await page.locator('#ex-ia1 .ex-top').getAttribute('aria-expanded') !== 'true') await page.locator('#ex-ia1 .ex-top').click();
+  await page.locator('#ex-ia1').getByRole('button', { name: 'Detalhes e como fazer' }).click();
+  await expect(page.locator('#sheet')).toContainText('Tendência: ficando mais difícil');
 });
 
 test('conquistas: desbloqueia, comemora uma vez só e nada ligado a peso', async ({ page }) => {

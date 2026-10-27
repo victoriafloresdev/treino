@@ -27,7 +27,8 @@ test('abre offline depois do primeiro carregamento', async ({ page, context }) =
   }
   // foto do exercício e gráfico também vêm do cache
   await go(page, '/index.html#treino/inferior-b', true);
-  const img = page.locator('.ex.open .media img').first();
+  await page.locator('.ex.open').getByRole('button', { name: 'Detalhes e como fazer' }).click();
+  const img = page.locator('#sheet .media img').first();
   await expect(img).toBeVisible();
   expect(await img.evaluate(el => el.complete && el.naturalWidth > 0)).toBe(true);
   expect(await page.evaluate(() => typeof window.Chart)).toBe('function');

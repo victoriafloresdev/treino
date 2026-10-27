@@ -13,7 +13,7 @@ export const monIdx = date => (new Date(date + 'T12:00:00').getDay() + 6) % 7;
 export function weekModelFromPlan() {
   return WD.map((_, i) => {
     const w = WEEK.find(x => x.dow === (i + 1) % 7);
-    return typeOf(!/descanso/i.test(w.cardio), !!w.plan);
+    return typeOf(!/descanso/i.test(w.cardio), !!w.musc);
   });
 }
 

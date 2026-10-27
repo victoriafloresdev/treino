@@ -13,7 +13,9 @@ const waterUid = date => `water:${date}`;
 
 export async function getModel() {
   const m = await db.setting('weekModel');
-  return Array.isArray(m) && m.length === 7 && m.every(t => DAYS[t]) ? m : weekModelFromPlan();
+  // o modelo antigo da ficha (musculação seg/ter/qui/sex) salvo sem edição segue o padrão novo
+  const fichaAntiga = 'AABAABD';
+  return Array.isArray(m) && m.length === 7 && m.every(t => DAYS[t]) && m.join('') !== fichaAntiga ? m : weekModelFromPlan();
 }
 export const setModel = model => db.setSetting('weekModel', model);
 export async function getProfile() { return (await db.get('profile', 'profile:main')) || null; }

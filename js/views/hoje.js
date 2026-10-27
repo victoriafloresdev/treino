@@ -1,10 +1,9 @@
 // Tela Hoje: resumo e acesso rápido. O plano completo do dia fica em Comida › Dia.
 import { esc, todayStr, parseDate, fmtN, fmtShort, weekStart, addDays } from '../util.js';
-import { planById, program, phaseLabel, loadAll, doneThisWeek, nextInSequence, avg7 } from '../training.js';
+import { planById, program, phaseLabel, loadAll, workoutOrder, suggestedWorkout, avg7 } from '../training.js';
 import { app, main, setBar, on, openSheet, toast } from '../ui.js';
 import { cardioToday, pendingPain, painCardHTML } from './cardio.js';
 import { db } from '../db.js';
-import { WEEK } from '../plan.js';
 import { TARGET_P } from '../data/nutricao.js';
 import { waterGoalCups, fmt } from '../nutri.js';
 import { dayInfo, getProfile, importProfileFile } from '../days.js';
@@ -32,7 +31,7 @@ export async function viewHoje() {
   const all = await loadAll();
   const needBackup = all.sets.length > 0 && (!lastBackup || (parseDate(today) - parseDate(lastBackup)) / 864e5 > 14);
   const askProfile = !(await getProfile()) && !(await db.setting('profilePromptHidden'));
-  H.ctx = { p, all, cardio: await cardioToday(today), pain: await pendingPain(today), closing: await pendingClosing(today) };
+  H.ctx = { p, all, order: await workoutOrder(), cardio: await cardioToday(today), pain: await pendingPain(today), closing: await pendingClosing(today) };
   if (tok !== app.seq) return;
   main.innerHTML = `
     ${dateNavHTML()}
@@ -136,11 +135,8 @@ function ringsHTML(info) {
 
 /* ---------- treinos de hoje ---------- */
 function workoutToday() {
-  const { all, p } = H.ctx;
-  const done = doneThisWeek(all);
-  const wk = WEEK.find(w => w.dow === parseDate(viewDate()).getDay());
-  const todayPlan = wk.plan ? planById(wk.plan) : null;
-  const plan = todayPlan && !done[todayPlan.id] ? todayPlan : nextInSequence(done);
+  const { all, p, order } = H.ctx;
+  const plan = planById(suggestedWorkout(all, order, viewDate()));
   const sess = plan && all.sessions.find(s => s.date === viewDate() && s.planId === plan.id && (all.setsBySession[s.id] || []).length);
   return { plan, started: !!sess, phase: p.phase };
 }

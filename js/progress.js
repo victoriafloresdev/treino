@@ -48,14 +48,17 @@ export function trendOf(sessions, timed = false) {
   return { id, ...TREND[id], date: last.date };
 }
 
-// Quantas vezes a força estimada de algum exercício bateu o próprio recorde.
+// Quantas vezes algum exercício bateu o próprio recorde: força estimada nos registros com repetições,
+// carga nos registros por exercício (sem repetições).
 export function prEvents(sets) {
   const best = {}, events = [];
   const sorted = [...sets].sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : (a.ts || 0) - (b.ts || 0)));
   for (const s of sorted) {
-    const v = e1rm(s.kg, s.reps); if (!v) continue;
-    if (best[s.exId] != null && v > best[s.exId] + 0.01) events.push({ exId: s.exId, date: s.date, e1: v });
-    if (best[s.exId] == null || v > best[s.exId]) best[s.exId] = v;
+    const byKg = s.reps == null;
+    const v = byKg ? (s.kg > 0 ? s.kg : null) : e1rm(s.kg, s.reps); if (!v) continue;
+    const k = s.exId + (byKg ? ':kg' : '');
+    if (best[k] != null && v > best[k] + 0.01) events.push({ exId: s.exId, date: s.date, e1: byKg ? null : v, kg: byKg ? v : null });
+    if (best[k] == null || v > best[k]) best[k] = v;
   }
   return events;
 }
@@ -92,7 +95,7 @@ export const ACHIEVEMENTS = [
   { id: 'treinos-10', ic: 'barbell', title: '10 treinos', desc: 'Dez sessões de musculação registradas.', ok: s => s.workouts >= 10, prog: s => [s.workouts, 10] },
   { id: 'treinos-25', ic: 'barbell', title: '25 treinos', desc: 'Vinte e cinco sessões de musculação.', ok: s => s.workouts >= 25, prog: s => [s.workouts, 25] },
   { id: 'treinos-50', ic: 'trophy', title: '50 treinos', desc: 'Cinquenta sessões de musculação.', ok: s => s.workouts >= 50, prog: s => [s.workouts, 50] },
-  { id: 'recorde', ic: 'target', title: 'Novo recorde de força', desc: 'A força estimada de um exercício passou do seu melhor.', ok: s => s.prs >= 1 },
+  { id: 'recorde', ic: 'target', title: 'Novo recorde de força', desc: 'A carga de um exercício passou do seu melhor.', ok: s => s.prs >= 1 },
   ...[0, 1, 2, 3].map(n => ({ id: `corrida-${n + 1}`, ic: 'sneaker-move', title: `Etapa ${n + 1} da corrida`, desc: 'Uma sessão completa da etapa.', ok: s => s.stagesDone.includes(n) })),
   { id: 'semanas-4', ic: 'list-checks', title: '4 semanas consistentes', desc: '4 semanas seguidas com 80% ou mais dos hábitos.', ok: s => s.streakBest >= 4, prog: s => [Math.min(s.streakBest, 4), 4] },
   { id: 'backup-4', ic: 'download-simple', title: '4 fechamentos com backup', desc: '4 semanas seguidas fechadas com o arquivo exportado.', ok: s => s.backupBest >= 4, prog: s => [Math.min(s.backupBest, 4), 4] }

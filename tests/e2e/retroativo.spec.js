@@ -84,18 +84,18 @@ test('Comida › Dia num dia escolhido no calendário; não muda o padrão dos p
   expect(r.def?.sel?.cafe).toBeUndefined();
 });
 
-test('Treino: registrar a série num dia que passou', async ({ page }) => {
+test('Treino: registrar o exercício num dia que passou', async ({ page }) => {
   await open(page, 'treino/inferior-a');
   await page.getByRole('button', { name: 'Dia anterior' }).click();
   await expect(page.locator('.past-note')).toBeVisible();
   const ex = page.locator('#ex-ia1');
   if (await ex.locator('.ex-top').getAttribute('aria-expanded') !== 'true') await ex.locator('.ex-top').click();
-  await ex.locator('input[name="kg"]').fill('100');
-  await ex.locator('input[name="reps"]').fill('10');
-  await ex.getByRole('button', { name: 'Salvar série' }).click();
-  await expect(ex.locator('.set.saved')).toHaveCount(1);
+  await ex.locator('input[name="v"]').fill('100');
+  await ex.locator('label.e-medio').click();
+  await ex.getByRole('button', { name: /Salvar/ }).click();
+  await expect(ex).toHaveClass(/done/);
   const r = await db(page, async db => ({ s: (await db.all('sessions')).map(x => x.date), sets: (await db.all('sets')).map(x => x.date) }));
-  expect(r).toEqual({ s: ['2026-10-27'], sets: ['2026-10-27'] });
+  expect(r).toEqual({ s: ['2026-10-27'], sets: ['2026-10-27', '2026-10-27'] });
   // e o dia passa a contar como dia de musculação registrada
   await page.goto('/index.html#hoje');
   await expect(page.locator('#hojeTreinos')).toContainText('Treino registrado');

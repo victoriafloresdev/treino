@@ -10,23 +10,13 @@ test('registrar treino, cardio, corpo, exportar e importar', async ({ page }) =>
   await page.getByRole('button', { name: 'Salvar data de início' }).click();
   await expect(page.locator('#ctx')).toContainText('Semana 1');
 
-  // série 1 do leg press
+  // leg press
   await page.goto('/index.html#treino/inferior-a');
-  const form = page.locator('[data-setform="ia1"]');
-  await form.locator('[name=kg]').fill('100');
-  await form.locator('[name=reps]').fill('10');
+  const form = page.locator('[data-exform="ia1"]');
+  await form.locator('[name=v]').fill('102,5');
   await form.locator('label.e-medio').click();
-  await form.getByRole('button', { name: 'Salvar série' }).click();
-  await expect(page.locator('#ex-ia1 .ex-top .c')).toHaveText('1/2');
-  await expect(page.locator('#timer')).toHaveClass(/on/);
-
-  // apagar e registrar de novo
-  await page.locator('#ex-ia1 [data-delset]').click();
-  await expect(page.locator('#ex-ia1 .ex-top .c')).toHaveText('0/2');
-  await form.locator('[name=kg]').fill('102,5');
-  await form.locator('[name=reps]').fill('12');
-  await form.getByRole('button', { name: 'Salvar série' }).click();
-  await expect(page.locator('#ex-ia1 .set.saved .sv')).toHaveText('102,5 kg × 12');
+  await form.getByRole('button', { name: /Salvar/ }).click();
+  await expect(page.locator('#ex-ia1 .ex-top .c')).toHaveText('102,5 kg');
 
   await page.getByRole('button', { name: 'Finalizar treino' }).click();
   await expect(page.locator('#sheet')).toContainText('Treino registrado');

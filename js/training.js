@@ -51,36 +51,51 @@ export function doneThisWeek(all) {
   all.realSessions.filter(s => weekStart(s.date) === ws).forEach(s => { done[s.planId] = s; });
   return done;
 }
-export function nextInSequence(done) {
-  return PLAN.find(p => !done[p.id]) || null;
+// Sequência dos treinos: a ficha não fica presa ao dia da semana.
+export const DEFAULT_ORDER = ['superior-a', 'inferior-a', 'inferior-b', 'superior-b'];
+export async function workoutOrder() {
+  const o = await db.setting('workoutOrder');
+  return Array.isArray(o) && o.length === PLAN.length && PLAN.every(p => o.includes(p.id)) ? o : DEFAULT_ORDER;
 }
-export async function lastSetsFor(exId, excludeSessionId) {
+// Sugerido para a data: o treino já começado nela; senão, o seguinte ao último feito antes dela.
+export function suggestedWorkout(all, order, date) {
+  const real = all.realSessions.filter(s => s.date <= date && planById(s.planId))
+    .sort((a, b) => (a.date === b.date ? (a.startedAt || 0) - (b.startedAt || 0) : a.date < b.date ? -1 : 1));
+  const onDate = real.filter(s => s.date === date).pop();
+  if (onDate) return onDate.planId;
+  const last = real.pop();
+  if (!last) return order[0];
+  return order[(order.indexOf(last.planId) + 1) % order.length];
+}
+
+// Última vez de cada exercício, uma entrada por sessão (a mais recente primeiro).
+const HARD = { facil: 1, medio: 2, dificil: 3 };
+export function entryOf(sets) {
+  const eff = sets.map(s => s.effort).filter(Boolean).sort((a, b) => HARD[b] - HARD[a])[0] || null;
+  return { date: sets[0].date, sessionId: sets[0].sessionId, n: sets.length,
+    kg: Math.max(0, ...sets.map(s => s.kg || 0)), secs: Math.max(0, ...sets.map(s => s.secs || 0)), effort: eff };
+}
+export async function historyFor(exId, excludeSessionId) {
   const rows = (await db.byIndex('sets', 'exId', exId)).filter(s => s.sessionId !== excludeSessionId);
-  if (!rows.length) return { date: null, sets: [] };
-  rows.sort((a, b) => (a.date === b.date ? a.ts - b.ts : a.date < b.date ? -1 : 1));
-  const lastSid = rows[rows.length - 1].sessionId;
-  const sets = rows.filter(s => s.sessionId === lastSid).sort((a, b) => a.setIndex - b.setIndex);
-  return { date: sets[0].date, sets };
+  const by = {};
+  rows.forEach(s => (by[s.sessionId] = by[s.sessionId] || []).push(s));
+  return Object.values(by).map(entryOf)
+    .sort((a, b) => (a.date === b.date ? b.sessionId - a.sessionId : a.date < b.date ? 1 : -1));
 }
-export function suggestion(it, sets, phase) {
-  if (!sets.length) return '';
-  if (isTimed(it)) {
-    const ok = sets.every(s => (s.secs || 0) >= 40);
-    return ok ? 'Segurou 40 s em todas: mantenha 40 s ou passe para o Pallof press.' : 'Some cerca de 5 s por série na próxima.';
-  }
-  const { lo, hi } = range(it);
-  const target = it.sets[phase];
-  const reps = sets.map(s => s.reps || 0);
-  const lastKg = sets[sets.length - 1].kg;
-  const anyHard = sets.some(s => s.effort === 'dificil');
-  const allEasy = sets.every(s => s.effort === 'facil');
-  if (sets.length >= target && reps.every(r => r >= hi))
-    return anyHard ? `Topo da faixa em todas, mas foi difícil: suba só o menor incremento (estava ${fmtN(lastKg)} kg).`
-      : `Topo da faixa em todas as séries: suba a carga (estava ${fmtN(lastKg)} kg).`;
-  if (reps.some(r => r < lo)) return `Alguma série ficou abaixo de ${lo} repetições: mantenha a carga ou reduza 5–10%.`;
-  if (allEasy && phase === 0) return 'Fácil é o esperado nas semanas 1–2. Mantenha a carga e busque +1 repetição.';
-  if (allEasy) return 'Tudo marcado como fácil: busque +2 repetições por série ou suba a carga.';
-  return 'Dentro da faixa: mantenha a carga e tente +1 repetição em alguma série.';
+
+// Sugestão pela dificuldade (o registro é uma carga e uma dificuldade por exercício):
+// Fácil → sobe o menor incremento; Médio → mantém, e sobe depois de dois Médios seguidos com a mesma carga;
+// Difícil → mantém. Nas semanas 1–2, Fácil é o esperado.
+export function suggestion(it, hist, phase) {
+  const [last, prev] = hist;
+  if (!last) return '';
+  if (isTimed(it)) return last.secs >= 40 ? 'Segurou 40 s: mantenha 40 s ou passe para o Pallof press.' : 'Tente uns 5 s a mais.';
+  const kg = `${fmtN(last.kg)} kg`;
+  if (last.effort === 'facil') return phase === 0 ? `Fácil é o esperado nas semanas 1–2: mantenha ${kg}.` : `Foi fácil com ${kg}: suba o menor incremento.`;
+  if (last.effort === 'medio') return prev?.effort === 'medio' && Math.abs(prev.kg - last.kg) < 0.01 && phase > 0
+    ? `Dois treinos em Médio com ${kg}: suba o menor incremento.` : `Médio é o ponto certo: mantenha ${kg}.`;
+  if (last.effort === 'dificil') return `Foi difícil: mantenha ${kg} até ficar Médio.`;
+  return `Mantenha ${kg}.`;
 }
 export function weeklyMuscleSets(all, phase) {
   const ws = weekStart(todayStr());

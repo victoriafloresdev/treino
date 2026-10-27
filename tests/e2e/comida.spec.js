@@ -20,14 +20,14 @@ test('tipo de dia: previsto, pulado pela usuária e elevado pelo registro', asyn
   await expect(page.locator('.daytag')).toContainText('Cardio + musculação');
   await expect(page.locator('.daytag')).toContainText('previsto pela ficha');
   await expect(page.locator('html')).toHaveAttribute('data-day', 'A');
-  await expect(page.locator('#hojeTreinos')).toContainText('Inferior A');
+  await expect(page.locator('#hojeTreinos')).toContainText('Superior A');
 
   await page.getByRole('button', { name: 'Mudar', exact: true }).click();
   await page.getByRole('button', { name: 'Hoje não vou treinar' }).click();
   await expect(page.locator('.daytag')).toContainText('Só cardio');
   await expect(page.locator('.daytag')).toContainText('escolhido por você');
   await expect(page.locator('html')).toHaveAttribute('data-day', 'B');
-  await expect(page.locator('#hojeTreinos')).not.toContainText('Inferior A');
+  await expect(page.locator('#hojeTreinos')).not.toContainText('Superior A');
   await page.goto('/index.html#comida/dia');
   await expect(page.locator('#meal-preTreino')).toHaveCount(0);
   await page.goto('/index.html#hoje');

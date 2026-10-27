@@ -7,8 +7,8 @@ const MODEL = weekModelFromPlan();
 // 2026-10-26 é segunda
 const SEG = '2026-10-26', QUA = '2026-10-28', SAB = '2026-10-31', DOM = '2026-11-01';
 
-test('modelo semanal vem da ficha', () => {
-  assert.deepEqual(MODEL, ['A', 'A', 'B', 'A', 'A', 'B', 'D']);
+test('modelo semanal: musculação seg–qui, cardio seg–sáb', () => {
+  assert.deepEqual(MODEL, ['A', 'A', 'A', 'A', 'B', 'B', 'D']);
   assert.equal(monIdx(SEG), 0); assert.equal(monIdx(DOM), 6);
 });
 

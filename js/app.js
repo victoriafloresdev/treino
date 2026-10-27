@@ -7,7 +7,7 @@ import { viewComida } from './views/comida.js';
 import { dayInfo } from './days.js';
 import { applyAppearance } from './ui/aparencia.js';
 import { viewTreinoLista } from './views/treino.js';
-import { S, viewSessao, setsOf, renderSessao, saveSet, finishSession, howSheet } from './views/sessao.js';
+import { S, viewSessao, finishSession, howSheet } from './views/sessao.js';
 import { viewProgresso } from './views/progresso.js';
 import { viewCorpo } from './views/corpo.js';
 import { viewMais, viewGuia, exportData, importFile } from './views/mais.js';
@@ -27,16 +27,6 @@ document.addEventListener('click', async e => {
   const eff = t.closest('.effort [data-e]');
   if (eff) { $$('[data-e]', eff.parentElement).forEach(b => b.setAttribute('aria-pressed', String(b === eff))); return; }
 
-  const sv = t.closest('[data-save]'); if (sv) { sv.disabled = true; try { await saveSet(sv.dataset.save); } finally { sv.disabled = false; } return; }
-
-  const ds = t.closest('[data-delset]');
-  if (ds) { const id = Number(ds.dataset.delset); await db.del('sets', id); S.sets = S.sets.filter(s => s.id !== id);
-    // renumera as séries restantes do exercício
-    const exId = ds.closest('.ex').id.slice(3);
-    const rest = setsOf(exId); for (let i = 0; i < rest.length; i++) if (rest[i].setIndex !== i) { rest[i].setIndex = i; await db.put('sets', rest[i]); }
-    renderSessao(); toast('Série apagada.'); return; }
-
-  const ex = t.closest('[data-extra]'); if (ex) { S.extra = ex.dataset.extra; renderSessao(); return; }
   const how = t.closest('[data-how]'); if (how) { howSheet(itemById(how.dataset.how)); return; }
 
   const sg = t.closest('.seg [data-v]');

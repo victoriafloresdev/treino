@@ -1067,47 +1067,13 @@ export const PLAN = [
  }
 ];
 
+// Dias previstos de musculação (seg–qui). A ficha não é fixa por dia: vale a sequência (ver workoutOrder).
 export const WEEK = [
- {
-  "d": "Seg",
-  "dow": 1,
-  "plan": "inferior-a",
-  "cardio": "Caminhada moderada"
- },
- {
-  "d": "Ter",
-  "dow": 2,
-  "plan": "superior-a",
-  "cardio": "Caminhada leve"
- },
- {
-  "d": "Qua",
-  "dow": 3,
-  "plan": null,
-  "cardio": "Corrida e caminhada intercaladas"
- },
- {
-  "d": "Qui",
-  "dow": 4,
-  "plan": "inferior-b",
-  "cardio": "Caminhada moderada"
- },
- {
-  "d": "Sex",
-  "dow": 5,
-  "plan": "superior-b",
-  "cardio": "Caminhada leve"
- },
- {
-  "d": "Sáb",
-  "dow": 6,
-  "plan": null,
-  "cardio": "Corrida leve e confortável"
- },
- {
-  "d": "Dom",
-  "dow": 0,
-  "plan": null,
-  "cardio": "Descanso completo"
- }
+ { "d": "Seg", "dow": 1, "musc": true, "cardio": "Caminhada moderada" },
+ { "d": "Ter", "dow": 2, "musc": true, "cardio": "Caminhada leve" },
+ { "d": "Qua", "dow": 3, "musc": true, "cardio": "Corrida e caminhada intercaladas" },
+ { "d": "Qui", "dow": 4, "musc": true, "cardio": "Caminhada moderada" },
+ { "d": "Sex", "dow": 5, "musc": false, "cardio": "Caminhada leve" },
+ { "d": "Sáb", "dow": 6, "musc": false, "cardio": "Corrida leve e confortável" },
+ { "d": "Dom", "dow": 0, "musc": false, "cardio": "Descanso completo" }
 ];

@@ -12,7 +12,7 @@ App web instalável (PWA) para o dia a dia: musculação, cardio, refeições, �
   - **Treinos de hoje:** musculação e cardio, com atalho para começar.
   - **Hábitos do dia** e da semana, e o peso.
 - **Treino**
-  - **Musculação:** seletor dos 4 treinos, que abre no do dia ou no próximo da sequência. Registro série por série (carga com ± 2,5 kg, repetições, fácil/médio/difícil), cronômetro de descanso, desenho dos músculos, sugestão de progressão e tendência de cada exercício.
+  - **Musculação:** os 4 treinos em todo dia, com o sugerido pela sequência (ordem ajustável em Mais). Uma carga (± 2,5 kg, já preenchida com a última) e uma dificuldade por exercício, valendo para todas as séries; sugestão de carga pela dificuldade; detalhes com desenho dos músculos, histórico e tendência.
   - **Cardio:** timer de intervalos com bip e tela ligada, registro, pergunta sobre dor no dia seguinte e progressão da corrida por etapas.
 - **Comida**
   - **Dia:** o plano alimentar do dia. Prato-relógio, macros, água e psyllium; refeições em linhas com check de um toque e troca de opção.

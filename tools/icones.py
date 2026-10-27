@@ -18,7 +18,7 @@ ICONES = [
     # estados
     'check', 'check-circle', 'check-circle-fill', 'circle', 'warning-circle', 'info',
     # ações
-    'plus', 'minus', 'x', 'caret-right', 'caret-down', 'arrow-counter-clockwise', 'play-fill', 'pause-fill', 'stop',
+    'plus', 'minus', 'x', 'caret-right', 'caret-down', 'caret-up', 'arrow-counter-clockwise', 'play-fill', 'pause-fill', 'stop',
     'timer', 'clock', 'export', 'download-simple', 'upload-simple', 'trash', 'pencil-simple', 'magnifying-glass',
     # temas
     'drop', 'drop-fill', 'scales', 'calendar-check', 'calendar-dots', 'trophy', 'lightbulb', 'swap', 'pizza',
