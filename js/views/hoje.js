@@ -17,7 +17,6 @@ import { viewDate, isPast, dateNavHTML, dayLabel } from '../ui/dia-ativo.js';
 
 export { applyDayColor };
 const H = { ctx: null };
-const hourNow = () => { const n = new Date(); return n.getHours() + n.getMinutes() / 60; };
 // Backup: o aviso aparece a partir do domingo e fica até você exportar; depois, só no domingo seguinte.
 export const lastSunday = d => addDays(d, -parseDate(d).getDay());
 export const backupDue = (today, lastBackup) => !lastBackup || lastBackup < lastSunday(today);
@@ -76,11 +75,9 @@ async function refreshHoje() {
   const weighed = body.find(b => b.date === today && b.weight != null);
   const hb = habitsOf(info, weighed);
   const wpct = wk.total ? Math.round(100 * wk.done / wk.total) : null;
-  // num dia que passou, a "próxima" é a primeira que ficou sem marcar
-  const hour = past ? 0 : hourNow();
 
   document.getElementById('hojeDay').innerHTML = dayTagHTML(info);
-  document.getElementById('hojeNext').innerHTML = nextHTML(info, hour, past);
+  document.getElementById('hojeNext').innerHTML = nextHTML(info, past);
   document.getElementById('hojeRings').innerHTML = ringsHTML(info);
   document.getElementById('hojeTreinos').innerHTML = treinosHTML(info);
   const hOpen = document.querySelector('#hojeHabits details')?.open;
@@ -94,8 +91,8 @@ async function refreshHoje() {
 }
 
 /* ---------- próxima refeição ---------- */
-function nextHTML(info, hour, past) {
-  const n = nextMeal(info, hour);
+function nextHTML(info, past) {
+  const n = nextMeal(info);
   const skipped = n?.skipped?.length ? `<p class="small muted skipped">Ficou sem marcar: ${n.skipped.map(s => esc(s.title.toLowerCase())).join(', ')}.
     <a href="#comida/dia">Ver o dia</a></p>` : '';
   if (!n || !n.slot) return `<div class="next-card done">

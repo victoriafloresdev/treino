@@ -47,8 +47,10 @@ export async function dayInfo(date = todayStr(), ctx = {}) {
     sel: { ...defaults.sel }, build: { almoco: { ...defaults.build.almoco }, jantar: { ...defaults.build.jantar } }, included: {},
     psy: rec?.psy != null ? rec.psy : defaults.psy
   };
+  st.skip = {};
   for (const m of meals) {
     if (m.optionId) st.sel[m.slot] = m.optionId;
+    if (m.skip) st.skip[m.slot] = m.skip;
     if (m.build) st.build[m.slot] = { ...st.build[m.slot], ...m.build };
   }
   for (const s of SLOTS) if (s.optional) {
@@ -70,8 +72,9 @@ async function saveMeal(date, slot, patch) {
   const info = await dayInfo(date);
   const cur = (await db.get('meals', mealUid(date, slot))) || { uid: mealUid(date, slot), date, slot };
   const next = { ...cur, ...patch };
-  const st = { ...info.st, sel: { ...info.st.sel }, build: { ...info.st.build } };
+  const st = { ...info.st, sel: { ...info.st.sel }, build: { ...info.st.build }, skip: { ...info.st.skip } };
   if (next.optionId) st.sel[slot] = next.optionId;
+  if ('skip' in next) st.skip[slot] = next.skip;
   if (next.build) st.build[slot] = { ...st.build[slot], ...next.build };
   next.m = mealOf(slot, info.d, st).m;
   await db.put('meals', next);
@@ -85,6 +88,10 @@ export async function chooseBuild(date, meal, key, value) {
   const info = await dayInfo(date);
   await saveMeal(date, meal, { build: { ...info.st.build[meal], [key]: value } });
   await patchDefaults(d => { d.build[meal] = { ...d.build[meal], [key]: value }; }, date);
+}
+// itens tirados da refeição só nesse dia (não muda o padrão); idx vazio volta ao completo
+export async function setSkipItems(date, slot, optId, idx) {
+  await saveMeal(date, slot, { skip: idx.length ? { opt: optId, idx } : null });
 }
 export async function setIncluded(date, slot, value) {
   const info = await dayInfo(date);

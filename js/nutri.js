@@ -1,9 +1,11 @@
 // Plano alimentar: cálculos puros (sem DOM e sem banco), portados do Plano da Vic.
-// Estado de um dia: { sel: {slot: opção}, build: {almoco, jantar}, included: {slot: bool}, psy: bool }
+// Estado de um dia: { sel: {slot: opção}, build: {almoco, jantar}, included: {slot: bool}, psy: bool,
+//   skip: {slot: { opt, idx: [itens tirados] }} }
 import {
   DAYS, PROT, CARB, MOLHO, LEG, SAL, OIL, PSY, OPTS, SLOTS, DEFAULT_BUILD, DINNER_PROT_FACTOR,
   ON_TARGET_KCAL, KCAL_PER_KG_FAT, CALC_MIN_PROT_PER_100, CALC_TOLERANCE, LIVRE_SEGUIR_ATE, LIVRE_MAX_CORTE_DIA, WEIGHT_MSGS, WEEK_NOTES
 } from './data/nutricao.js';
+import { ITEM_EST } from './data/itens.js';
 
 export const ZERO = [0, 0, 0, 0, 0];
 export const add = (a, b) => a.map((v, i) => v + (b[i] || 0));
@@ -40,8 +42,34 @@ export function prato(meal, d, st) {
 }
 export function mealOf(slot, d, st) {
   if (slot === 'almoco') return prato('almoco', d, st);
-  if (slot === 'jantar') { const o = getOpt('jantar', st); return o.builder ? prato('jantar', d, st) : o; }
-  return getOpt(slot, st);
+  if (slot === 'jantar') { const o = getOpt('jantar', st); return o.builder ? prato('jantar', d, st) : withSkip(slot, o, st); }
+  return withSkip(slot, getOpt(slot, st), st);
+}
+
+// Macros de cada item da opção, ajustados para a soma dar exatamente o total da opção (o.m).
+const round = (v, j) => (j === 0 ? Math.round(v) : Math.round(v * 10) / 10);
+export function itemMacros(slot, o) {
+  const est = ITEM_EST[`${slot}:${o.id}`];
+  if (!est || est.length !== o.items?.length) return null;
+  const out = est.map(() => [0, 0, 0, 0, 0]);
+  for (let j = 0; j < 5; j++) {
+    const tot = est.reduce((a, x) => a + x[j], 0);
+    est.forEach((x, i) => { out[i][j] = tot ? round(x[j] * o.m[j] / tot, j) : 0; });
+    // o arredondamento vai para o maior item, para a soma bater
+    const diff = round(o.m[j] - out.reduce((a, x) => a + x[j], 0), j);
+    if (diff) { const k = est.reduce((b, x, i) => (x[j] > est[b][j] ? i : b), 0); out[k][j] = round(out[k][j] + diff, j); }
+  }
+  return out;
+}
+export const canEditItems = (slot, o) => !o.builder && (o.items?.length || 0) > 1 && !!itemMacros(slot, o);
+// tira do dia os itens desmarcados (vale só se a opção ainda for a mesma)
+function withSkip(slot, o, st) {
+  const sk = st?.skip?.[slot];
+  if (!sk || sk.opt !== o.id || !sk.idx?.length) return o;
+  const im = itemMacros(slot, o);
+  if (!im) return o;
+  const m = im.reduce((t, x, i) => (sk.idx.includes(i) ? t : add(t, x)), ZERO).map((v, j) => round(v, j));
+  return { ...o, m, skipped: sk.idx, base: o };
 }
 export const slotById = id => SLOTS.find(s => s.id === id);
 export function included(s, st) {

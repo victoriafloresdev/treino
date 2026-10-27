@@ -9,6 +9,7 @@ const SCREENS = [
   { name: 'comida-dia-almoco', hash: 'comida/dia', run: async p => { const h = p.locator('#meal-almoco .meal-head'); if (await h.getAttribute('aria-expanded') !== 'true') await h.click(); } },
   { name: 'comida-dia-jantar', hash: 'comida/dia', run: async p => { const h = p.locator('#meal-jantar .meal-head'); if (await h.getAttribute('aria-expanded') !== 'true') await h.click(); } },
   { name: 'comida-dia-opcoes', hash: 'comida/dia', run: async p => { const h = p.locator('#meal-cafe .meal-head'); if (await h.getAttribute('aria-expanded') !== 'true') await h.click(); await p.locator('#meal-cafe [data-act="mealPick"]').click(); await p.waitForSelector('#sheet.on'); } },
+  { name: 'comida-dia-itens', hash: 'comida/dia', run: async p => { const h = p.locator('#meal-cafe .meal-head'); if (await h.getAttribute('aria-expanded') !== 'true') await h.click(); await p.locator('#meal-cafe [data-act="itemsEdit"]').click(); await p.waitForSelector('#sheet.on'); } },
   { name: 'hoje-mudar-dia', hash: 'hoje', sheet: '[data-act="daySheet"]' },
   { name: 'treino', hash: 'treino' },
   { name: 'sessao', hash: 'treino/inferior-a', open: true },

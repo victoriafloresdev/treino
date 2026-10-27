@@ -3,7 +3,9 @@
 /* hidden sempre esconde, mesmo com display definido na classe */
 [hidden]{display:none!important}
 html,body{margin:0;background:var(--bg);color:var(--ink)}
-html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;touch-action:manipulation}
+/* sem zoom no toque duplo (ex.: tocar rápido no + da carga) */
+button,a,label,input,select,summary{touch-action:manipulation}
 body{font-family:var(--font-ui);font-size:16.5px;line-height:1.45;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent;overscroll-behavior-y:none}
 button,input,select,textarea{font:inherit;color:inherit}
 a{color:var(--accent);text-underline-offset:.18em}

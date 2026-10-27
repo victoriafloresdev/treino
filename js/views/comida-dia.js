@@ -2,8 +2,8 @@
 import { esc } from '../util.js';
 import { app, setBar, on, onChange, openSheet, closeSheet, toast, refreshView } from '../ui.js';
 import { OPTS, PROT, CARB, MOLHO, PSY, TARGET_P, FAT_RANGE, FIBER_RANGE } from '../data/nutricao.js';
-import { mealOf, included, status, deficit, waterGoalCups, fmt, fmt1, noteOf } from '../nutri.js';
-import { dayInfo, chooseOption, chooseBuild, setIncluded, toggleDone, setPsy, setWater } from '../days.js';
+import { mealOf, included, status, deficit, waterGoalCups, fmt, fmt1, noteOf, itemMacros, canEditItems } from '../nutri.js';
+import { dayInfo, chooseOption, chooseBuild, setIncluded, toggleDone, setPsy, setWater, setSkipItems } from '../days.js';
 import { nextMeal } from '../proximo.js';
 import { plateSVG, updatePlate } from '../ui/plate.js';
 import { icon } from '../ui/icons.js';
@@ -11,7 +11,6 @@ import { dayTagHTML, applyDayColor } from './dia.js';
 import { viewDate, isPast, dateNavHTML } from '../ui/dia-ativo.js';
 
 const D = { open: new Set(), date: null, info: null, resumo: false };
-const hourNow = () => { const n = new Date(); return n.getHours() + n.getMinutes() / 60; };
 
 export async function renderDia(box) {
   const today = viewDate();
@@ -41,7 +40,7 @@ export async function refreshDia() {
   D.info = info;
   applyDayColor(info.type);
   // abre a próxima refeição na primeira vez do dia
-  if (D.auto) { const n = nextMeal(info, isPast() ? 0 : hourNow()); if (n?.slot) D.open.add(n.slot.id); D.auto = false; }
+  if (D.auto) { const n = nextMeal(info); if (n?.slot) D.open.add(n.slot.id); D.auto = false; }
   setBar('Comida', `<span class="num">${fmt(info.eaten[0])}</span> de ${fmt(info.d.target)} kcal`);
   document.getElementById('diaDay').innerHTML = dayTagHTML(info);
   updatePlate(document.getElementById('diaPlate'), info);
@@ -147,7 +146,10 @@ function mealHTML(s, info) {
         <span><small>Opção</small><b>${esc(mm.builder ? 'Prato montado' : mm.name)}</b></span><span class="pick-go">Trocar</span></button>`}
       ${isBuilder ? ['prot', 'carb', 'molho'].map(k => chips(`${s.id}-${k}`, 'mealBuild', { prot: PROT, carb: CARB, molho: MOLHO }[k], st.build[s.id][k],
         `data-meal="${s.id}" data-key="${k}"`, { prot: 'Proteína', carb: 'Carboidrato', molho: 'Molho' }[k])).join('') : ''}
-      <ul class="items">${mm.items.map(it => `<li><span>${esc(it[0])}</span><span class="q">${esc(it[1])}</span></li>`).join('')}</ul>
+      <ul class="items">${mm.items.map((it, i) => mm.skipped?.includes(i)
+        ? `<li class="off"><span><s>${esc(it[0])}</s> <small>tirado hoje</small></span><span class="q">${esc(it[1])}</span></li>`
+        : `<li><span>${esc(it[0])}</span><span class="q">${esc(it[1])}</span></li>`).join('')}</ul>
+      ${!isBuilder && canEditItems(s.id, mm.base || mm) ? `<button class="linkbtn items-edit" type="button" data-act="itemsEdit" data-slot="${s.id}">${icon('pencil-simple')} ${mm.skipped ? 'Editar itens (alterado neste dia)' : 'Editar itens'}</button>` : ''}
       ${note ? `<p class="note">${esc(note)}</p>` : ''}
       <div class="stack" aria-hidden="true"><i style="width:${m[1] * 4 / kc * 100}%;background:var(--p)"></i><i style="width:${m[2] * 4 / kc * 100}%;background:var(--c)"></i><i style="width:${m[3] * 9 / kc * 100}%;background:var(--g)"></i></div>
       <div class="macro-strip">
@@ -175,6 +177,21 @@ function pickSheet(slot) {
     }).join('')}</fieldset>`);
 }
 
+// sheet para tirar itens da refeição só nesse dia; as calorias passam a contar só os itens marcados
+function itemsSheet(slot) {
+  const info = D.info, s = info.visible.find(x => x.id === slot);
+  const mm = mealOf(slot, info.d, info.st), o = mm.base || mm, im = itemMacros(slot, o);
+  openSheet(`<h2>${esc(s.title)}: ${esc(o.name)}</h2>
+    <p class="small muted">Desmarque o que você não comeu. Vale só para ${isPast() ? 'esse dia' : 'hoje'}; o padrão continua completo.</p>
+    <fieldset class="checks" id="itemsBox"><legend class="sr">Itens de ${esc(s.title.toLowerCase())}</legend>
+      ${o.items.map((it, i) => `<label class="check-row"><input type="checkbox" value="${i}" ${mm.skipped?.includes(i) ? '' : 'checked'}>
+        <span><b>${esc(it[0])}</b><small>${esc(it[1])}</small></span><span class="num">${fmt(im[i][0])} kcal</span></label>`).join('')}
+    </fieldset>
+    <p class="small muted">Valores por item estimados (tabela TACO), ajustados para somar o total da opção.</p>
+    <div class="form-actions"><button class="btn solid block" type="button" data-act="itemsSave" data-slot="${slot}" data-opt="${o.id}">Salvar itens</button>
+      ${mm.skipped ? `<button class="btn block" type="button" data-act="itemsReset" data-slot="${slot}" data-opt="${o.id}">Voltar ao completo</button>` : ''}</div>`);
+}
+
 /* ---------- ações (refreshView atualiza a tela em que você está) ---------- */
 on({
   async psy() { const info = await dayInfo(viewDate()); await setPsy(viewDate(), !info.st.psy); await refreshView(); },
@@ -196,6 +213,14 @@ on({
     li.classList.toggle('open', open); body.hidden = !open; el.setAttribute('aria-expanded', open);
   },
   mealPick(el) { pickSheet(el.dataset.slot); },
+  itemsEdit(el) { itemsSheet(el.dataset.slot); },
+  async itemsSave(el) {
+    const boxes = [...document.querySelectorAll('#itemsBox input')];
+    if (!boxes.some(b => b.checked)) { toast('Deixe pelo menos um item. Para tirar a refeição inteira, não marque como feita.'); return; }
+    await setSkipItems(viewDate(), el.dataset.slot, el.dataset.opt, boxes.filter(b => !b.checked).map(b => Number(b.value)));
+    closeSheet(); await refreshView(); toast('Itens salvos para esse dia.');
+  },
+  async itemsReset(el) { await setSkipItems(viewDate(), el.dataset.slot, el.dataset.opt, []); closeSheet(); await refreshView(); },
   // da tela Hoje: abre Comida › Dia já na refeição
   openMeal(el) {
     if (D.date !== viewDate()) { D.open = new Set(); D.date = viewDate(); }
