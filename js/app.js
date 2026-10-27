@@ -11,6 +11,7 @@ import { viewProgresso } from './views/progresso.js';
 import { viewCorpo } from './views/corpo.js';
 import { viewMais, viewGuia, exportData, importFile } from './views/mais.js';
 import { viewCardio } from './views/cardio.js';
+import { viewConquistas, viewFechar } from './views/conquistas.js';
 import { db, STORES } from './db.js';
 
 /* ================= eventos ================= */
@@ -84,7 +85,7 @@ async function route() {
   const [r, arg] = (location.hash.slice(1) || 'hoje').split('/');
   // endereço antigo da aba Corpo
   if (r === 'corpo') { location.replace('#progresso/corpo'); return; }
-  const tab = { guia: 'mais', cardio: 'treino' }[r] || r;
+  const tab = { guia: 'mais', cardio: 'treino', fechar: 'hoje' }[r] || r;
   $$('.nav a').forEach(a => a.setAttribute('aria-current', a.dataset.r === tab ? 'page' : 'false'));
   // a cor de destaque segue o tipo de hoje em todas as telas
   if (r !== 'hoje' && r !== 'comida') dayInfo().then(i => applyDayColor(i.type)).catch(() => {});
@@ -94,6 +95,8 @@ async function route() {
     else if (r === 'cardio') await viewCardio();
     else if (r === 'comida') await viewComida(arg);
     else if (r === 'progresso' && arg === 'corpo') await viewCorpo();
+    else if (r === 'progresso' && arg === 'conquistas') await viewConquistas();
+    else if (r === 'fechar') await viewFechar(arg);
     else if (r === 'progresso') await viewProgresso();
     else if (r === 'mais') await viewMais();
     else if (r === 'guia') viewGuia();

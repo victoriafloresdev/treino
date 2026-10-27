@@ -237,3 +237,34 @@ details.tip>summary small{display:block;font-size:13px;color:var(--muted)}
 .pain-ask h3{margin:0 0 8px}
 details.adjust>summary,details.more>summary{cursor:pointer;font-weight:700;min-height:44px;display:flex;align-items:center}
 details.more{margin-top:10px}
+
+/* ---------- progresso, conquistas e fechamento ---------- */
+.trend{font-weight:800;font-size:14px;white-space:nowrap}
+p.trend{margin:0 0 8px;white-space:normal}
+.trend.facil{color:var(--ok)} .trend.dificil{color:var(--hard)} .trend.estavel{color:var(--muted)}
+.rows.trends li{grid-template-columns:minmax(0,1fr) auto}
+.weeks-bars{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:8px}
+.weeks-bars li{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:8px;align-items:center;font-size:14px}
+.weeks-bars .num{font-weight:700;font-variant-numeric:tabular-nums}
+.track .fill.full,.weeks-bars .fill.full{background:var(--ok)}
+.weeks-bars .fill,.ach .fill{background:var(--accent)}
+.ach{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.ach li{display:grid;grid-template-columns:44px minmax(0,1fr);gap:10px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px 12px}
+.ach li>div{min-width:0;display:grid;gap:3px}
+.ach li .em{font-size:28px;text-align:center;filter:grayscale(1);opacity:.5}
+.ach li.on{border-color:var(--ok)}
+.ach li.on .em{filter:none;opacity:1}
+.ach .track{height:8px}
+.wkline{margin:4px 0 0}
+a.card.closing{display:grid;grid-template-columns:32px minmax(0,1fr) auto;gap:10px;align-items:center;text-decoration:none;color:inherit;border:2px solid var(--day,var(--accent))}
+a.card.closing .em{font-size:24px}
+a.card.closing b{display:block;font-size:17px}
+a.card.closing small{display:block;color:var(--muted);font-size:13.5px}
+ul.plain{margin:4px 0 10px;padding-left:20px}
+.celebrate{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 70px);transform:translateX(-50%);z-index:60;display:grid;justify-items:center;gap:2px;
+  background:var(--surface);border:2px solid var(--ok);border-radius:18px;padding:12px 20px;box-shadow:0 10px 30px rgba(0,0,0,.25);max-width:calc(100vw - 32px);text-align:center;
+  animation:celebrate .5s ease-out}
+.celebrate span:first-child{font-size:30px}
+.celebrate b{color:var(--ok);font-size:13px}
+@keyframes celebrate{0%{transform:translateX(-50%) scale(.6);opacity:0}100%{transform:translateX(-50%) scale(1);opacity:1}}
+@media (prefers-reduced-motion:reduce){.celebrate{animation:none}}

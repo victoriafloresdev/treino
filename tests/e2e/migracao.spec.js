@@ -50,7 +50,9 @@ test('migração v1 → v2 preserva tudo e preenche uid e updatedAt', async ({ p
   expect(after.idb.version).toBe(2);
   expect(after.idb.stores).toEqual(['achievements', 'body', 'cardio', 'comps', 'daytypes', 'meals', 'profile', 'sessions', 'sets', 'settings', 'water', 'weekly']);
   for (const s of V1_STORES) {
-    expect(after.out[s].length, s).toBe(v1[s].length);
+    // a v2 pode criar ajustes próprios (ex.: v2Since); os da v1 precisam continuar todos lá
+    const mine = s === 'settings' ? after.out[s].filter(r => v1.settings.some(o => o.key === r.key)) : after.out[s];
+    expect(mine.length, s).toBe(v1[s].length);
     // todo campo antigo continua com o mesmo valor
     for (const old of v1[s]) {
       const key = s === 'settings' ? 'key' : 'id';
@@ -80,7 +82,8 @@ test('backup v1 importado depois da migração não duplica nada', async ({ page
     await db.importAll(v1, 'merge');
     await db.importAll(v1, 'merge');
     const c = {};
-    for (const s of ['sessions', 'sets', 'body', 'comps', 'cardio', 'settings']) c[s] = (await db.all(s)).length;
+    for (const s of ['sessions', 'sets', 'body', 'comps', 'cardio']) c[s] = (await db.all(s)).length;
+    c.settings = (await db.all('settings')).filter(r => v1.settings.some(o => o.key === r.key)).length;
     // as séries continuam ligadas às sessões certas
     const sessions = await db.all('sessions');
     c.orphanSets = (await db.all('sets')).filter(x => !sessions.some(s => s.id === x.sessionId)).length;

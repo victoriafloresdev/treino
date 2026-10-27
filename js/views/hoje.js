@@ -1,5 +1,5 @@
 // Tela Hoje: a linha do tempo do dia (remédio, cardio, refeições, musculação, sono) com o prato-relógio.
-import { esc, todayStr, parseDate, fmtLong, fmtN } from '../util.js';
+import { esc, todayStr, parseDate, fmtLong, fmtN, fmtShort, weekStart, addDays } from '../util.js';
 import { planById, program, phaseLabel, loadAll, doneThisWeek, nextInSequence, avg7 } from '../training.js';
 import { app, main, setBar, on, onChange, openSheet, closeSheet, toast } from '../ui.js';
 import { cardioToday, pendingPain, painCardHTML } from './cardio.js';
@@ -10,6 +10,8 @@ import { mealOf, included, status, deficit, waterGoalCups, fmt, fmt1, noteOf } f
 import { SOURCES } from '../daytype.js';
 import { dayInfo, chooseOption, chooseBuild, setIncluded, toggleDone, setPsy, setWater, setOverride, setSkip, getProfile, importProfileFile } from '../days.js';
 import { habitsOf } from '../habitos.js';
+import { pendingClosing, weekHabits, v2Since } from '../stats.js';
+import { CONSISTENT } from '../progress.js';
 import { plateSVG, updatePlate } from '../ui/plate.js';
 
 const H = { open: new Set(), date: null, info: null, ctx: null };
@@ -35,7 +37,7 @@ export async function viewHoje() {
   const all = await loadAll();
   const needBackup = all.sets.length > 0 && (!lastBackup || (parseDate(today) - parseDate(lastBackup)) / 864e5 > 14);
   const askProfile = !(await getProfile()) && !(await db.setting('profilePromptHidden'));
-  H.ctx = { p, all, cardio: await cardioToday(today), pain: await pendingPain(today) };
+  H.ctx = { p, all, cardio: await cardioToday(today), pain: await pendingPain(today), closing: await pendingClosing(today) };
 
   if (tok !== app.seq) return;
   main.innerHTML = `
@@ -51,6 +53,8 @@ export async function viewHoje() {
       <div class="row"><label class="btn solid" style="cursor:pointer">Importar perfil de saúde<input type="file" id="profileFileHoje" accept="application/json,.json" hidden></label>
         <button class="btn" type="button" data-act="profileLater">Agora não</button></div></div>` : ''}
     ${H.ctx.pain ? painCardHTML(H.ctx.pain, today) : ''}
+    ${H.ctx.closing ? `<a class="card closing" href="#fechar/${H.ctx.closing}"><span class="em" aria-hidden="true">🗓️</span>
+      <span><b>Fechar a semana</b><small>${fmtShort(H.ctx.closing)} a ${fmtShort(addDays(H.ctx.closing, 6))}: veja o resumo e anote como foi.</small></span><span aria-hidden="true">›</span></a>` : ''}
     <div class="hoje-grid">
       <section class="h-day" id="hojeDay" aria-label="Tipo de dia"></section>
       <section class="h-now" id="hojeNow" aria-label="Agora"></section>
@@ -85,7 +89,11 @@ async function refresh() {
   updatePlate(document.getElementById('hojePlate'), info);
   document.getElementById('hojeSummary').innerHTML = summaryHTML(info);
   const hb = habitsOf(info, weighed);
+  const wk = await weekHabits(weekStart(today), await v2Since(), today);
+  if (tok !== app.seq || !document.getElementById('hojeHabits')) return;
+  const wpct = wk.total ? Math.round(100 * wk.done / wk.total) : 0;
   document.getElementById('hojeHabits').innerHTML = `<div class="spread"><h3>Hábitos do dia</h3><span class="count">${hb.done} de ${hb.total}</span></div>
+    <p class="small muted wkline">Na semana: ${wk.done} de ${wk.total} (${wpct}%)${wpct >= CONSISTENT * 100 ? ' · semana consistente' : ` · ${Math.round(CONSISTENT * 100)}% fecha a semana como consistente`}</p>
     <ul class="habits">${hb.list.map(h => `<li class="${h.done ? 'ok' : ''}"><span class="ck" aria-hidden="true">${h.done ? '✓' : ''}</span>${esc(h.label)}<span class="sr">${h.done ? ': feito' : ': ainda não'}</span></li>`).join('')}</ul>`;
   document.getElementById('hojeNow').innerHTML = nowHTML(info);
   document.getElementById('hojeTimeline').innerHTML = info.visible.map(s => slotHTML(s, info)).join('');

@@ -110,3 +110,17 @@ $('#timerPlus').onclick = () => {
   startTimer(left + 15, label);
 };
 $('#timerSkip').onclick = () => { clearInterval(timer.int); $('#timer').classList.remove('on', 'end'); document.body.classList.remove('timer-on'); };
+
+// Pequena celebração ao desbloquear uma conquista.
+export function celebrate(text) {
+  const el = document.createElement('div');
+  el.className = 'celebrate'; el.setAttribute('role', 'status');
+  // várias de uma vez ficam empilhadas
+  el.style.marginTop = `${document.querySelectorAll('.celebrate').length * 96}px`;
+  el.innerHTML = `<span aria-hidden="true">🎉</span><b>Conquista</b><span></span>`;
+  el.lastChild.textContent = text;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 3600);
+}
+// carrega a checagem de conquistas sob demanda (evita ciclo de imports)
+export function announceAchievements() { return import('./views/conquistas.js').then(m => m.announceAchievements()); }

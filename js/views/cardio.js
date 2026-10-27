@@ -1,7 +1,7 @@
 // Cardio da manhã: timer de intervalos, registro, pergunta sobre dor e progressão da corrida.
 import { $, esc, todayStr, fmtShort, num, pad2, DIAS, parseDate, addDays } from '../util.js';
 import { program, phaseLabel } from '../training.js';
-import { app, main, setBar, on, onChange, openSheet, closeSheet, toast, beep, unlockAudio } from '../ui.js';
+import { app, main, setBar, on, onChange, openSheet, closeSheet, toast, beep, unlockAudio, announceAchievements } from '../ui.js';
 import { db } from '../db.js';
 import { STAGES, LAST_STAGE, PAIN, painLabel, weekStage, cardioOfDay, totalSecs, timerAt, progression, pendingPainCheck } from '../cardio.js';
 
@@ -183,6 +183,7 @@ async function saveCardio(el) {
   await db.add('cardio', rec);
   if (T.run) { T.run = null; await saveRun(); wakeLock(false); }
   closeSheet(); toast('Cardio salvo.'); app.route();
+  announceAchievements();
 }
 
 /* ---------- ações ---------- */

@@ -19,6 +19,8 @@ const SCREENS = [
   { name: 'comida-dicas', hash: 'comida/dicas', run: async p => { await p.evaluate(() => document.querySelectorAll('details.tip').forEach(d => { d.open = true; })); } },
   { name: 'progresso', hash: 'progresso' },
   { name: 'corpo', hash: 'progresso/corpo' },
+  { name: 'conquistas', hash: 'progresso/conquistas' },
+  { name: 'fechar', hash: 'fechar' },
   { name: 'mais', hash: 'mais' },
   { name: 'guia', hash: 'guia' },
   { name: 'como-fazer', hash: 'treino/inferior-a', sheet: '[data-how]' }

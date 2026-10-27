@@ -1,8 +1,9 @@
 // Sessão de treino: registro série por série.
 import { $, esc, todayStr, fmtShort, fmtLong, num, fmtN } from '../util.js';
 import { e1rm, planById, EFFORT, isTimed, range, rirFor, program, phaseLabel, loadAll, lastSetsFor, suggestion } from '../training.js';
-import { app, main, setBar, toast, openSheet, unlockAudio, startTimer } from '../ui.js';
+import { app, main, setBar, toast, openSheet, unlockAudio, startTimer, announceAchievements } from '../ui.js';
 import { db } from '../db.js';
+import { exSessions, trendOf } from '../progress.js';
 import { MUSCLES } from '../plan.js';
 import { bodyMap } from '../bodymap.js';
 
@@ -21,6 +22,7 @@ export async function viewSessao(planId) {
   S.session = sessions[0] || null;
   S.sets = S.session ? await db.byIndex('sets', 'sessionId', S.session.id) : [];
   S.last = {};
+  S.allSets = await db.all('sets');
   for (const it of pl.items) S.last[it.id] = await lastSetsFor(it.id, S.session?.id);
   if (!S.open.size || ![...S.open].some(id => pl.items.some(i => i.id === id))) {
     S.open = new Set();
@@ -78,6 +80,7 @@ export function exCardInner(it) {
         <div><dt>RIR</dt><dd>${esc(rirFor(it, ph).replace('Pare ao perder o alinhamento', 'técnica'))}</dd></div><div><dt>Descanso</dt><dd>${esc(it.rest.replace('90 s–2 min', '1,5–2 min'))}</dd></div>
       </dl>
       ${lastTxt}
+      ${trendLine(it)}
       ${sug ? `<div class="suggest">${esc(sug)}</div>` : ''}
       <button class="btn sm how" type="button" data-how="${it.id}">Como fazer</button>
       ${saved.map(s => `
@@ -152,6 +155,11 @@ export async function saveSet(exId) {
   if (card && doneCount(it) >= target) card.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
+function trendLine(it) {
+  const t = trendOf(exSessions(S.allSets || [], it.id), isTimed(it));
+  return t ? `<p class="trend ${t.id}"><span aria-hidden="true">${t.arrow}</span> Tendência: ${t.label}</p>` : '';
+}
+
 export async function finishSession() {
   if (!S.session) return;
   S.session.finishedAt = Date.now();
@@ -182,6 +190,8 @@ export async function finishSession() {
     <p class="small muted">Força estimada usa a fórmula de Epley (carga × (1 + reps/30)). É uma estimativa para acompanhar tendência, não um teste de carga máxima.</p>
     <div class="form-actions"><a class="btn solid block" href="#hoje" data-close>Voltar para Hoje</a></div>`);
   renderSessao();
+  S.allSets = await db.all('sets');
+  announceAchievements();
 }
 
 export function howSheet(it) {

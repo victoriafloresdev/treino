@@ -15,3 +15,11 @@ export const cap = s => s[0].toUpperCase() + s.slice(1);
 export const fmtLong = s => { const d = parseDate(s); return `${cap(DIAS[d.getDay()])}, ${d.getDate()} de ${MESES[d.getMonth()]}`; };
 export const num = v => { if (v == null || String(v).trim() === '') return null; const n = Number(String(v).replace(',', '.')); return Number.isFinite(n) ? n : null; };
 export const fmtN = (n, d = 1) => n == null ? '–' : (Math.round(n * 10 ** d) / 10 ** d).toLocaleString('pt-BR');
+// Semana ISO (segunda a domingo), ex.: { year: 2026, week: 44, id: '2026-W44' }
+export function isoWeek(s) {
+  const d = parseDate(s); d.setHours(12);
+  d.setDate(d.getDate() + 3 - ((d.getDay() + 6) % 7)); // quinta da mesma semana
+  const y = d.getFullYear(), jan4 = new Date(y, 0, 4, 12);
+  const week = 1 + Math.round(((d - jan4) / 864e5 - 3 + ((jan4.getDay() + 6) % 7)) / 7);
+  return { year: y, week, id: `${y}-W${pad2(week)}` };
+}
