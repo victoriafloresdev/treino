@@ -6,9 +6,9 @@ async function open(page, time, seed) {
   await page.setViewportSize({ width: 402, height: 874 });
   await page.goto('/index.html#hoje');
   await page.getByRole('button', { name: 'Salvar data de início' }).click();
+  await expect(page.locator('#ctx')).toContainText('Semana 1');
   if (seed) await page.evaluate(seed);
-  await page.goto('/index.html#mais');
-  await page.goto('/index.html#hoje');
+  await page.reload();
   await page.waitForSelector('#hojeNext h2');
 }
 const withData = async () => { const { db } = await import('/js/db.js'); await db.add('body', { date: '2026-10-20', weight: 80, waist: null, note: '' }); };

@@ -2,7 +2,7 @@
 import { esc, todayStr, fmtShort, fmtN } from '../util.js';
 import { program, phaseLabel, loadAll } from '../training.js';
 import { app, main, setBar, subTabs } from '../ui.js';
-import { PROG_TABS } from './progresso.js';
+import { PROG_TABS, corpoChartsHTML, drawCorpoCharts } from './progresso.js';
 
 /* ================= tela: Corpo ================= */
 export async function viewCorpo() {
@@ -16,9 +16,9 @@ export async function viewCorpo() {
   const body = [...all.body].sort((a, b) => a.date < b.date ? 1 : -1);
   const comps = [...all.comps].sort((a, b) => a.date < b.date ? 1 : -1);
   if (tok !== app.seq) return;
-  main.innerHTML = subTabs('progresso', PROG_TABS, 'corpo') + `
-    <div class="card"><h2>Peso e cintura</h2>
-      <div class="grid2" style="margin-top:10px">
+  main.innerHTML = subTabs('progresso', PROG_TABS, 'corpo') + corpoChartsHTML(all) + `
+    <details class="card more-card"><summary>Registrar peso e cintura</summary>
+      <div class="grid2" style="margin-top:4px">
         <label class="f">Data<input type="date" id="bDate" value="${today}"></label>
         <label class="f">Peso (kg)<input id="bW" inputmode="decimal" placeholder="0,0"></label>
         <label class="f">Cintura (cm)<input id="bWaist" inputmode="decimal" placeholder="opcional"></label>
@@ -26,9 +26,8 @@ export async function viewCorpo() {
       </div>
       <div class="form-actions"><button class="btn solid block" data-act="saveBody">Salvar medida</button></div>
       <p class="small muted" style="margin:10px 0 0">Cintura: meça na altura do umbigo, de manhã, a cada 2 semanas.</p>
-    </div>
-
-    <div class="card"><h2>Avaliação de composição</h2>
+    </details>
+    <details class="card more-card"><summary>Registrar avaliação de composição</summary>
       <p class="small muted" style="margin:0 0 10px">Bioimpedância, dobras cutâneas ou outro método. Preencha o que o laudo trouxer.</p>
       <label class="f">Método<select id="cMethod"><option>Dobras cutâneas</option><option>Bioimpedância</option><option>Outro</option></select></label>
       <div class="grid2" style="margin-top:10px">
@@ -42,7 +41,7 @@ export async function viewCorpo() {
         <label class="f">Observação<input id="cNote" placeholder="local, aparelho"></label>
       </div>
       <div class="form-actions"><button class="btn solid block" data-act="saveComp">Salvar avaliação</button></div>
-    </div>
+    </details>
 
     <h2 class="section-title">Avaliações</h2>
     <div class="card">${comps.length ? `<ul class="rows">
@@ -55,4 +54,5 @@ export async function viewCorpo() {
     <div class="card">${body.length ? `<table class="t"><thead><tr><th>Data</th><th>Peso</th><th>Cintura</th><th></th></tr></thead><tbody>
       ${body.slice(0, 40).map(b => `<tr><td>${fmtShort(b.date)}</td><td>${fmtN(b.weight)} kg</td><td>${b.waist ? fmtN(b.waist) + ' cm' : '–'}</td><td><button class="del" data-del="body:${b.id}">apagar</button></td></tr>`).join('')}
       </tbody></table>` : `<p class="empty">Nenhuma medida ainda.</p>`}</div>`;
+  drawCorpoCharts(all);
 }

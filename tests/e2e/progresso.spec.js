@@ -38,11 +38,21 @@ test('Progresso mostra os gráficos de treino, comida, água, déficit, cardio e
     await db.add('comps', { date: '2026-03-03', method: 'Dobras cutâneas', weight: 83, fatPct: 24, fatKg: 19.92, leanKg: 63.08 });
     await db.add('body', { date: '2026-10-27', weight: 82, waist: null, note: '' });
   } });
-  for (const id of ['cWeeks', 'cKcal', 'cProt', 'cWater', 'cDef', 'cWeight', 'cComp', 'cLean', 'cCardio', 'cStage']) await expect(page.locator('#' + id), id).toBeVisible();
-  await expect(page.locator('main')).toContainText('Déficit semanal (estimativa)');
-  // o dado do dia 27 aparece no gráfico de calorias
-  const kcal = await page.evaluate(() => Chart.getChart('cKcal').data.datasets[0].data);
-  expect(kcal[12]).toBe(405);
+  // cada sub-aba mostra os gráficos principais; o resto fica em "Mais"
+  const tabs = { treino: [['cWeeks', 'cCardio'], ['cStage']], comida: [['cKcal', 'cProt'], ['cWater', 'cDef']], corpo: [['cWeight'], ['cComp', 'cMLG']] };
+  for (const [tab, [main, more]] of Object.entries(tabs)) {
+    await page.goto('/index.html#progresso/' + tab);
+    for (const id of main) await expect(page.locator('#' + id), id).toBeVisible();
+    for (const id of more) await expect(page.locator('#' + id), id).toBeHidden();
+    await page.locator('details.more-card > summary').first().click();
+    for (const id of more) await expect(page.locator('#' + id), id).toBeVisible();
+    if (tab === 'comida') {
+      await expect(page.locator('main')).toContainText('Déficit semanal (estimativa)');
+      // o dado do dia 27 aparece no gráfico de calorias
+      const kcal = await page.evaluate(() => Chart.getChart('cKcal').data.datasets[0].data);
+      expect(kcal[12]).toBe(405);
+    }
+  }
   expect(errors).toEqual([]);
 });
 

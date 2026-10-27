@@ -8,7 +8,7 @@ const PERFIL = new URL('../../privado/perfil-saude.json', import.meta.url);
 
 test('perfil de saúde privado importa e todas as chaves de texto existem no app', async ({ page }) => {
   test.skip(!existsSync(PERFIL), 'perfil privado ausente');
-  await page.goto('/index.html#mais');
+  await page.goto('/index.html#mais/perfil');
   await page.waitForSelector('main > *');
   await page.locator('#profileFile').setInputFiles(PERFIL.pathname.replace(/^\/(\w:)/, '$1'));
   await expect(page.locator('main')).toContainText('Perfil importado');

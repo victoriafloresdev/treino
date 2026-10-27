@@ -90,8 +90,8 @@ async function route() {
     else if (r === 'progresso' && arg === 'corpo') await viewCorpo();
     else if (r === 'progresso' && arg === 'conquistas') await viewConquistas();
     else if (r === 'fechar') await viewFechar(arg);
-    else if (r === 'progresso') await viewProgresso();
-    else if (r === 'mais') await viewMais();
+    else if (r === 'progresso') await viewProgresso(arg);
+    else if (r === 'mais') await viewMais(arg);
     else if (r === 'guia') viewGuia();
     else await viewHoje();
   } catch (err) {

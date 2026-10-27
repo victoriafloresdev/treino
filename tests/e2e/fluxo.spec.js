@@ -38,8 +38,10 @@ test('registrar treino, cardio, corpo, exportar e importar', async ({ page }) =>
 
   // corpo
   await page.goto('/index.html#progresso/corpo');
+  await page.locator('summary:has-text("Registrar peso e cintura")').click();
   await page.locator('#bWaist').fill('81');
   await page.getByRole('button', { name: 'Salvar medida' }).click();
+  await page.locator('summary:has-text("Registrar avaliação")').click();
   await page.locator('#cW').fill('81,6');
   await page.locator('#cFat').fill('33');
   await page.getByRole('button', { name: 'Salvar avaliação' }).click();
@@ -51,7 +53,7 @@ test('registrar treino, cardio, corpo, exportar e importar', async ({ page }) =>
   await expect(page.locator('main')).toContainText('Quanto esforço');
 
   // exportar (cai no download quando não há folha de compartilhamento)
-  await page.goto('/index.html#mais');
+  await page.goto('/index.html#mais/backup');
   await page.evaluate(() => { navigator.canShare = () => false; });
   const [dl] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: 'Exportar dados' }).click()]);
   const path = await dl.path();

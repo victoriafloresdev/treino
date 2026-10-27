@@ -161,7 +161,7 @@ test('Comida: semana, trocas, refeição livre e dicas', async ({ page }) => {
 });
 
 test('perfil de saúde: importar mostra os textos pessoais; remover volta ao genérico', async ({ page }, info) => {
-  await open(page, 'mais');
+  await open(page, 'mais/perfil');
   const file = info.outputPath('perfil.json');
   writeFileSync(file, JSON.stringify({ tipo: 'perfil-saude', versao: 1, nome: 'Fulana',
     remedio: { rotulo: 'Lembrete de teste', sub: 'Texto do lembrete.', hora: '06h00', h: 6 },
@@ -175,7 +175,7 @@ test('perfil de saúde: importar mostra os textos pessoais; remover volta ao gen
   await expect(page.locator('details.tip')).toHaveCount(11);
   await expect(page.locator('#dica-medico')).toContainText('Ponto pessoal de teste');
 
-  await page.goto('/index.html#mais');
+  await page.goto('/index.html#mais/perfil');
   page.once('dialog', d => d.accept());
   await page.getByRole('button', { name: 'Remover perfil' }).click();
   await expect(page.locator('main')).toContainText('Nenhum perfil importado');
@@ -185,18 +185,18 @@ test('perfil de saúde: importar mostra os textos pessoais; remover volta ao gen
   // arquivo errado é recusado
   const bad = info.outputPath('backup.json');
   writeFileSync(bad, JSON.stringify({ app: 'treino-app', version: 2 }));
-  await page.goto('/index.html#mais');
+  await page.goto('/index.html#mais/perfil');
   await page.locator('#profileFile').setInputFiles(bad);
   await expect(page.locator('#toast')).toContainText('não é um perfil de saúde');
 });
 
 test('semana modelo editável em Mais', async ({ page }) => {
-  await open(page, 'mais');
+  await open(page, 'mais/treino');
   await page.locator('fieldset[data-i="5"] label:has(input[value="D"])').click();
   await expect(page.getByRole('button', { name: 'Voltar ao modelo padrão' })).toBeVisible();
   await page.goto('/index.html#comida/semana');
   await expect(page.locator('.wk-line').nth(5)).toContainText('Descanso');
-  await page.goto('/index.html#mais');
+  await page.goto('/index.html#mais/treino');
   await page.getByRole('button', { name: 'Voltar ao modelo padrão' }).click();
   await page.goto('/index.html#comida/semana');
   await expect(page.locator('.wk-line').nth(5)).toContainText('Só cardio');
@@ -205,9 +205,9 @@ test('semana modelo editável em Mais', async ({ page }) => {
 test('trocar de tela rápido: a última tela aberta é a que fica', async ({ page }) => {
   const errors = watchErrors(page);
   await open(page, 'hoje');
-  for (const r of ['comida/semana', 'progresso', 'comida/livre', 'hoje', 'progresso/corpo', 'comida/semana', 'mais'])
+  for (const r of ['comida/semana', 'progresso', 'comida/livre', 'hoje', 'progresso/corpo', 'comida/semana', 'mais/treino'])
     await page.evaluate(h => { location.hash = h; }, r);
-  await expect(page.locator('#title')).toHaveText('Mais');
+  await expect(page.locator('#title')).toHaveText('Programa e treinos');
   await page.waitForTimeout(800);
   await expect(page.locator('main')).toContainText('Semana modelo');
   await expect(page.locator('main')).not.toContainText('Algo deu errado');
@@ -238,6 +238,6 @@ test('"Agora não" esconde o aviso do perfil', async ({ page }) => {
   await expect(page.locator('.notice:has-text("Importe seu perfil")')).toHaveCount(0);
   await page.reload();
   await expect(page.locator('.notice:has-text("Importe seu perfil")')).toHaveCount(0);
-  await page.goto('/index.html#mais');
+  await page.goto('/index.html#mais/perfil');
   await expect(page.locator('main')).toContainText('Nenhum perfil importado');
 });

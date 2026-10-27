@@ -25,6 +25,8 @@ const SCREENS = [
   { name: 'conquistas', hash: 'progresso/conquistas' },
   { name: 'fechar', hash: 'fechar' },
   { name: 'mais', hash: 'mais' },
+  { name: 'mais-treino', hash: 'mais/treino' },
+  { name: 'mais-aparencia', hash: 'mais/aparencia' },
   { name: 'guia', hash: 'guia' },
   { name: 'como-fazer', hash: 'treino/inferior-a', sheet: '[data-how]' },
   // por último, porque a paleta fica salva no aparelho

@@ -146,7 +146,7 @@ test('o sugerido é o seguinte ao último feito, inclusive entre semanas, e a or
   await expect(page.locator('#hojeTreinos')).toContainText('Superior B');
 
   // trocar a ordem: Superior B sobe para antes de Inferior B
-  await page.goto('/index.html#mais');
+  await page.goto('/index.html#mais/treino');
   await page.getByRole('button', { name: 'Subir Superior B' }).click();
   await expect(page.locator('.order li')).toHaveText([/Superior A/, /Inferior A/, /Superior B/, /Inferior B/]);
   await page.goto('/index.html#treino');

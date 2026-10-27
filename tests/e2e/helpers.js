@@ -17,7 +17,7 @@ export function watchErrors(page) {
 // Grava dados de exemplo pelo próprio módulo de banco do app.
 export async function seed(page) {
   await page.goto('/index.html#mais');
-  await page.waitForSelector('main .card');
+  await page.waitForSelector('main > *');
   await page.evaluate(async () => {
     const { db } = await import('/js/db.js');
     const d = n => { const x = new Date(); x.setDate(x.getDate() - n); return x.toISOString().slice(0, 10); };

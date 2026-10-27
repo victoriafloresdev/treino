@@ -10,22 +10,37 @@ import { THEMES, PALETTES, getAppearance, setAppearance } from '../ui/aparencia.
 import { WD, weekModelFromPlan } from '../daytype.js';
 import { getModel, setModel, getProfile, importProfileFile, removeProfile } from '../days.js';
 
-export const VERSION = '2.0.0';
+export const VERSION = '3.0.0';
 
 /* ================= tela: Mais / Guia ================= */
-export async function viewMais() {
+export async function viewMais(sub) {
   // descarta o desenho se outra tela foi aberta enquanto este esperava o banco
   const tok = app.seq;
   const p = await program();
-  if (tok !== app.seq) return;
-  setBar('Mais', phaseLabel(p));
   const lastBackup = await db.setting('lastBackup');
-  const standalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
   const model = await getModel(), fromPlan = weekModelFromPlan(), profile = await getProfile(), order = await workoutOrder();
   if (tok !== app.seq) return;
   const ap = getAppearance();
-  main.innerHTML = `
-    <div class="card"><h2>Aparência</h2>
+  const page = MAIS_PAGES[sub];
+  if (!page) {
+    setBar('Mais', phaseLabel(p));
+    const row = (href, ic, title, small) => `<li><a class="set-row" href="${href}">${icon(ic, 'lead-ic')}<span><b>${title}</b>${small ? `<small>${small}</small>` : ''}</span>${icon('caret-right')}</a></li>`;
+    main.innerHTML = `
+      <ul class="set-group">
+        ${row('#mais/treino', 'barbell', 'Programa e treinos', p.start ? `Semana ${p.week} · ordem dos treinos · semana modelo` : 'Defina a data de início')}
+        ${row('#guia', 'book-open', 'Guia rápido', 'RIR, quando subir a carga, cardio e quando parar')}
+      </ul>
+      <ul class="set-group">
+        ${row('#mais/aparencia', 'palette', 'Aparência', `${THEMES.find(t => t[0] === ap.theme)?.[1] || ''} · ${PALETTES.find(x => x.id === ap.palette)?.name || ''}`)}
+        ${row('#mais/perfil', 'user-circle', 'Perfil de saúde', profile ? `Importado em ${fmtShort(profile.importedAt.slice(0, 10))}` : 'Nenhum perfil importado')}
+        ${row('#mais/backup', 'download-simple', 'Backup', `Último: ${lastBackup ? fmtShort(lastBackup) : 'nunca'}`)}
+        ${row('#mais/sobre', 'info', 'Sobre e instalação', `Versão ${VERSION}`)}
+      </ul>`;
+    return;
+  }
+  setBar(page, '', 'mais');
+  if (sub === 'aparencia') main.innerHTML = `
+    <div class="card">
       <fieldset class="chipset" data-on="themeMode"><legend>Tema</legend><div class="segr c3 ic-top">
         ${THEMES.map(([v, l, ic]) => `<label><input type="radio" name="themeMode" value="${v}" ${v === ap.theme ? 'checked' : ''}><span>${icon(ic)}${l}</span></label>`).join('')}
       </div></fieldset>
@@ -34,9 +49,10 @@ export async function viewMais() {
           <span><span class="pal-dots" data-palette="${p.id}" aria-hidden="true">${['A', 'B', 'C', 'D'].map(d => `<i style="background:var(--day-${d})"></i>`).join('')}</span>
           <b>${p.name}</b><small>${p.desc}</small></span></label>`).join('')}
       </div></fieldset>
-      <p class="small muted" style="margin:10px 0 0">A paleta muda a cor de cada tipo de dia; o ícone e o nome continuam dizendo o tipo. Vale só neste aparelho.</p>
-    </div>
-    <div class="card"><h2>Programa</h2>
+      <p class="small muted" style="margin:10px 0 0">Vale só neste aparelho.</p>
+    </div>`;
+  if (sub === 'treino') main.innerHTML = `
+    <div class="card"><h2>Início do programa</h2>
       <label class="f" style="margin-top:8px">Data de início<input type="date" id="startDate" value="${p.start || todayStr()}"></label>
       <div class="form-actions"><button class="btn block" data-act="setStart">Salvar data de início</button></div>
       <p class="small muted" style="margin:10px 0 0">${p.start ? `Você está na semana ${p.week}. Semanas 1–2: 2 séries por exercício e RIR 3–4.` : 'Defina a data para o app calcular a semana e a fase.'}</p>
@@ -49,26 +65,33 @@ export async function viewMais() {
       ${order.join() !== DEFAULT_ORDER.join() ? `<div class="form-actions"><button class="btn block" type="button" data-act="orderReset">Voltar à ordem padrão</button></div>` : ''}
     </div>
     <div class="card"><h2>Semana modelo</h2>
-      <p class="small muted" style="margin:4px 0 10px">O tipo previsto de cada dia da semana: musculação de segunda a quinta, cardio de segunda a sábado. Treinou em outro dia? O tipo se ajusta pelo registro.</p>
+      <p class="small muted" style="margin:4px 0 10px">O tipo previsto de cada dia: musculação de segunda a quinta, cardio de segunda a sábado. Treinou em outro dia? O tipo se ajusta pelo registro.</p>
       <div class="week">${WD.map((w, i) => `<div class="wk-row"><div class="wk-d"><b>${w}</b></div>
         <fieldset class="wk-opts" data-on="modelDay" data-i="${i}"><legend class="sr">Tipo previsto de ${w}</legend>
           ${DAY_IDS.map(t => `<label style="--wk:var(--day-${t})"><input type="radio" name="model-${i}" value="${t}" ${t === model[i] ? 'checked' : ''} aria-label="${esc(DAYS[t].name)}"><span aria-hidden="true">${icon(DAY_ICON[t])}</span></label>`).join('')}
         </fieldset><div class="wk-k"><small>${esc(DAYS[model[i]].short)}</small></div></div>`).join('')}</div>
       ${model.join() !== fromPlan.join() ? `<div class="form-actions"><button class="btn block" type="button" data-act="modelReset">Voltar ao modelo padrão</button></div>` : ''}
-    </div>
-    <div class="card"><h2>Perfil de saúde</h2>
-      <p class="small muted" style="margin:4px 0 10px">Textos pessoais (remédio, pontos dos exames, metas) ficam só neste aparelho, num arquivo que você importa. Sem ele, o app mostra textos genéricos.</p>
+    </div>`;
+  if (sub === 'perfil') {
+    main.innerHTML = `<div class="card">
+      <p class="small muted" style="margin:0 0 10px">Textos pessoais (remédio, pontos dos exames, metas) ficam só neste aparelho, num arquivo que você importa. Sem ele, o app mostra textos genéricos.</p>
       <p style="margin:0 0 10px">${profile ? `✓ Perfil importado em ${fmtShort(profile.importedAt.slice(0, 10))}.` : 'Nenhum perfil importado.'}</p>
       <div class="row"><label class="btn ${profile ? '' : 'solid'}" style="cursor:pointer">Importar perfil de saúde<input type="file" id="profileFile" accept="application/json,.json" hidden></label>
         ${profile ? '<button class="btn danger" type="button" data-act="profileRemove">Remover perfil</button>' : ''}</div>
-    </div>
-    <a class="card link-row" href="#guia">${icon('book-open', 'lead-ic')}<span><b>Guia rápido</b><small>RIR, quando subir a carga, cardio e quando parar.</small></span>${icon('caret-right')}</a>
-    <div class="card"><h2>Backup</h2>
-      <p class="muted" style="margin:4px 0 12px">Os dados ficam só neste celular. Exporte de tempos em tempos e guarde o arquivo no iCloud Drive ou no Google Drive. Último backup: <b>${lastBackup ? fmtShort(lastBackup) : 'nunca'}</b>.</p>
+    </div>`;
+    $('#profileFile').onchange = async e => { if (await importProfileFile(e.target.files[0])) app.route(); };
+  }
+  if (sub === 'backup') {
+    main.innerHTML = `<div class="card">
+      <p class="muted" style="margin:0 0 12px">Os dados ficam só neste celular. Exporte toda semana (o aviso aparece aos domingos) e guarde o arquivo no iCloud Drive ou no Google Drive. Último backup: <b>${lastBackup ? fmtShort(lastBackup) : 'nunca'}</b>.</p>
       <div class="row"><button class="btn solid" data-act="export">Exportar dados</button>
         <label class="btn" style="cursor:pointer">Importar arquivo<input type="file" id="importFile" accept="application/json,.json" hidden></label></div>
-    </div>
-    ${standalone ? '' : `<div class="card"><h2>Instalar no iPhone</h2>
+    </div>`;
+    $('#importFile').onchange = e => importFile(e.target.files[0]);
+  }
+  if (sub === 'sobre') {
+    const standalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+    main.innerHTML = `${standalone ? '' : `<div class="card"><h2>Instalar no iPhone</h2>
       <ol style="margin:6px 0 0;padding-left:20px"><li>Abra este endereço no Safari.</li><li>Toque em Compartilhar (quadrado com seta).</li><li>Escolha “Adicionar à Tela de Início”.</li><li>Use sempre o ícone da tela inicial: os dados do app instalado ficam separados dos dados da aba do navegador.</li></ol></div>`}
     <div class="card"><h2>Sobre</h2>
       <p class="small muted" style="margin:4px 0 0">Versão ${VERSION}. Fotos dos exercícios: Free Exercise DB (domínio público). Gráficos: Chart.js (MIT). Fontes: Bricolage Grotesque e Atkinson Hyperlegible Next (OFL). Ícones: Phosphor (MIT). Este app organiza o treino; não substitui avaliação profissional. Dor articular, tontura, dor no peito ou falta de ar fora do normal: pare e procure avaliação médica.</p>
@@ -76,9 +99,9 @@ export async function viewMais() {
     <div class="card"><h2>Apagar dados</h2>
       <p class="small muted" style="margin:4px 0 12px">Remove treinos, medidas e ajustes deste aparelho. Exporte antes.</p>
       <button class="btn danger" data-act="wipe">Apagar todos os dados</button></div>`;
-  $('#importFile').onchange = e => importFile(e.target.files[0]);
-  $('#profileFile').onchange = async e => { if (await importProfileFile(e.target.files[0])) app.route(); };
+  }
 }
+const MAIS_PAGES = { aparencia: 'Aparência', treino: 'Programa e treinos', perfil: 'Perfil de saúde', backup: 'Backup', sobre: 'Sobre e instalação' };
 
 export function viewGuia() {
   setBar('Guia', '', 'mais');

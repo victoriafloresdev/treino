@@ -418,3 +418,14 @@ ul.plain{margin:4px 0 10px;padding-left:20px}
 .segr.ic-top label>span small{font-size:12.5px;color:var(--muted);font-weight:500}
 details.more-card>summary{cursor:pointer;font-weight:700;min-height:28px;display:flex;align-items:center}
 details.more-card[open]>summary{margin-bottom:10px}
+/* Mais: lista agrupada, estilo Ajustes */
+.set-group{list-style:none;padding:0;margin:0 0 16px;background:var(--surface);border:1px solid color-mix(in oklch,var(--line) 70%,transparent);border-radius:var(--r-block);overflow:hidden}
+.set-group li+li{border-top:1px solid var(--line)}
+.set-row{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;min-height:60px;padding:8px 14px;text-decoration:none;color:inherit}
+.set-row b{display:block;font-size:16.5px}
+.set-row small{display:block;color:var(--muted);font-size:13.5px}
+.set-row>.ic:last-child{color:var(--muted)}
+details.more-card>summary{list-style:none}
+details.more-card>summary::-webkit-details-marker{display:none}
+details.more-card>summary::after{content:"";margin-left:auto;width:8px;height:8px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg) translateY(-3px);transition:transform .2s;flex:none}
+details.more-card[open]>summary::after{transform:rotate(-135deg) translateY(-1px)}

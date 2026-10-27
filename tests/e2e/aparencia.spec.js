@@ -5,7 +5,7 @@ import { watchErrors } from './helpers.js';
 test('tema e paleta mudam na hora e ficam salvos', async ({ page }) => {
   const errors = watchErrors(page);
   await page.emulateMedia({ colorScheme: 'light' });
-  await page.goto('/index.html#mais');
+  await page.goto('/index.html#mais/aparencia');
   await page.waitForSelector('.pal-grid');
   const bg = () => page.evaluate(async () => (await import('/js/ui.js')).cssVar('--bg'));
   const meta = () => page.evaluate(() => document.querySelector('meta[name="theme-color"]').content);
