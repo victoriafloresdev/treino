@@ -10,3 +10,4 @@ CLAUDE.local.md
 # testes
 node_modules/
 tests/output/
+__pycache__/
