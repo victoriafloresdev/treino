@@ -18,7 +18,7 @@ test('tipo de dia: previsto, pulado pela usuária e elevado pelo registro', asyn
   const errors = watchErrors(page);
   await open(page, 'hoje');
   await expect(page.locator('.daytag')).toContainText('Cardio + musculação');
-  await expect(page.locator('.daytag')).toContainText('previsto pela ficha');
+  await expect(page.locator('.daytag')).toContainText('previsto na semana');
   await expect(page.locator('html')).toHaveAttribute('data-day', 'A');
   await expect(page.locator('#hojeTreinos')).toContainText('Superior A');
 
@@ -37,7 +37,7 @@ test('tipo de dia: previsto, pulado pela usuária e elevado pelo registro', asyn
   await page.locator('#sheet label:has(input[value="D"])').click();
   await expect(page.locator('.daytag')).toContainText('Descanso');
   await page.getByRole('button', { name: 'Mudar', exact: true }).click();
-  await page.getByRole('button', { name: 'Voltar ao previsto pela ficha' }).click();
+  await page.getByRole('button', { name: 'Voltar ao previsto na semana' }).click();
   await expect(page.locator('.daytag')).toContainText('Só cardio');
   expect(errors).toEqual([]);
 });
@@ -125,11 +125,11 @@ test('Comida: semana, trocas, refeição livre e dicas', async ({ page }) => {
   const errors = watchErrors(page);
   await open(page, 'comida/semana');
   const qua = page.locator('.wk-row').nth(2);
-  await expect(qua).toContainText('previsto pela ficha');
+  await expect(qua).toContainText('previsto na semana');
   await qua.locator('label:has(input[value="D"])').click();
   await expect(page.locator('.wk-row').nth(2)).toContainText('escolhido por você');
   await page.locator('.wk-row').nth(2).getByRole('button', { name: 'voltar ao previsto' }).click();
-  await expect(page.locator('.wk-row').nth(2)).toContainText('previsto pela ficha');
+  await expect(page.locator('.wk-row').nth(2)).toContainText('previsto na semana');
   await expect(page.locator('.callout')).toContainText('Boa distribuição');
 
   await page.getByRole('link', { name: 'Trocas' }).click();
@@ -163,8 +163,6 @@ test('perfil de saúde: importar mostra os textos pessoais; remover volta ao gen
     dicas: { remedio: { e: '💊', title: 'Dica pessoal de teste', small: 'só com perfil', html: '<p>Conteúdo.</p>' } } }));
   await page.locator('#profileFile').setInputFiles(file);
   await expect(page.locator('main')).toContainText('Perfil importado');
-  await page.goto('/index.html#hoje');
-  await expect(page.locator('#hojeGreet')).toContainText('Fulana');
   await page.goto('/index.html#comida/dia');
   await expect(page.locator('#diaMeals')).toContainText('Lembrete de teste');
   await page.goto('/index.html#comida/dicas');
@@ -189,11 +187,11 @@ test('perfil de saúde: importar mostra os textos pessoais; remover volta ao gen
 test('semana modelo editável em Mais', async ({ page }) => {
   await open(page, 'mais');
   await page.locator('fieldset[data-i="5"] label:has(input[value="D"])').click();
-  await expect(page.getByRole('button', { name: 'Voltar ao modelo da ficha' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Voltar ao modelo padrão' })).toBeVisible();
   await page.goto('/index.html#comida/semana');
   await expect(page.locator('.wk-row').nth(5).locator('input[value="D"]')).toBeChecked();
   await page.goto('/index.html#mais');
-  await page.getByRole('button', { name: 'Voltar ao modelo da ficha' }).click();
+  await page.getByRole('button', { name: 'Voltar ao modelo padrão' }).click();
   await page.goto('/index.html#comida/semana');
   await expect(page.locator('.wk-row').nth(5).locator('input[value="B"]')).toBeChecked();
 });
@@ -217,14 +215,14 @@ test('aviso na tela Hoje para importar o perfil, uma vez só, e o perfil vai no 
   const file = info.outputPath('perfil.json');
   writeFileSync(file, JSON.stringify({ tipo: 'perfil-saude', versao: 1, nome: 'Fulana', remedio: { rotulo: 'Lembrete de teste', sub: '', hora: '06h00', h: 6 } }));
   await page.locator('#profileFileHoje').setInputFiles(file);
-  await expect(page.locator('#hojeGreet')).toContainText('Fulana');
   await expect(page.locator('.notice:has-text("Importe seu perfil")')).toHaveCount(0);
   // vai no backup e volta ao restaurar
   const backup = await page.evaluate(async () => { const { db } = await import('/js/db.js'); return db.exportAll(); });
   expect(backup.profile.map(p => p.nome)).toEqual(['Fulana']);
   await page.evaluate(async b => { const { db, STORES } = await import('/js/db.js'); for (const s of STORES) await db.clear(s); await db.importAll(b, 'replace'); }, backup);
   await page.reload();
-  await expect(page.locator('#hojeGreet')).toContainText('Fulana');
+  await page.waitForSelector('#hojeNext h2');
+  await expect(page.locator('.notice:has-text("Importe seu perfil")')).toHaveCount(0);
   expect(errors).toEqual([]);
 });
 

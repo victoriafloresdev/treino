@@ -69,8 +69,10 @@ test('timer de intervalos: blocos, pausa, fim e registro', async ({ page }) => {
   expect(errors).toEqual([]);
 });
 
-test('no dia seguinte, pergunta sobre dor na tela Hoje', async ({ page }) => {
+test('no dia seguinte, Hoje lembra da pergunta sobre dor e o Cardio pergunta', async ({ page }) => {
   await open(page, 'hoje', { time: new Date('2026-10-29T08:00:00'), seed: [run('2026-10-28', 2, 'sim', null)] });
+  await page.locator('a.alert:has-text("Alguma dor da corrida?")').click();
+  await expect(page).toHaveURL(/#treino\/cardio$/);
   await expect(page.locator('.pain-ask')).toContainText('Alguma dor da corrida de ontem?');
   await page.locator('.pain-ask label:has(input[value="nenhuma"])').click();
   await expect(page.locator('.pain-ask')).toHaveCount(0);

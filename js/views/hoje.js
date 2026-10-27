@@ -2,7 +2,7 @@
 import { esc, todayStr, parseDate, fmtN, fmtShort, weekStart, addDays } from '../util.js';
 import { planById, program, phaseLabel, loadAll, workoutOrder, suggestedWorkout, avg7 } from '../training.js';
 import { app, main, setBar, on, openSheet, toast } from '../ui.js';
-import { cardioToday, pendingPain, painCardHTML } from './cardio.js';
+import { cardioToday, pendingPain } from './cardio.js';
 import { db } from '../db.js';
 import { TARGET_P } from '../data/nutricao.js';
 import { waterGoalCups, fmt } from '../nutri.js';
@@ -10,7 +10,7 @@ import { dayInfo, getProfile, importProfileFile } from '../days.js';
 import { habitsOf } from '../habitos.js';
 import { pendingClosing, weekHabits, v2Since } from '../stats.js';
 import { CONSISTENT } from '../progress.js';
-import { nextMeal, mensagemDoDia } from '../proximo.js';
+import { nextMeal } from '../proximo.js';
 import { icon } from '../ui/icons.js';
 import { dayTagHTML, applyDayColor } from './dia.js';
 import { viewDate, isPast, dateNavHTML, dayLabel } from '../ui/dia-ativo.js';
@@ -18,7 +18,9 @@ import { viewDate, isPast, dateNavHTML, dayLabel } from '../ui/dia-ativo.js';
 export { applyDayColor };
 const H = { ctx: null };
 const hourNow = () => { const n = new Date(); return n.getHours() + n.getMinutes() / 60; };
-const greet = name => { const h = new Date().getHours(); return `${h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite'}${name ? ', ' + name : ''}.`; };
+// Backup: o aviso aparece a partir do domingo e fica até você exportar; depois, só no domingo seguinte.
+export const lastSunday = d => addDays(d, -parseDate(d).getDay());
+export const backupDue = (today, lastBackup) => !lastBackup || lastBackup < lastSunday(today);
 
 export async function viewHoje() {
   // descarta o desenho se outra tela foi aberta enquanto este esperava o banco
@@ -29,29 +31,27 @@ export async function viewHoje() {
   const today = todayStr(), past = isPast();
   const lastBackup = await db.setting('lastBackup');
   const all = await loadAll();
-  const needBackup = all.sets.length > 0 && (!lastBackup || (parseDate(today) - parseDate(lastBackup)) / 864e5 > 14);
+  const hasData = all.sets.length > 0 || all.cardio.length > 0 || all.body.length > 0;
+  const needBackup = hasData && backupDue(today, lastBackup);
   const askProfile = !(await getProfile()) && !(await db.setting('profilePromptHidden'));
   H.ctx = { p, all, order: await workoutOrder(), cardio: await cardioToday(today), pain: await pendingPain(today), closing: await pendingClosing(today) };
   if (tok !== app.seq) return;
   main.innerHTML = `
     ${dateNavHTML()}
-    ${past ? '' : `<header class="hoje-top">
-      <h2 class="greet" id="hojeGreet"></h2>
-      <p class="msg" id="hojeMsg"></p>
-    </header>`}
     ${past ? '' : `${!p.start ? `<div class="card"><h2>Quando o programa começa?</h2>
        <p class="muted small">A data define a semana atual, a fase (adaptação nas semanas 1–2) e o cardio do dia.</p>
        <div class="row"><label class="f" style="flex:1">Data de início<input type="date" id="startDate" value="${today}"></label></div>
        <div class="form-actions"><button class="btn solid block" data-act="setStart">Salvar data de início</button></div></div>` : ''}
     ${p.week >= 8 ? `<div class="banner"><b>Semana ${p.week}:</b> hora de revisar a ficha. Veja aderência e progressão na aba Progresso.</div>` : ''}
-    ${needBackup ? `<div class="banner"><b>Faça um backup.</b> Seus dados ficam só neste celular. <a href="#mais">Exportar agora</a></div>` : ''}
+    ${needBackup ? `<div class="alert">${icon('download-simple')}<span><b>Backup da semana</b><small>Seus dados ficam só neste celular.</small></span>
+      <button class="btn sm solid" type="button" data-act="export">Exportar</button></div>` : ''}
     ${askProfile ? `<div class="card notice">${icon('user-circle', 'lead-ic')}<div><h3>Importe seu perfil de saúde</h3>
       <p class="small muted">Ele traz o lembrete do remédio, as suas notas e as dicas pessoais. Fica só neste celular e vai junto nos backups. É uma vez só.</p>
       <div class="row"><label class="btn solid sm" style="cursor:pointer">Importar perfil de saúde<input type="file" id="profileFileHoje" accept="application/json,.json" hidden></label>
         <button class="btn sm" type="button" data-act="profileLater">Agora não</button></div></div></div>` : ''}
-    ${H.ctx.pain ? painCardHTML(H.ctx.pain, today) : ''}
-    ${H.ctx.closing ? `<a class="card notice link" href="#fechar/${H.ctx.closing}">${icon('calendar-check', 'lead-ic')}
-      <span><b>Fechar a semana</b><small>${fmtShort(H.ctx.closing)} a ${fmtShort(addDays(H.ctx.closing, 6))}: veja o resumo e anote como foi.</small></span></a>` : ''}`}
+    ${H.ctx.pain ? `<a class="alert" href="#treino/cardio">${icon('sneaker-move')}<span><b>Alguma dor da corrida?</b><small>Responda em Cardio para decidir a etapa.</small></span>${icon('caret-right')}</a>` : ''}
+    ${H.ctx.closing ? `<a class="alert" href="#fechar/${H.ctx.closing}">${icon('calendar-check')}
+      <span><b>Fechar a semana</b><small>${fmtShort(H.ctx.closing)} a ${fmtShort(addDays(H.ctx.closing, 6))}</small></span>${icon('caret-right')}</a>` : ''}`}
     <section id="hojeDay" aria-label="Tipo de dia"></section>
     <section class="next" id="hojeNext" aria-label="${past ? 'Refeições do dia' : 'Próxima refeição'}"></section>
     <section class="rings" id="hojeRings" aria-label="Resumo do dia"></section>
@@ -79,16 +79,14 @@ async function refreshHoje() {
   // num dia que passou, a "próxima" é a primeira que ficou sem marcar
   const hour = past ? 0 : hourNow();
 
-  if (!past) document.getElementById('hojeGreet').textContent = greet(info.profile?.nome);
-  if (!past) document.getElementById('hojeMsg').textContent = mensagemDoDia({ hour, cardio: info.d.cardio, musc: info.d.musc, cardioDone: info.reg.cardio, muscDone: info.reg.musc,
-    weekPct: wpct, weekday: (new Date().getDay() + 6) % 7 + 1 }, today).text;
   document.getElementById('hojeDay').innerHTML = dayTagHTML(info);
   document.getElementById('hojeNext').innerHTML = nextHTML(info, hour, past);
   document.getElementById('hojeRings').innerHTML = ringsHTML(info);
   document.getElementById('hojeTreinos').innerHTML = treinosHTML(info);
-  document.getElementById('hojeHabits').innerHTML = `<div class="spread"><h3>Hábitos do dia</h3><span class="count">${hb.done} de ${hb.total}</span></div>
+  const hOpen = document.querySelector('#hojeHabits details')?.open;
+  document.getElementById('hojeHabits').innerHTML = `<details ${hOpen ? 'open' : ''}><summary><span>Hábitos do dia</span><span class="count num">${hb.done} de ${hb.total}</span>${icon('caret-down')}</summary>
     <ul class="habits">${hb.list.map(h => `<li class="${h.done ? 'ok' : ''}">${icon(h.done ? 'check-circle-fill' : 'circle')}<span>${esc(h.label)}</span><span class="sr">${h.done ? ': feito' : ': ainda não'}</span></li>`).join('')}</ul>
-    ${wpct != null ? `<p class="small muted wkline">Na semana: ${wk.done} de ${wk.total} (${wpct}%)${wpct >= CONSISTENT * 100 ? ', semana consistente' : ''}</p>` : ''}`;
+    ${wpct != null ? `<p class="small muted wkline">Na semana: ${wk.done} de ${wk.total} (${wpct}%)${wpct >= CONSISTENT * 100 ? ', semana consistente' : ''}</p>` : ''}</details>`;
   const w7 = avg7(body, today);
   document.getElementById('hojePeso').innerHTML = `${icon('scales', 'lead-ic')}
     <span class="peso-t"><b>Peso</b><small>${weighed ? `${past ? 'Neste dia' : 'Hoje'}: <span class="num">${fmtN(weighed.weight)}</span> kg · ` : ''}média de 7 dias: <span class="num">${w7 ? fmtN(w7) + ' kg' : '–'}</span></small></span>
@@ -157,9 +155,12 @@ function treinosHTML(info) {
     rows.push(info.reg.cardio
       ? `<li class="tr done">${icon('check-circle-fill')}<span class="tr-t"><b>Cardio</b><small>${c.map(x => `${x.minutes} min de ${esc(x.type)}`).join(', ') || 'Registrado'}</small></span></li>`
       : `<li class="tr">${icon('sneaker-move')}<span class="tr-t"><b>Cardio${H.ctx.cardio.label ? ' · ' + esc(H.ctx.cardio.label) : ''}</b><small>${esc(H.ctx.cardio.text)}</small></span>
-          <span class="tr-acts">${isPast() ? '' : '<a class="btn sm solid" href="#treino/cardio">Timer</a>'}<button class="btn sm ${isPast() ? 'solid' : ''}" type="button" data-act="cardioForm">Registrar</button></span></li>`);
+          <button class="btn sm" type="button" data-act="cardioForm">Registrar</button></li>`);
   }
   if (!rows.length) rows.push(`<li class="tr">${icon('leaf')}<span class="tr-t"><b>${isPast() ? 'Dia de descanso' : 'Hoje é descanso'}</b><small>Recuperar também faz parte do plano.</small></span></li>`);
+  // sem musculação prevista: dá para treinar mesmo assim (o tipo do dia se ajusta pelo registro)
+  if (!info.d.musc && !info.reg.musc) rows.push(`<li class="tr quiet">${icon('barbell')}<span class="tr-t"><small>Musculação não prevista</small></span>
+          <a class="linkbtn" href="#treino">Treinar mesmo assim</a></li>`);
   return `<h3>${isPast() ? 'Treinos do dia' : 'Treinos de hoje'}</h3><ul class="treinos">${rows.join('')}</ul>`;
 }
 

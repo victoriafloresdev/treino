@@ -1,9 +1,8 @@
-// Próxima refeição e mensagem do dia.
+// Próxima refeição.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { DAYS } from '../../js/data/nutricao.js';
-import { nextMeal, mensagemDoDia } from '../../js/proximo.js';
-import { MENSAGENS } from '../../js/data/mensagens.js';
+import { nextMeal } from '../../js/proximo.js';
 
 const info = (type, done = {}, st = {}) => ({ d: DAYS[type], st: { sel: {}, build: {}, included: {}, ...st }, done, profile: null });
 const id = r => r?.slot?.id ?? null;
@@ -40,22 +39,4 @@ test('dia completo', () => {
   // última marcada foi o jantar mas faltou o lanche: não há "próxima", e o lanche aparece como pulado
   const r2 = nextMeal(info('B', { cafe: true, almoco: true, doce: true, jantar: true }), 20);
   assert.equal(r2.slot, null); assert.equal(r2.done, false); assert.deepEqual(r2.skipped.map(s => s.id), ['lanche']);
-});
-
-test('mensagem do dia muda com o contexto e fica estável no dia', () => {
-  const base = { hour: 9, cardio: true, musc: true, cardioDone: false, muscDone: false, weekPct: 60, weekday: 2 };
-  assert.equal(mensagemDoDia({ ...base, hour: 7 }, '2026-10-27').key, 'manhaCardio');
-  assert.equal(mensagemDoDia({ ...base, hour: 12 }, '2026-10-27').key, 'diaTreino');
-  assert.equal(mensagemDoDia({ ...base, hour: 12, muscDone: true }, '2026-10-27').key, 'treinoFeito');
-  assert.equal(mensagemDoDia({ ...base, hour: 12, cardio: false, musc: false }, '2026-10-27').key, 'descanso');
-  assert.equal(mensagemDoDia({ ...base, hour: 12, weekday: 5, weekPct: 30 }, '2026-10-30').key, 'semanaCorrida');
-  assert.equal(mensagemDoDia({ ...base, hour: 21 }, '2026-10-27').key, 'noite');
-  const a = mensagemDoDia({ ...base, hour: 12 }, '2026-10-27').text;
-  assert.equal(mensagemDoDia({ ...base, hour: 13 }, '2026-10-27').text, a);
-});
-
-test('mensagens sem culpa e sem falar de peso', () => {
-  const all = Object.values(MENSAGENS).flat();
-  for (const m of all) assert.doesNotMatch(m, /deveria|falhou|culpa|errou|peso|kg|emagre|gordura|proibid/i, m);
-  for (const m of all) assert.ok(m.length <= 90, `curta: ${m}`);
 });

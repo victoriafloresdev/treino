@@ -94,7 +94,7 @@ Recalcule a duração estimada de cada treino e mostre os novos valores. Se algu
 - **Registrar** uma atividade não prevista eleva o tipo do dia (por exemplo, D → B ao registrar cardio).
 - **Não registrar não rebaixa o tipo sozinho**, porque a musculação é só às 19h. Para rebaixar, há uma ação explícita: "Hoje não vou treinar" ou "Pular cardio de hoje".
 - O override manual por data continua possível e sempre vence.
-- A tela mostra de onde veio o tipo: "previsto pela ficha", "ajustado pelo registro" ou "escolhido por você".
+- A tela mostra de onde veio o tipo: "previsto na semana", "ajustado pelo registro" ou "escolhido por você".
 - Os dados antigos do `plano-vic-v1` (`weights`, `week`, `sel`, `build`, `opt`, `psy`) podem ser importados. Em Mais, um campo de texto aceita o JSON colado. Adicione também um botão "Exportar dados" à cópia em `privado/Plano_da_Vic.html`, para a usuária extrair os dados de onde usava a página. Pesos vão para o store `body`.
 
 ## 4. Tela Hoje (centro do app)

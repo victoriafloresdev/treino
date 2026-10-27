@@ -119,7 +119,7 @@ test('cardio de um dia que passou, e semanas anteriores em Comida › Semana', a
   await page.getByRole('button', { name: 'Semana anterior' }).click();
   await expect(page.locator('.datenav-pick b')).toHaveText('19/10 a 25/10');
   const sab = page.locator('.wk-row').nth(5);
-  await expect(sab).toContainText('previsto pela ficha'); // corrida já era prevista no sábado
+  await expect(sab).toContainText('previsto na semana'); // corrida já era prevista no sábado
   await sab.locator('label:has(input[value="D"])').click();
   await expect(page.locator('.wk-row').nth(5)).toContainText('escolhido por você');
   await page.getByRole('button', { name: 'Voltar para esta semana' }).click();

@@ -33,7 +33,7 @@ function daySheet() {
     <fieldset class="chipset" data-on="dayOverride"><legend>${isPast() ? 'Tipo desse dia' : 'Tipo de hoje'}</legend><div class="segr">
       ${DAY_IDS.map(k => `<label><input type="radio" name="dayOverride" value="${k}" ${info.manual && info.type === k ? 'checked' : ''}><span>${icon(DAY_ICON[k])}${esc(DAYS[k].short)}</span></label>`).join('')}
     </div></fieldset>
-    ${info.manual ? `<button class="btn block" type="button" data-act="dayAuto">Voltar ao previsto pela ficha</button>` : ''}
+    ${info.manual ? `<button class="btn block" type="button" data-act="dayAuto">Voltar ao previsto na semana</button>` : ''}
     <div class="sheet-actions">
       ${p.musc && !info.reg.musc ? (info.skip?.musc ? `<button class="btn block" type="button" data-act="skip" data-kind="musc" data-v="0">Vou treinar hoje</button>`
         : `<button class="btn block" type="button" data-act="skip" data-kind="musc" data-v="1">Hoje não vou treinar</button>`) : ''}

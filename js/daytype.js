@@ -17,7 +17,7 @@ export function weekModelFromPlan() {
   });
 }
 
-export const SOURCES = { ficha: 'previsto pela ficha', registro: 'ajustado pelo registro', voce: 'escolhido por você' };
+export const SOURCES = { ficha: 'previsto na semana', registro: 'ajustado pelo registro', voce: 'escolhido por você' };
 
 // model: 7 tipos (seg..dom); reg: { cardio, musc } registrados na data; rec: registro do store daytypes
 export function resolveDay(date, model, reg = {}, rec = null) {

@@ -5,7 +5,7 @@ App web instalável (PWA) para o dia a dia: musculação, cardio, refeições, �
 ## O que o app faz
 
 - **Hoje.** Resumo e acesso rápido:
-  - **Tipo do dia:** A, B, C ou D, com a origem ("previsto pela ficha", "ajustado pelo registro" ou "escolhido por você").
+  - **Tipo do dia:** A, B, C ou D, com a origem ("previsto na semana", "ajustado pelo registro" ou "escolhido por você").
   - **Mensagem do dia**, sobre hábito e sem culpa.
   - **Próxima refeição:** a seguinte à última marcada como feita (ou a da hora, se nada foi marcado), com "Marcar como feito".
   - **Anéis** de calorias, proteína e água. Tocar no da água soma um copo.

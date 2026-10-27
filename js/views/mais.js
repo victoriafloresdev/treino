@@ -54,7 +54,7 @@ export async function viewMais() {
         <fieldset class="wk-opts" data-on="modelDay" data-i="${i}"><legend class="sr">Tipo previsto de ${w}</legend>
           ${DAY_IDS.map(t => `<label style="--wk:var(--day-${t})"><input type="radio" name="model-${i}" value="${t}" ${t === model[i] ? 'checked' : ''} aria-label="${esc(DAYS[t].name)}"><span aria-hidden="true">${icon(DAY_ICON[t])}</span></label>`).join('')}
         </fieldset><div class="wk-k"><small>${esc(DAYS[model[i]].short)}</small></div></div>`).join('')}</div>
-      ${model.join() !== fromPlan.join() ? `<div class="form-actions"><button class="btn block" type="button" data-act="modelReset">Voltar ao modelo da ficha</button></div>` : ''}
+      ${model.join() !== fromPlan.join() ? `<div class="form-actions"><button class="btn block" type="button" data-act="modelReset">Voltar ao modelo padrão</button></div>` : ''}
     </div>
     <div class="card"><h2>Perfil de saúde</h2>
       <p class="small muted" style="margin:4px 0 10px">Textos pessoais (remédio, pontos dos exames, metas) ficam só neste aparelho, num arquivo que você importa. Sem ele, o app mostra textos genéricos.</p>
@@ -158,7 +158,7 @@ on({
     await db.setSetting('workoutOrder', o); app.route();
   },
   async orderReset() { await db.setSetting('workoutOrder', DEFAULT_ORDER); toast('Ordem padrão restaurada.'); app.route(); },
-  async modelReset() { await setModel(weekModelFromPlan()); toast('Modelo da ficha restaurado.'); app.route(); },
+  async modelReset() { await setModel(weekModelFromPlan()); toast('Modelo padrão restaurado.'); app.route(); },
   async profileRemove() { if (!confirm('Remover o perfil de saúde deste aparelho?')) return; await removeProfile(); toast('Perfil removido.'); app.route(); }
 });
 onChange({

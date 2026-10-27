@@ -16,9 +16,21 @@
 .daytag-t small{display:block;font-size:13.5px;color:var(--muted)}
 
 /* ---------- Hoje ---------- */
-.hoje-top{margin:2px 0 6px}
-.hoje-top .greet{margin:2px 0 4px;font-size:27px;line-height:1.1;font-weight:700;letter-spacing:-.02em}
-.hoje-top .msg{margin:0;color:var(--muted);font-size:16px;max-width:36em}
+/* aviso de uma linha (backup, dor da corrida, fechar a semana) */
+.alert{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;padding:10px 12px 10px 14px;margin:0 0 8px;
+  border-radius:var(--r-block);background:var(--tint);color:inherit;text-decoration:none;min-height:56px}
+.alert>.ic{color:var(--accent)}
+.alert b{display:block;font-size:15.5px}
+.alert small{display:block;color:var(--muted);font-size:13.5px}
+/* hábitos recolhidos */
+#hojeHabits summary{display:flex;align-items:center;gap:10px;cursor:pointer;list-style:none;min-height:40px;font-weight:700;font-size:17px}
+#hojeHabits summary::-webkit-details-marker{display:none}
+#hojeHabits summary .count{margin-left:auto;font-weight:600;color:var(--muted)}
+#hojeHabits summary .ic{color:var(--muted);transition:transform .2s}
+#hojeHabits details[open] summary .ic{transform:rotate(180deg)}
+.tr.quiet{padding:6px 0}
+.tr.quiet>.ic{color:var(--muted)}
+.tr.quiet small{color:var(--muted);font-size:14.5px}
 .notice{display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;align-items:start}
 .notice h3{margin:0 0 4px}
 .notice p{margin:0 0 10px}

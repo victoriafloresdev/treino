@@ -1,4 +1,4 @@
-// Tipo de dia: previsto pela ficha, elevado pelo registro, rebaixado só por ação explícita.
+// Tipo de dia: previsto na semana, elevado pelo registro, rebaixado só por ação explícita.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { weekModelFromPlan, resolveDay, monIdx } from '../../js/daytype.js';
@@ -12,7 +12,7 @@ test('modelo semanal: musculação seg–qui, cardio seg–sáb', () => {
   assert.equal(monIdx(SEG), 0); assert.equal(monIdx(DOM), 6);
 });
 
-test('previsto pela ficha', () => {
+test('previsto na semana', () => {
   assert.deepEqual(resolveDay(SEG, MODEL), { type: 'A', plannedType: 'A', source: 'ficha', manual: false, skip: { cardio: false, musc: false } });
   assert.equal(resolveDay(DOM, MODEL).type, 'D');
 });
