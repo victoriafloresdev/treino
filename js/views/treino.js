@@ -1,12 +1,13 @@
 // Aba Treino › Musculação: abre no treino escolhido, no do dia (se ainda não feito) ou no próximo da sequência.
-import { todayStr, parseDate } from '../util.js';
+import { parseDate } from '../util.js';
 import { loadAll, doneThisWeek, nextInSequence, planById } from '../training.js';
 import { WEEK, PLAN } from '../plan.js';
 import { S, viewSessao } from './sessao.js';
+import { viewDate } from '../ui/dia-ativo.js';
 
 export function defaultWorkout(all) {
   const done = doneThisWeek(all);
-  const today = WEEK.find(w => w.dow === parseDate(todayStr()).getDay())?.plan;
+  const today = WEEK.find(w => w.dow === parseDate(viewDate()).getDay())?.plan;
   if (today && !done[today]) return today;
   return (nextInSequence(done) || PLAN[0]).id;
 }

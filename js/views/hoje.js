@@ -1,5 +1,5 @@
 // Tela Hoje: resumo e acesso rápido. O plano completo do dia fica em Comida › Dia.
-import { esc, todayStr, parseDate, fmtLong, fmtN, fmtShort, weekStart, addDays } from '../util.js';
+import { esc, todayStr, parseDate, fmtN, fmtShort, weekStart, addDays } from '../util.js';
 import { planById, program, phaseLabel, loadAll, doneThisWeek, nextInSequence, avg7 } from '../training.js';
 import { app, main, setBar, on, openSheet, toast } from '../ui.js';
 import { cardioToday, pendingPain, painCardHTML } from './cardio.js';
@@ -14,6 +14,7 @@ import { CONSISTENT } from '../progress.js';
 import { nextMeal, mensagemDoDia } from '../proximo.js';
 import { icon } from '../ui/icons.js';
 import { dayTagHTML, applyDayColor } from './dia.js';
+import { viewDate, isPast, dateNavHTML, dayLabel } from '../ui/dia-ativo.js';
 
 export { applyDayColor };
 const H = { ctx: null };
@@ -26,7 +27,7 @@ export async function viewHoje() {
   const p = await program();
   if (tok !== app.seq) return;
   setBar('Hoje', phaseLabel(p));
-  const today = todayStr();
+  const today = todayStr(), past = isPast();
   const lastBackup = await db.setting('lastBackup');
   const all = await loadAll();
   const needBackup = all.sets.length > 0 && (!lastBackup || (parseDate(today) - parseDate(lastBackup)) / 864e5 > 14);
@@ -34,12 +35,12 @@ export async function viewHoje() {
   H.ctx = { p, all, cardio: await cardioToday(today), pain: await pendingPain(today), closing: await pendingClosing(today) };
   if (tok !== app.seq) return;
   main.innerHTML = `
-    <header class="hoje-top">
-      <p class="hero-day">${fmtLong(today)}</p>
+    ${dateNavHTML()}
+    ${past ? '' : `<header class="hoje-top">
       <h2 class="greet" id="hojeGreet"></h2>
       <p class="msg" id="hojeMsg"></p>
-    </header>
-    ${!p.start ? `<div class="card"><h2>Quando o programa começa?</h2>
+    </header>`}
+    ${past ? '' : `${!p.start ? `<div class="card"><h2>Quando o programa começa?</h2>
        <p class="muted small">A data define a semana atual, a fase (adaptação nas semanas 1–2) e o cardio do dia.</p>
        <div class="row"><label class="f" style="flex:1">Data de início<input type="date" id="startDate" value="${today}"></label></div>
        <div class="form-actions"><button class="btn solid block" data-act="setStart">Salvar data de início</button></div></div>` : ''}
@@ -51,11 +52,11 @@ export async function viewHoje() {
         <button class="btn sm" type="button" data-act="profileLater">Agora não</button></div></div></div>` : ''}
     ${H.ctx.pain ? painCardHTML(H.ctx.pain, today) : ''}
     ${H.ctx.closing ? `<a class="card notice link" href="#fechar/${H.ctx.closing}">${icon('calendar-check', 'lead-ic')}
-      <span><b>Fechar a semana</b><small>${fmtShort(H.ctx.closing)} a ${fmtShort(addDays(H.ctx.closing, 6))}: veja o resumo e anote como foi.</small></span></a>` : ''}
+      <span><b>Fechar a semana</b><small>${fmtShort(H.ctx.closing)} a ${fmtShort(addDays(H.ctx.closing, 6))}: veja o resumo e anote como foi.</small></span></a>` : ''}`}
     <section id="hojeDay" aria-label="Tipo de dia"></section>
-    <section class="next" id="hojeNext" aria-label="Próxima refeição"></section>
+    <section class="next" id="hojeNext" aria-label="${past ? 'Refeições do dia' : 'Próxima refeição'}"></section>
     <section class="rings" id="hojeRings" aria-label="Resumo do dia"></section>
-    <section class="card" id="hojeTreinos" aria-label="Treinos de hoje"></section>
+    <section class="card" id="hojeTreinos" aria-label="Treinos do dia"></section>
     <section class="card" id="hojeHabits" aria-label="Hábitos do dia"></section>
     <section class="card peso" id="hojePeso" aria-label="Peso"></section>`;
   const pf = document.getElementById('profileFileHoje');
@@ -67,7 +68,7 @@ export async function viewHoje() {
 // Atualiza as partes da tela no lugar (os anéis animam entre os valores).
 async function refreshHoje() {
   const tok = app.seq;
-  const today = todayStr();
+  const today = viewDate(), past = isPast();
   const info = await dayInfo(today);
   const body = await db.all('body');
   const wk = await weekHabits(weekStart(today), await v2Since(), today);
@@ -76,13 +77,14 @@ async function refreshHoje() {
   const weighed = body.find(b => b.date === today && b.weight != null);
   const hb = habitsOf(info, weighed);
   const wpct = wk.total ? Math.round(100 * wk.done / wk.total) : null;
-  const hour = hourNow();
+  // num dia que passou, a "próxima" é a primeira que ficou sem marcar
+  const hour = past ? 0 : hourNow();
 
-  document.getElementById('hojeGreet').textContent = greet(info.profile?.nome);
-  document.getElementById('hojeMsg').textContent = mensagemDoDia({ hour, cardio: info.d.cardio, musc: info.d.musc, cardioDone: info.reg.cardio, muscDone: info.reg.musc,
+  if (!past) document.getElementById('hojeGreet').textContent = greet(info.profile?.nome);
+  if (!past) document.getElementById('hojeMsg').textContent = mensagemDoDia({ hour, cardio: info.d.cardio, musc: info.d.musc, cardioDone: info.reg.cardio, muscDone: info.reg.musc,
     weekPct: wpct, weekday: (new Date().getDay() + 6) % 7 + 1 }, today).text;
   document.getElementById('hojeDay').innerHTML = dayTagHTML(info);
-  document.getElementById('hojeNext').innerHTML = nextHTML(info, hour);
+  document.getElementById('hojeNext').innerHTML = nextHTML(info, hour, past);
   document.getElementById('hojeRings').innerHTML = ringsHTML(info);
   document.getElementById('hojeTreinos').innerHTML = treinosHTML(info);
   document.getElementById('hojeHabits').innerHTML = `<div class="spread"><h3>Hábitos do dia</h3><span class="count">${hb.done} de ${hb.total}</span></div>
@@ -90,28 +92,29 @@ async function refreshHoje() {
     ${wpct != null ? `<p class="small muted wkline">Na semana: ${wk.done} de ${wk.total} (${wpct}%)${wpct >= CONSISTENT * 100 ? ', semana consistente' : ''}</p>` : ''}`;
   const w7 = avg7(body, today);
   document.getElementById('hojePeso').innerHTML = `${icon('scales', 'lead-ic')}
-    <span class="peso-t"><b>Peso</b><small>${weighed ? `Hoje: <span class="num">${fmtN(weighed.weight)}</span> kg · ` : ''}média de 7 dias: <span class="num">${w7 ? fmtN(w7) + ' kg' : '–'}</span></small></span>
+    <span class="peso-t"><b>Peso</b><small>${weighed ? `${past ? 'Neste dia' : 'Hoje'}: <span class="num">${fmtN(weighed.weight)}</span> kg · ` : ''}média de 7 dias: <span class="num">${w7 ? fmtN(w7) + ' kg' : '–'}</span></small></span>
     ${weighed ? '' : '<button class="btn sm" type="button" data-act="weightSheet">Registrar peso</button>'}`;
 }
 
 /* ---------- próxima refeição ---------- */
-function nextHTML(info, hour) {
+function nextHTML(info, hour, past) {
   const n = nextMeal(info, hour);
   const skipped = n?.skipped?.length ? `<p class="small muted skipped">Ficou sem marcar: ${n.skipped.map(s => esc(s.title.toLowerCase())).join(', ')}.
     <a href="#comida/dia">Ver o dia</a></p>` : '';
   if (!n || !n.slot) return `<div class="next-card done">
-    <p class="next-k">${icon('check-circle-fill')} Refeições do dia</p>
-    <h2>${n?.done ? 'Tudo marcado por hoje' : 'Sem próxima refeição'}</h2>
+    <p class="next-k">${icon('check-circle-fill')} Refeições ${past ? 'de ' + esc(dayLabel(info.date).toLowerCase()) : 'do dia'}</p>
+    <h2>${n?.done ? (past ? 'Tudo marcado nesse dia' : 'Tudo marcado por hoje') : 'Sem próxima refeição'}</h2>
     ${skipped}<div class="row"><a class="btn" href="#comida/dia">Ver o plano do dia</a></div></div>`;
   const mm = n.meal;
   return `<div class="next-card">
-    <p class="next-k">Próxima refeição${n.time === 'livre' ? ', quando quiser' : ` · <span class="num">${n.time}</span>`}</p>
+    <p class="next-k">${past ? `Falta marcar · ${esc(dayLabel(info.date))}` : `Próxima refeição${n.time === 'livre' ? ', quando quiser' : ` · <span class="num">${n.time}</span>`}`}</p>
     <div class="next-main"><span class="disc" aria-hidden="true">${mm.e}</span>
       <div><h2>${esc(n.slot.title)}</h2><p>${esc(mm.builder ? `${mm.prot.name} + ${mm.carb.name}` : mm.name)}</p></div></div>
     <p class="next-nums"><span class="num">${fmt(mm.m[0])}</span> kcal · <span class="num">${fmt(mm.m[1])}</span> g de proteína</p>
     ${skipped}
     <div class="row"><button class="btn solid" type="button" data-act="mealDone" data-slot="${n.slot.id}">Marcar como feito</button>
       <button class="btn" type="button" data-act="openMeal" data-slot="${n.slot.id}">Ver no plano</button></div></div>`;
+
 }
 
 /* ---------- anéis ---------- */
@@ -135,10 +138,10 @@ function ringsHTML(info) {
 function workoutToday() {
   const { all, p } = H.ctx;
   const done = doneThisWeek(all);
-  const wk = WEEK.find(w => w.dow === new Date().getDay());
+  const wk = WEEK.find(w => w.dow === parseDate(viewDate()).getDay());
   const todayPlan = wk.plan ? planById(wk.plan) : null;
   const plan = todayPlan && !done[todayPlan.id] ? todayPlan : nextInSequence(done);
-  const sess = plan && all.sessions.find(s => s.date === todayStr() && s.planId === plan.id && (all.setsBySession[s.id] || []).length);
+  const sess = plan && all.sessions.find(s => s.date === viewDate() && s.planId === plan.id && (all.setsBySession[s.id] || []).length);
   return { plan, started: !!sess, phase: p.phase };
 }
 function treinosHTML(info) {
@@ -158,17 +161,18 @@ function treinosHTML(info) {
     rows.push(info.reg.cardio
       ? `<li class="tr done">${icon('check-circle-fill')}<span class="tr-t"><b>Cardio</b><small>${c.map(x => `${x.minutes} min de ${esc(x.type)}`).join(', ') || 'Registrado'}</small></span></li>`
       : `<li class="tr">${icon('sneaker-move')}<span class="tr-t"><b>Cardio${H.ctx.cardio.label ? ' · ' + esc(H.ctx.cardio.label) : ''}</b><small>${esc(H.ctx.cardio.text)}</small></span>
-          <span class="tr-acts"><a class="btn sm solid" href="#treino/cardio">Timer</a><button class="btn sm" type="button" data-act="cardioForm">Registrar</button></span></li>`);
+          <span class="tr-acts">${isPast() ? '' : '<a class="btn sm solid" href="#treino/cardio">Timer</a>'}<button class="btn sm ${isPast() ? 'solid' : ''}" type="button" data-act="cardioForm">Registrar</button></span></li>`);
   }
-  if (!rows.length) rows.push(`<li class="tr">${icon('leaf')}<span class="tr-t"><b>Hoje é descanso</b><small>Recuperar também faz parte do plano.</small></span></li>`);
-  return `<h3>Treinos de hoje</h3><ul class="treinos">${rows.join('')}</ul>`;
+  if (!rows.length) rows.push(`<li class="tr">${icon('leaf')}<span class="tr-t"><b>${isPast() ? 'Dia de descanso' : 'Hoje é descanso'}</b><small>Recuperar também faz parte do plano.</small></span></li>`);
+  return `<h3>${isPast() ? 'Treinos do dia' : 'Treinos de hoje'}</h3><ul class="treinos">${rows.join('')}</ul>`;
 }
 
 on({
   async profileLater() { await db.setSetting('profilePromptHidden', true); toast('Você pode importar depois em Mais.'); app.route(); },
   weightSheet() {
     openSheet(`<h2>Registrar peso</h2>
-      <label class="f">Peso de hoje (kg)<input id="wQuick" inputmode="decimal" placeholder="0,0" autocomplete="off"></label>
+      <div class="grid2"><label class="f">Data<input type="date" id="wDate" value="${viewDate()}" max="${todayStr()}"></label>
+      <label class="f">Peso (kg)<input id="wQuick" inputmode="decimal" placeholder="0,0" autocomplete="off"></label></div>
       <p class="small muted">Pese-se de manhã, depois do banheiro e antes de comer. A média de 7 dias é o que importa.</p>
       <div class="form-actions"><button class="btn solid block" type="button" data-act="saveWeight">Salvar peso</button></div>`);
     setTimeout(() => document.getElementById('wQuick')?.focus(), 50);

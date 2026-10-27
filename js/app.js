@@ -54,7 +54,7 @@ document.addEventListener('click', async e => {
   if (actions[act]) { await actions[act](t.closest('[data-act]'), e); return; }
   if (act === 'setStart') { const v = $('#startDate').value; if (!v) return; await db.setSetting('startDate', v); toast('Data de início salva.'); route(); }
   if (act === 'saveWeight') { const w = num($('#wQuick').value); if (!w) { toast('Informe o peso.'); return; }
-    await db.add('body', { date: todayStr(), weight: w, waist: null, note: '' }); toast('Peso salvo.'); route(); }
+    await db.add('body', { date: $('#wDate')?.value || todayStr(), weight: w, waist: null, note: '' }); toast('Peso salvo.'); route(); }
   if (act === 'saveBody') { const w = num($('#bW').value), waist = num($('#bWaist').value);
     if (w == null && waist == null) { toast('Informe o peso ou a cintura.'); return; }
     await db.add('body', { date: $('#bDate').value || todayStr(), weight: w, waist, note: $('#bNote').value.trim() }); toast('Medida salva.'); route(); }

@@ -28,6 +28,10 @@ const SCREENS = [
   { name: 'guia', hash: 'guia' },
   { name: 'como-fazer', hash: 'treino/inferior-a', sheet: '[data-how]' },
   // por último, porque a paleta fica salva no aparelho
+  { name: 'hoje-ontem', hash: 'hoje', run: async p => { await p.getByRole('button', { name: 'Dia anterior' }).click(); await p.waitForSelector('.past-note'); } },
+  { name: 'comida-dia-ontem', hash: 'comida/dia', run: async p => { await p.getByRole('button', { name: 'Dia anterior' }).click(); await p.waitForSelector('.past-note'); } },
+  { name: 'sessao-ontem', hash: 'treino/inferior-a', run: async p => { await p.getByRole('button', { name: 'Dia anterior' }).click(); await p.waitForSelector('.past-note'); } },
+  { name: 'comida-semana-anterior', hash: 'comida/semana', run: async p => { await p.getByRole('button', { name: 'Semana anterior' }).click(); await p.waitForSelector('.past-note'); } },
   { name: 'hoje-floresta', hash: 'hoje', run: async p => { await p.evaluate(async () => (await import('/js/ui/aparencia.js')).setAppearance({ palette: 'floresta' })); } },
   { name: 'comida-dia-lavanda', hash: 'comida/dia', run: async p => { await p.evaluate(async () => (await import('/js/ui/aparencia.js')).setAppearance({ palette: 'lavanda' })); } }
 ];

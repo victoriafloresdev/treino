@@ -3,6 +3,7 @@ import { $, esc, todayStr, fmtShort, fmtLong, num, fmtN } from '../util.js';
 import { e1rm, planById, EFFORT, isTimed, range, rirFor, program, phaseLabel, loadAll, lastSetsFor, suggestion, doneThisWeek } from '../training.js';
 import { app, main, setBar, toast, openSheet, unlockAudio, startTimer, announceAchievements, on, onChange } from '../ui.js';
 import { icon } from '../ui/icons.js';
+import { viewDate, isPast, dateNavHTML } from '../ui/dia-ativo.js';
 import { db } from '../db.js';
 import { exSessions, trendOf } from '../progress.js';
 import { MUSCLES, PLAN } from '../plan.js';
@@ -32,7 +33,7 @@ export async function viewSessao(planId) {
   if (!pl) { location.hash = 'treino'; return; }
   const p = await program();
   S.plan = pl; S.phase = p.phase;
-  const today = todayStr();
+  const today = viewDate();
   const sessions = (await db.byIndex('sessions', 'date', today)).filter(s => s.planId === planId).sort((a, b) => b.startedAt - a.startedAt);
   S.session = sessions[0] || null;
   S.sets = S.session ? await db.byIndex('sets', 'sessionId', S.session.id) : [];
@@ -48,7 +49,7 @@ export async function viewSessao(planId) {
   if (tok !== app.seq) return;
   S.pick = planId;
   setBar('Treino', phaseLabel(p));
-  main.innerHTML = treinoNav('musc') + pickerHTML(planId, done) + '<div id="sessao"></div>';
+  main.innerHTML = treinoNav('musc') + dateNavHTML() + pickerHTML(planId, done) + '<div id="sessao"></div>';
   renderSessao();
 }
 export const setsOf = exId => S.sets.filter(s => s.exId === exId).sort((a, b) => a.setIndex - b.setIndex);
@@ -148,7 +149,8 @@ export async function saveSet(exId) {
   }
   unlockAudio();
   if (!S.session) {
-    const s = { date: todayStr(), planId: S.plan.id, startedAt: Date.now(), finishedAt: null };
+    // num dia que passou, a sessão fica com a data dele
+    const s = { date: viewDate(), planId: S.plan.id, startedAt: Date.now(), finishedAt: null };
     s.id = await db.add('sessions', s); S.session = s;
     if (navigator.storage?.persist) navigator.storage.persist().catch(() => {});
   }

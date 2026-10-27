@@ -21,7 +21,10 @@ async function getDefaults() {
   const d = (await db.setting('nutriDefaults')) || {};
   return { sel: d.sel || {}, build: { almoco: { ...DEFAULT_BUILD, ...(d.build?.almoco || {}) }, jantar: { ...DEFAULT_BUILD, ...(d.build?.jantar || {}) } }, opt: d.opt || {}, psy: !!d.psy };
 }
-async function patchDefaults(fn) { const d = await getDefaults(); fn(d); await db.setSetting('nutriDefaults', d); }
+async function patchDefaults(fn, date = todayStr()) {
+  if (date < todayStr()) return; // corrigir um dia que passou não muda o padrão dos próximos
+  const d = await getDefaults(); fn(d); await db.setSetting('nutriDefaults', d);
+}
 
 // atividades registradas na data: musculação conta com pelo menos 1 série
 async function registered(date) {
@@ -74,17 +77,17 @@ async function saveMeal(date, slot, patch) {
 export async function chooseOption(date, slot, optionId) {
   if (!OPTS[slot]?.some(o => o.id === optionId)) return;
   await saveMeal(date, slot, { optionId });
-  await patchDefaults(d => { d.sel[slot] = optionId; });
+  await patchDefaults(d => { d.sel[slot] = optionId; }, date);
 }
 export async function chooseBuild(date, meal, key, value) {
   const info = await dayInfo(date);
   await saveMeal(date, meal, { build: { ...info.st.build[meal], [key]: value } });
-  await patchDefaults(d => { d.build[meal] = { ...d.build[meal], [key]: value }; });
+  await patchDefaults(d => { d.build[meal] = { ...d.build[meal], [key]: value }; }, date);
 }
 export async function setIncluded(date, slot, value) {
   const info = await dayInfo(date);
   await saveMeal(date, slot, { included: value });
-  await patchDefaults(d => { d.opt[`${info.type}:${slot}`] = value; });
+  await patchDefaults(d => { d.opt[`${info.type}:${slot}`] = value; }, date);
 }
 export async function toggleDone(date, slot) {
   const cur = await db.get('meals', mealUid(date, slot));
@@ -97,7 +100,7 @@ async function patchDay(date, patch) {
 }
 export async function setPsy(date, value) {
   await patchDay(date, { psy: value });
-  await patchDefaults(d => { d.psy = value; });
+  await patchDefaults(d => { d.psy = value; }, date);
 }
 export const setOverride = (date, type) => patchDay(date, { override: type || null });
 export async function setSkip(date, kind, value) {

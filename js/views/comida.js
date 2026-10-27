@@ -1,5 +1,5 @@
 // Aba Comida: Semana, Trocas, Refeição livre e Dicas (porte do Plano da Vic).
-import { esc, todayStr, fmtShort } from '../util.js';
+import { esc, todayStr, fmtShort, addDays, weekStart, isoWeek } from '../util.js';
 import { app, main, setBar, on, onChange, subTabs } from '../ui.js';
 import { db } from '../db.js';
 import { DAYS, DAY_IDS, OPTS, CATS, CALC, PRESETS, TROCA_REGRAS, DICAS, RODAPE, LIVRE_CALLOUT, LIVRE_DEFAULT_KCAL } from '../data/nutricao.js';
@@ -13,7 +13,7 @@ const TIP_ICON = { agua: 'drop', remedio: 'pill', cardio: 'sneaker-move', pretre
 import { renderDia } from './comida-dia.js';
 
 const TABS = [['dia', 'Dia'], ['semana', 'Semana'], ['trocas', 'Trocas'], ['livre', 'Livre'], ['dicas', 'Dicas']];
-const C = { cat: 'prot', calc: 'protA', k: '', p: '', lv: { repl: 'jantar', strat: 'seguir', days: 3, kcal: LIVRE_DEFAULT_KCAL, preset: null } };
+const C = { weekOf: null, cat: 'prot', calc: 'protA', k: '', p: '', lv: { repl: 'jantar', strat: 'seguir', days: 3, kcal: LIVRE_DEFAULT_KCAL, preset: null } };
 
 export async function viewComida(sub) {
   // descarta o desenho se outra tela foi aberta enquanto este esperava o banco
@@ -35,8 +35,9 @@ export async function viewComida(sub) {
 /* ---------- Semana ---------- */
 async function renderSemana() {
   const tok = app.seq;
-  const days = await weekInfo(todayStr());
   const today = todayStr();
+  const ws = C.weekOf || weekStart(today), thisWeek = ws === weekStart(today);
+  const days = await weekInfo(ws);
   const w = weekNumbers(days.map(x => ({ type: x.type, kcal: x.planned[0] })));
   const body = (await db.all('body')).filter(b => b.weight != null).sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : (a.updatedAt || 0) - (b.updatedAt || 0)));
   const weights = {}; body.forEach(b => { weights[b.date] = b.weight; });
@@ -44,6 +45,12 @@ async function renderSemana() {
   const box = document.getElementById('comidaBody');
   if (tok !== app.seq || !box) return;
   box.innerHTML = `
+    <div class="datenav">
+      <button class="icon-btn" type="button" data-act="weekPrev" aria-label="Semana anterior">${icon('caret-right', 'flip')}</button>
+      <div class="datenav-pick"><span><b>${thisWeek ? 'Esta semana' : `${fmtShort(ws)} a ${fmtShort(addDays(ws, 6))}`}</b><small>${thisWeek ? `${fmtShort(ws)} a ${fmtShort(addDays(ws, 6))}` : `semana ${isoWeek(ws).week}`}</small></span></div>
+      <button class="icon-btn" type="button" data-act="weekNext" aria-label="Próxima semana">${icon('caret-right')}</button>
+    </div>
+    ${thisWeek ? '' : '<p class="past-note"><span>Vendo outra semana.</span><button class="linkbtn" type="button" data-act="weekNow">Voltar para esta semana</button></p>'}
     <p class="lead">O tipo de cada dia vem da ficha de treino e muda sozinho quando você registra um treino ou cardio. Toque em outro tipo para trocar só aquela data.</p>
     <div class="legend">${DAY_IDS.map(k => `<span style="color:var(--day-${k})">${icon(DAY_ICON[k])}<span style="color:var(--muted)">${esc(DAYS[k].name)}</span></span>`).join('')}</div>
     <div class="week">${days.map((x, i) => `
@@ -183,7 +190,10 @@ function renderDicas(profile) {
 
 /* ---------- ações ---------- */
 on({
-  async weekAuto(el) { await setOverride(el.dataset.date, null); await renderSemana(); }
+  async weekAuto(el) { await setOverride(el.dataset.date, null); await renderSemana(); },
+  weekPrev() { C.weekOf = addDays(C.weekOf || weekStart(todayStr()), -7); renderSemana(); },
+  weekNext() { C.weekOf = addDays(C.weekOf || weekStart(todayStr()), 7); renderSemana(); },
+  weekNow() { C.weekOf = null; renderSemana(); }
 });
 onChange({
   async weekOverride(el, e) {

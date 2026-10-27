@@ -4,6 +4,7 @@ import { program, phaseLabel } from '../training.js';
 import { app, main, setBar, on, onChange, openSheet, closeSheet, toast, beep, unlockAudio, announceAchievements } from '../ui.js';
 import { db } from '../db.js';
 import { treinoNav } from './sessao.js';
+import { viewDate } from '../ui/dia-ativo.js';
 import { STAGES, LAST_STAGE, PAIN, painLabel, weekStage, cardioOfDay, totalSecs, timerAt, progression, pendingPainCheck } from '../cardio.js';
 
 /* ---------- etapa atual ---------- */
@@ -149,13 +150,13 @@ export async function pendingPain(today = todayStr()) { return pendingPainCheck(
 
 /* ---------- registro ---------- */
 export async function cardioForm() {
-  const today = todayStr(), c = await cardioToday(today), run = await loadRun();
+  const today = viewDate(), c = await cardioToday(today), run = today === todayStr() ? await loadRun() : null;
   const minutes = run ? Math.max(1, Math.round(Math.min(elapsedOf(run), totalSecs(run.segs)) / 60)) : 30;
   const type = c.kind === 'corrida' && c.stage > 0 ? 'intervalado' : 'caminhada';
   const done = run?.finished ? 'sim' : run ? 'parcial' : 'sim';
   const radios = (name, list, sel) => `<div class="segr ${list.length === 3 ? 'c3' : ''}">${list.map(([v, l]) => `<label><input type="radio" name="${name}" value="${v}" ${v === sel ? 'checked' : ''}><span>${l}</span></label>`).join('')}</div>`;
   openSheet(`<h2>Registrar cardio</h2>
-    <label class="f" style="margin-top:8px">Data<input type="date" id="kDate" value="${today}"></label>
+    <label class="f" style="margin-top:8px">Data<input type="date" id="kDate" value="${today}" max="${todayStr()}"></label>
     <fieldset class="chipset"><legend>Tipo</legend>${radios('kType', [['caminhada', 'Caminhada'], ['intervalado', 'Intercalado'], ['corrida', 'Corrida']], type)}</fieldset>
     <label class="f">Minutos<input id="kMin" inputmode="numeric" value="${minutes}"></label>
     ${c.kind === 'corrida' ? `<fieldset class="chipset"><legend>Completou a ${esc(c.label.toLowerCase())}?</legend>${radios('kDone', [['sim', 'Sim'], ['parcial', 'Em parte'], ['nao', 'Não']], done)}</fieldset>` : ''}
@@ -168,7 +169,7 @@ export async function cardioForm() {
         <label class="f">Distância (km)<input id="kDist" inputmode="decimal" placeholder="ex.: 3,2"></label>
       </div></details>
     <label class="f" style="margin-top:12px">Observação<input id="kNote" placeholder="ex.: canela ok, inclinação 5%"></label>
-    <div class="form-actions"><button class="btn solid block" type="button" data-act="saveCardio" data-stage="${c.kind === 'corrida' ? c.stage : ''}">Salvar cardio</button></div>`);
+    <div class="form-actions"><button class="btn solid block" type="button" data-act="saveCardio" data-stage="${c.kind === 'corrida' ? c.stage : ''}" data-date="${today}">Salvar cardio</button></div>`);
 }
 const radioVal = name => document.querySelector(`#sheet input[name="${name}"]:checked`)?.value;
 async function saveCardio(el) {
@@ -176,7 +177,7 @@ async function saveCardio(el) {
   const date = $('#kDate').value || todayStr();
   const rec = { date, type: radioVal('kType'), minutes: m, effort: radioVal('kEff'), note: $('#kNote').value.trim() };
   // a etapa só vale para o cardio de corrida do próprio dia
-  if (el.dataset.stage !== '' && date === todayStr()) { rec.stage = Number(el.dataset.stage); rec.completed = radioVal('kDone') || 'sim'; }
+  if (el.dataset.stage !== '' && date === el.dataset.date) { rec.stage = Number(el.dataset.stage); rec.completed = radioVal('kDone') || 'sim'; }
   const vw = num($('#kVw').value), vr = num($('#kVr').value), inc = num($('#kInc').value), dist = num($('#kDist').value);
   if (vw != null || vr != null) rec.speeds = { walk: vw, run: vr };
   if (inc != null) rec.incline = inc;

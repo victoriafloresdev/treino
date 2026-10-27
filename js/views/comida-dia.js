@@ -1,5 +1,5 @@
 // Comida › Dia: o plano alimentar completo do dia, para usar refeição por refeição.
-import { esc, todayStr } from '../util.js';
+import { esc } from '../util.js';
 import { app, setBar, on, onChange, openSheet, closeSheet, toast, refreshView } from '../ui.js';
 import { OPTS, PROT, CARB, MOLHO, PSY, TARGET_P, FAT_RANGE, FIBER_RANGE } from '../data/nutricao.js';
 import { mealOf, included, status, deficit, waterGoalCups, fmt, fmt1, noteOf } from '../nutri.js';
@@ -8,14 +8,16 @@ import { nextMeal } from '../proximo.js';
 import { plateSVG, updatePlate } from '../ui/plate.js';
 import { icon } from '../ui/icons.js';
 import { dayTagHTML, applyDayColor } from './dia.js';
+import { viewDate, isPast, dateNavHTML } from '../ui/dia-ativo.js';
 
 const D = { open: new Set(), date: null, info: null };
 const hourNow = () => { const n = new Date(); return n.getHours() + n.getMinutes() / 60; };
 
 export async function renderDia(box) {
-  const today = todayStr();
+  const today = viewDate();
   if (D.date !== today) { D.open = new Set(); D.date = today; D.auto = true; }
   box.innerHTML = `
+    ${dateNavHTML()}
     <section id="diaDay" aria-label="Tipo de dia"></section>
     <section class="card dia-panel" aria-label="Resumo do dia">
       <div class="plate-wrap" id="diaPlate">${plateSVG()}</div>
@@ -30,12 +32,12 @@ export async function renderDia(box) {
 // Atualiza no lugar (o donut anima entre os valores).
 export async function refreshDia() {
   const tok = app.seq;
-  const info = await dayInfo(todayStr());
+  const info = await dayInfo(viewDate());
   if (tok !== app.seq || !document.getElementById('diaMeals')) return;
   D.info = info;
   applyDayColor(info.type);
   // abre a próxima refeição na primeira vez do dia
-  if (D.auto) { const n = nextMeal(info, hourNow()); if (n?.slot) D.open.add(n.slot.id); D.auto = false; }
+  if (D.auto) { const n = nextMeal(info, isPast() ? 0 : hourNow()); if (n?.slot) D.open.add(n.slot.id); D.auto = false; }
   setBar('Comida', `<span class="num">${fmt(info.eaten[0])}</span> de ${fmt(info.d.target)} kcal`);
   document.getElementById('diaDay').innerHTML = dayTagHTML(info);
   updatePlate(document.getElementById('diaPlate'), info);
@@ -58,7 +60,7 @@ function summaryHTML(info) {
   const s = status(t[0], d), df = deficit(t[0], d);
   const kc = t[0] || 1, goal = waterGoalCups(d);
   return `
-    <p class="status ${s.on ? 'on' : ''}" role="status">${s.on ? icon('check-circle-fill') : ''}${s.text} <span class="muted">no plano de hoje</span></p>
+    <p class="status ${s.on ? 'on' : ''}" role="status">${s.on ? icon('check-circle-fill') : ''}${s.text} <span class="muted">${isPast() ? 'no plano desse dia' : 'no plano de hoje'}</span></p>
     <dl class="facts">
       <div><dt>Feito</dt><dd class="num">${fmt(eaten[0])} <small>kcal</small></dd></div>
       <div><dt>Gasto estimado</dt><dd class="num">~${fmt(d.burn)} <small>kcal</small></dd></div>
@@ -160,14 +162,14 @@ function pickSheet(slot) {
 
 /* ---------- ações (refreshView atualiza a tela em que você está) ---------- */
 on({
-  async psy() { const info = await dayInfo(todayStr()); await setPsy(todayStr(), !info.st.psy); await refreshView(); },
-  async water(el) { const info = await dayInfo(todayStr()); await setWater(todayStr(), info.water + Number(el.dataset.v)); await refreshView(); },
+  async psy() { const info = await dayInfo(viewDate()); await setPsy(viewDate(), !info.st.psy); await refreshView(); },
+  async water(el) { const info = await dayInfo(viewDate()); await setWater(viewDate(), info.water + Number(el.dataset.v)); await refreshView(); },
   async mealInclude(el) {
-    const info = await dayInfo(todayStr()), s = info.visible.find(x => x.id === el.dataset.slot);
-    await setIncluded(todayStr(), s.id, !included(s, info.st)); await refreshView();
+    const info = await dayInfo(viewDate()), s = info.visible.find(x => x.id === el.dataset.slot);
+    await setIncluded(viewDate(), s.id, !included(s, info.st)); await refreshView();
   },
   async mealDone(el) {
-    const now = await toggleDone(todayStr(), el.dataset.slot);
+    const now = await toggleDone(viewDate(), el.dataset.slot);
     if (now) D.open.delete(el.dataset.slot);
     await refreshView();
     toast(now ? 'Refeição marcada como feita.' : 'Desmarcada.');
@@ -181,12 +183,12 @@ on({
   mealPick(el) { pickSheet(el.dataset.slot); },
   // da tela Hoje: abre Comida › Dia já na refeição
   openMeal(el) {
-    if (D.date !== todayStr()) { D.open = new Set(); D.date = todayStr(); }
+    if (D.date !== viewDate()) { D.open = new Set(); D.date = viewDate(); }
     D.auto = false; D.open.add(el.dataset.slot); D.scrollTo = el.dataset.slot;
     location.hash = 'comida/dia';
   }
 });
 onChange({
-  async mealPickOpt(el, e) { await chooseOption(todayStr(), el.dataset.slot, e.target.value); closeSheet(); await refreshView(); },
-  async mealBuild(el, e) { await chooseBuild(todayStr(), el.dataset.meal, el.dataset.key, e.target.value); await refreshView(); }
+  async mealPickOpt(el, e) { await chooseOption(viewDate(), el.dataset.slot, e.target.value); closeSheet(); await refreshView(); },
+  async mealBuild(el, e) { await chooseBuild(viewDate(), el.dataset.meal, el.dataset.key, e.target.value); await refreshView(); }
 });
