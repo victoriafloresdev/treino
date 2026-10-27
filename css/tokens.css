@@ -1,0 +1,70 @@
+/* Tokens de design. Regras em docs/design.md.
+   Neutros levemente tingidos pelo matiz do tipo de dia (--h); cor do dia só em ação, progresso e "hoje". */
+@font-face{font-family:"Bricolage Grotesque";font-style:normal;font-display:swap;font-weight:200 800;font-stretch:75% 100%;
+  src:url(../fonts/bricolage-grotesque.woff2) format("woff2")}
+@font-face{font-family:"Atkinson Hyperlegible Next";font-style:normal;font-display:swap;font-weight:200 800;
+  src:url(../fonts/atkinson-hyperlegible-next.woff2) format("woff2")}
+
+:root{
+  color-scheme:light dark;
+  --font-ui:"Atkinson Hyperlegible Next",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --font-display:"Bricolage Grotesque","Atkinson Hyperlegible Next",system-ui,sans-serif;
+
+  /* matiz dos neutros: frio por padrão; o tipo de dia troca */
+  --h:255;
+  --bg:light-dark(oklch(97.4% .007 var(--h)),oklch(17% .012 var(--h)));
+  --surface:light-dark(oklch(99.6% .003 var(--h)),oklch(21% .014 var(--h)));
+  --surface2:light-dark(oklch(95.2% .009 var(--h)),oklch(25% .016 var(--h)));
+  --surface3:light-dark(oklch(91.5% .012 var(--h)),oklch(29.5% .018 var(--h)));
+  --line:light-dark(oklch(89.5% .012 var(--h)),oklch(33% .018 var(--h)));
+  --ink:light-dark(oklch(24% .02 var(--h)),oklch(94.5% .008 var(--h)));
+  --muted:light-dark(oklch(47% .02 var(--h)),oklch(73% .016 var(--h)));
+
+  /* cor de destaque: --day é a cor do tipo de dia; --accent é a versão para texto e botão (AA) */
+  --day:light-dark(oklch(52% .12 262),oklch(76% .1 262));
+  --accent:light-dark(oklch(48% .13 262),oklch(78% .1 262));
+  --accent-ink:light-dark(oklch(99% 0 0),oklch(18% .02 262));
+  --tint:color-mix(in oklch,var(--day) 13%,var(--surface));
+  --tint-strong:color-mix(in oklch,var(--day) 24%,var(--surface));
+
+  /* estados */
+  --ok:light-dark(oklch(50% .11 160),oklch(78% .12 160));
+  --hard:light-dark(oklch(53% .17 25),oklch(74% .14 25));
+  --warn:light-dark(oklch(50% .11 70),oklch(82% .12 80));
+  --warn-bg:light-dark(oklch(95% .04 85),oklch(27% .04 75));
+
+  /* treino (mapa muscular, esforço) */
+  --prim:light-dark(oklch(58% .17 15),oklch(72% .15 15));
+  --sec:light-dark(oklch(82% .07 15),oklch(42% .08 15));
+  --body:var(--surface3);
+  --body2:color-mix(in oklch,var(--surface3) 70%,var(--ink));
+  --easy:var(--ok); --mid:var(--accent); --hard-effort:var(--hard);
+  --lower:var(--accent); --upper:var(--accent);
+
+  /* macros: cores fixas do plano alimentar */
+  --p:light-dark(#E0526A,#F27389); --c:light-dark(#E39A1E,#F2B045); --g:light-dark(#7D9D29,#A4C34E); --f:light-dark(#2F8C80,#4FB8A9);
+  --water:light-dark(oklch(58% .12 240),oklch(75% .1 235));
+
+  /* prato-relógio */
+  --plate:var(--surface); --rim:var(--surface2); --ring:var(--surface3); --sleep:light-dark(oklch(85% .04 270),oklch(38% .05 270));
+
+  /* tipos de dia (cor "pura", para legendas e marcadores) */
+  --day-A:light-dark(oklch(62% .14 30),oklch(72% .13 30));
+  --day-B:light-dark(oklch(70% .13 60),oklch(78% .12 65));
+  --day-C:light-dark(oklch(48% .12 320),oklch(72% .11 320));
+  --day-D:light-dark(oklch(60% .11 145),oklch(74% .12 145));
+
+  /* forma e espaço */
+  --r-field:8px; --r-block:14px; --r-hero:24px; --r-pill:999px;
+  --shadow-float:0 10px 32px -8px oklch(20% .03 var(--h) / .28),0 2px 6px oklch(20% .03 var(--h) / .12);
+  --nav-h:64px;
+  --ease-spring:linear(0,.009,.035 2.1%,.141,.281 6.7%,.723 12.9%,.938 16.7%,1.017,1.077,1.121 24.2%,1.149,1.163 28.6%,1.162,1.149 33.7%,1.083 41.6%,1.014 49.6%,.988 53.8%,.981 58.1%,.993 66.3%,1.002 77.6%,1);
+}
+@media (prefers-color-scheme:light){:root{color-scheme:light}}
+@media (prefers-color-scheme:dark){:root{color-scheme:dark}}
+
+/* tipo de dia: matiz dos neutros + cor de destaque */
+html[data-day="A"]{--h:30;--day:var(--day-A);--accent:light-dark(oklch(50% .15 30),oklch(76% .12 30))}
+html[data-day="B"]{--h:62;--day:var(--day-B);--accent:light-dark(oklch(50% .12 55),oklch(80% .12 65))}
+html[data-day="C"]{--h:320;--day:var(--day-C);--accent:light-dark(oklch(46% .13 320),oklch(76% .1 320))}
+html[data-day="D"]{--h:145;--day:var(--day-D);--accent:light-dark(oklch(45% .1 145),oklch(78% .12 145))}

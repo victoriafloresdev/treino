@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Treino</title>
-<meta name="theme-color" content="#F2F4F8" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#0E1320" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#F3F5F8" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0F1318" media="(prefers-color-scheme: dark)">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -13,15 +13,17 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" href="icons/icon-192.png">
-<link rel="preload" href="fonts/archivo.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/atkinson-hyperlegible-next.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/bricolage-grotesque.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="css/tokens.css">
 <link rel="stylesheet" href="css/app.css">
-<link rel="stylesheet" href="css/comida.css">
+<link rel="stylesheet" href="css/telas.css">
 <script>try { var t = localStorage.getItem('dayType'); if (/^[ABCD]$/.test(t)) document.documentElement.dataset.day = t; } catch (e) {}</script>
 </head>
 <body>
 <header class="appbar" id="appbar">
   <div>
-    <button class="back" id="back" hidden>‹ Voltar</button>
+    <button class="back" id="back" hidden><svg class="ic" style="transform:scaleX(-1)" aria-hidden="true" focusable="false"><use href="icons/sprite.svg#i-caret-right"></use></svg>Voltar</button>
     <h1 id="title">Hoje</h1>
   </div>
   <div class="ctx" id="ctx"></div>
@@ -40,16 +42,11 @@
 <div class="toast" id="toast" role="status"></div>
 
 <nav class="nav" aria-label="Seções">
-  <a href="#hoje" data-r="hoje">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="3"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>Hoje</a>
-  <a href="#treino" data-r="treino">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 12h20M5 8v8M8 6v12M16 6v12M19 8v8"/></svg>Treino</a>
-  <a href="#comida" data-r="comida">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 2v8M4 2v5a3 3 0 0 0 6 0V2M7 10v12M17 2c-2 1.5-3 4-3 7v4h3v9M17 2v20"/></svg>Comida</a>
-  <a href="#progresso" data-r="progresso">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18M5 16l5-5 4 3 6-7"/></svg>Progresso</a>
-  <a href="#mais" data-r="mais">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg>Mais</a>
+  <a href="#hoje" data-r="hoje"><svg class="ic" aria-hidden="true" focusable="false"><use href="icons/sprite.svg#i-house"></use></svg>Hoje</a>
+  <a href="#treino" data-r="treino"><svg class="ic" aria-hidden="true" focusable="false"><use href="icons/sprite.svg#i-barbell"></use></svg>Treino</a>
+  <a href="#comida" data-r="comida"><svg class="ic" aria-hidden="true" focusable="false"><use href="icons/sprite.svg#i-fork-knife"></use></svg>Comida</a>
+  <a href="#progresso" data-r="progresso"><svg class="ic" aria-hidden="true" focusable="false"><use href="icons/sprite.svg#i-chart-line-up"></use></svg>Progresso</a>
+  <a href="#mais" data-r="mais"><svg class="ic" aria-hidden="true" focusable="false"><use href="icons/sprite.svg#i-dots-three-outline"></use></svg>Mais</a>
 </nav>
 
 <script src="vendor/chart.umd.js"></script>

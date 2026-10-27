@@ -13,7 +13,8 @@ test('arquivos versionados não citam dados de saúde', { skip: !existsSync(LIST
   const terms = readFileSync(LIST, 'utf8').split(/\r?\n/).map(t => t.trim()).filter(t => t && !t.startsWith('#'));
   // arquivos rastreados e os novos ainda não ignorados
   const files = execSync('git ls-files --cached --others --exclude-standard', { cwd: ROOT, encoding: 'utf8' })
-    .split('\n').filter(f => f && !/\.(png|jpg|woff2)$/.test(f) && !f.startsWith('vendor/') && !f.endsWith('package-lock.json'));
+    // imagens, fontes e o sprite de ícones (coordenadas de desenho) ficam de fora
+    .split('\n').filter(f => f && !/\.(png|jpg|woff2|svg)$/.test(f) && !f.startsWith('vendor/') && !f.endsWith('package-lock.json'));
   const hits = [];
   for (const f of files) {
     if (!existsSync(join(ROOT, f))) continue;

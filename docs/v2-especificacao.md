@@ -79,7 +79,7 @@ Recalcule a duração estimada de cada treino e mostre os novos valores. Se algu
 - Histórico por data: hoje o `done` guarda só o dia atual. Na v2, cada data guarda as escolhas, as refeições feitas, o psyllium e a água. Assim é possível calcular kcal e proteína consumidas em qualquer dia passado.
 - Textos que citam exames da usuária (por exemplo, em "pontos para levar ao médico") passam a ler do store `profile`. Sem perfil importado, aparece uma versão genérica.
 - Gere `privado/perfil-saude.json` a partir dos arquivos privados e crie em Mais a opção "Importar perfil de saúde".
-- Fontes: use a Archivo, que já está local. Tire as Google Fonts da página original.
+- Fontes: locais (ver `docs/design.md`). Tire as Google Fonts da página original.
 
 ### 3.1 Tipo de dia (fonte única de verdade)
 
@@ -198,7 +198,7 @@ Uma "pull" automática do PC exigiria um servidor. Por isso, o fluxo é: o celul
 
 ## 10. Design
 
-- Um único design system. Base: Archivo local, tokens claro e escuro do app atual.
+- Um único design system, descrito em `docs/design.md` (revisado em out/2026: Bricolage Grotesque + Atkinson Hyperlegible Next, tokens OKLCH, ícones Phosphor).
 - O tipo de dia define a cor de destaque da página via `data-day` no `<html>`, com as cores do contexto alimentar. As cores dos macros são fixas.
 - **Navegação**: barra inferior com 5 abas: Hoje, Treino, Comida, Progresso e Mais.
   - Comida tem sub-abas em segmented control: Semana, Trocas, Refeição livre e Dicas.

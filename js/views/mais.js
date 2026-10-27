@@ -49,7 +49,7 @@ export async function viewMais() {
     ${standalone ? '' : `<div class="card"><h2>Instalar no iPhone</h2>
       <ol style="margin:6px 0 0;padding-left:20px"><li>Abra este endereço no Safari.</li><li>Toque em Compartilhar (quadrado com seta).</li><li>Escolha “Adicionar à Tela de Início”.</li><li>Use sempre o ícone da tela inicial: os dados do app instalado ficam separados dos dados da aba do navegador.</li></ol></div>`}
     <div class="card"><h2>Sobre</h2>
-      <p class="small muted" style="margin:4px 0 0">Versão ${VERSION}. Fotos dos exercícios: Free Exercise DB (domínio público). Gráficos: Chart.js (MIT). Fonte: Archivo (OFL). Este app organiza o treino; não substitui avaliação profissional. Dor articular, tontura, dor no peito ou falta de ar fora do normal: pare e procure avaliação médica.</p>
+      <p class="small muted" style="margin:4px 0 0">Versão ${VERSION}. Fotos dos exercícios: Free Exercise DB (domínio público). Gráficos: Chart.js (MIT). Fontes: Bricolage Grotesque e Atkinson Hyperlegible Next (OFL). Ícones: Phosphor (MIT). Este app organiza o treino; não substitui avaliação profissional. Dor articular, tontura, dor no peito ou falta de ar fora do normal: pare e procure avaliação médica.</p>
     </div>
     <div class="card"><h2>Apagar dados</h2>
       <p class="small muted" style="margin:4px 0 12px">Remove treinos, medidas e ajustes deste aparelho. Exporte antes.</p>

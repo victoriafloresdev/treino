@@ -27,7 +27,7 @@ export function plateSVG() {
     <g id="pActs"></g>${ticks}${labels}
     <circle r="70" fill="none" stroke="var(--surface2)" stroke-width="18"/>
     <g transform="rotate(-90)">${seg('segP')}${seg('segC')}${seg('segG')}</g>
-    <text id="pK" y="-4" text-anchor="middle" font-weight="850" font-size="34" fill="var(--ink)" style="font-stretch:75%">0</text>
+    <text id="pK" y="-4" text-anchor="middle" font-weight="650" font-size="34" fill="var(--ink)">0</text>
     <text id="pT" y="20" text-anchor="middle" font-size="11.5" fill="var(--muted)">kcal planejadas</text>
     <g id="pEm"></g>
   </svg>`;

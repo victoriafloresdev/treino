@@ -59,8 +59,8 @@ export function bodyMap(p, s, label){
       <g>${head}<g>${halfFront(p,s)}</g><g ${mir}>${halfFront(p,s)}</g></g>
       <g transform="translate(220,0)">${head}<g>${halfBack(p,s)}</g><g ${mir}>${halfBack(p,s)}</g></g>
     </g>
-    <text x="100" y="406" text-anchor="middle" font-size="15" fill="var(--muted)" font-family="Archivo, sans-serif">frente</text>
-    <text x="320" y="406" text-anchor="middle" font-size="15" fill="var(--muted)" font-family="Archivo, sans-serif">costas</text>
+    <text x="100" y="406" text-anchor="middle" font-size="15" fill="var(--muted)" font-family="Atkinson Hyperlegible Next, sans-serif">frente</text>
+    <text x="320" y="406" text-anchor="middle" font-size="15" fill="var(--muted)" font-family="Atkinson Hyperlegible Next, sans-serif">costas</text>
   </svg>`;
 }
 

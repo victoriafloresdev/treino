@@ -49,12 +49,23 @@ $('#sheetBg').addEventListener('click', closeSheet);
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSheet(); });
 window.addEventListener('scroll', () => $('#appbar').classList.toggle('scrolled', window.scrollY > 4), { passive: true });
 
-export function cssVar(n) { return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
+// Cor de um token já resolvida em rgb() (o Chart.js não entende light-dark() nem oklch()).
+const probe = { el: null, ctx: null };
+export function cssVar(n) {
+  if (!probe.el) {
+    probe.el = document.createElement('i'); probe.el.style.display = 'none'; document.body.appendChild(probe.el);
+    probe.ctx = document.createElement('canvas').getContext('2d', { willReadFrequently: true });
+  }
+  probe.el.style.color = `var(${n})`;
+  const c = probe.ctx; c.clearRect(0, 0, 1, 1); c.fillStyle = '#000'; c.fillStyle = getComputedStyle(probe.el).color; c.fillRect(0, 0, 1, 1);
+  const [r, g, b, a] = c.getImageData(0, 0, 1, 1).data;
+  return a === 255 ? `rgb(${r},${g},${b})` : `rgba(${r},${g},${b},${(a / 255).toFixed(2)})`;
+}
 export function destroyCharts() { charts.forEach(c => c.destroy()); charts = []; }
 export function mkChart(canvas, cfg) {
   if (!window.Chart) return;
   const ink = cssVar('--muted'), line = cssVar('--line');
-  Chart.defaults.font.family = 'Archivo, system-ui, sans-serif';
+  Chart.defaults.font.family = '"Atkinson Hyperlegible Next", system-ui, sans-serif';
   Chart.defaults.color = ink;
   cfg.options = Object.assign({
     responsive: true, maintainAspectRatio: false, animation: false, locale: 'pt-BR',

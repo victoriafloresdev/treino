@@ -1,4 +1,4 @@
-/* Tela Hoje, aba Comida e peças do plano alimentar. Tokens em app.css. */
+/* Estilos das telas (Hoje, Treino, Comida, Progresso). Tokens em tokens.css; componentes em app.css. */
 
 /* ---------- sub-abas (controle segmentado de links) ---------- */
 .subtabs{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:3px;padding:3px;margin:4px 0 14px;
@@ -18,24 +18,25 @@
   .hoje-grid .h-timeline{grid-row:2 / span 3}
 }
 
-.daybox{background:var(--surface);border:1px solid var(--line);border-left:6px solid var(--day);border-radius:14px;padding:12px 14px;display:grid;gap:6px}
+.daybox{background:var(--surface);border-radius:var(--r-block);padding:12px 14px;display:grid;gap:6px}
 .daybox p{margin:0}
 .daybox .btn{justify-self:start}
 .day-tag{display:flex;align-items:center;gap:10px}
 .day-tag .em{font-size:26px;line-height:1}
-.day-tag b{display:block;font-size:19px;font-stretch:80%;font-weight:850;line-height:1.1}
+.day-tag b{display:block;font-size:19px;font-weight:650;line-height:1.1}
 .day-tag small{display:block;font-size:13px;color:var(--muted);font-weight:600}
 
 .now{background:var(--tint);border-radius:16px;padding:14px 16px;border:1px solid var(--line)}
 .now .k{font-size:13px;font-weight:700;color:var(--accent)}
-.now h2{margin:2px 0 4px;font-stretch:75%;font-weight:850;font-size:28px;line-height:1.05}
+.now h2{margin:2px 0 4px;font-weight:650;font-size:28px;line-height:1.05}
 .now p{margin:0 0 12px}
 .now.done h2{color:var(--ok)}
 
 .plate-wrap{max-width:300px;margin:0 auto 6px}
 .plate{display:block;width:100%;height:auto}
 .plate circle[id^="seg"]{transition:stroke-dasharray .5s,stroke-dashoffset .5s}
-.plate text{font-family:"Archivo",system-ui,sans-serif}
+.plate text{font-family:var(--font-ui)}
+.plate #pK{font-family:var(--font-display);font-variant-numeric:tabular-nums}
 @media (prefers-reduced-motion:reduce){.plate circle[id^="seg"],.mbar .fill{transition:none}}
 
 .status{font-weight:800;font-size:16px;text-align:center;margin:4px 0 10px}
@@ -76,7 +77,7 @@
 
 .habits{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:6px}
 .habits li{display:flex;align-items:center;gap:10px;font-size:15px}
-.habits .ck{flex:none;width:24px;height:24px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;font-size:13px;font-weight:900}
+.habits .ck{flex:none;width:24px;height:24px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;font-size:13px;font-weight:650}
 .habits li.ok .ck{background:var(--ok);border-color:var(--ok);color:var(--surface)}
 .count{font-weight:800;color:var(--accent)}
 .okline{color:var(--ok);font-weight:700;margin:6px 0 0}
@@ -88,7 +89,7 @@
 .marker-box{display:flex;gap:10px;align-items:flex-start;background:var(--surface);border:1px dashed var(--line);border-radius:14px;padding:12px;font-size:14px;color:var(--muted)}
 .marker-box b{color:var(--ink);font-size:15px}
 .marker-box>div{min-width:0}
-.tl.activity .marker-box{border-style:solid;border-left:5px solid var(--day)}
+.tl.activity .marker-box{border-style:solid}
 .marker-box .em{font-size:22px;line-height:1}
 
 details.meal{background:var(--surface);border:1px solid var(--line);border-radius:14px;min-width:0}
@@ -101,7 +102,7 @@ details.meal>summary::-webkit-details-marker{display:none}
 .meal-t b{display:block;font-size:16px;line-height:1.15}
 .meal-t small{display:block;font-size:13px;color:var(--muted);line-height:1.2}
 .meal-k{text-align:right;line-height:1.05}
-.meal-k b{display:block;font-size:20px;font-stretch:75%;font-weight:850;font-variant-numeric:tabular-nums}
+.meal-k b{display:block;font-size:20px;font-weight:650;font-variant-numeric:tabular-nums}
 .meal-k small{font-size:12px;color:var(--muted)}
 .donechip{display:block;font-size:12px;font-weight:800;color:var(--ok);margin-bottom:2px}
 .meal-in{padding:0 12px 12px;display:grid;gap:10px}
@@ -178,7 +179,7 @@ details.meal>summary::-webkit-details-marker{display:none}
 .rows .kc b{font-size:17px}
 .calc-out{background:var(--tint);border-radius:12px;padding:12px 14px;margin:12px 0;font-size:15px}
 .calc-out:empty{display:none}
-.calc-out .big{font-size:30px;font-stretch:75%;font-weight:850;line-height:1.05;margin-bottom:2px}
+.calc-out .big{font-size:30px;font-weight:650;line-height:1.05;margin-bottom:2px}
 .rules{margin:10px 0 0;padding-left:20px;font-size:14px;display:grid;gap:6px}
 .card .chipset{margin:10px 0}
 .card .grid2{margin-top:10px}
@@ -208,18 +209,18 @@ details.tip>summary small{display:block;font-size:13px;color:var(--muted)}
 .recipe{border-top:1px solid var(--line);padding:10px 0}
 .recipe h4{margin:0}
 .recipe .meta{margin:0 0 4px;font-size:13px;color:var(--muted)}
-.alert{background:var(--warn-bg);border-left:4px solid var(--hard);border-radius:0 10px 10px 0;padding:10px 12px;margin-top:10px}
+.alert{background:var(--warn-bg);border-radius:10px;padding:10px 12px;margin-top:10px}
 .foot{margin-top:18px}
 
 /* ---------- cardio: timer de intervalos ---------- */
 .timer-card{text-align:center}
 .tm{display:grid;gap:8px;justify-items:center}
 .tm .row{justify-content:center}
-.tm-seg{font-weight:850;font-size:20px;font-stretch:80%;padding:4px 14px;border-radius:999px;background:var(--surface2)}
+.tm-seg{font-weight:650;font-size:20px;padding:4px 14px;border-radius:999px;background:var(--surface2)}
 .tm-seg.trote{background:var(--day,var(--accent));color:#fff}
 @media (prefers-color-scheme:dark){.tm-seg.trote{color:#0E1320}}
 .tm-seg.done{color:var(--ok)}
-.tm-big{font-size:72px;line-height:1;font-weight:850;font-stretch:70%;font-variant-numeric:tabular-nums}
+.tm-big{font-size:72px;line-height:1;font-weight:650;font-variant-numeric:tabular-nums}
 .tm-sub,.tm-next{margin:0;color:var(--muted);font-size:14px}
 .tm-bar{display:flex;gap:2px;width:100%;height:14px;margin:6px 0}
 .tm-bar i{display:block;min-width:2px;border-radius:3px;background:var(--line)}
@@ -231,9 +232,9 @@ details.tip>summary small{display:block;font-size:13px;color:var(--muted)}
 @media (prefers-reduced-motion:reduce){.tm.flash{animation:none}}
 .prog h3{margin:0 0 6px}
 .prog p{margin:0 0 8px}
-.prog.ok{border-left:5px solid var(--ok)}
-.prog.dor{border-left:5px solid var(--hard)}
-.pain-ask{border:2px solid var(--day,var(--accent))}
+.prog.ok h3{color:var(--ok)}
+.prog.dor h3{color:var(--hard)}
+.pain-ask{background:var(--tint);border-color:transparent}
 .pain-ask h3{margin:0 0 8px}
 details.adjust>summary,details.more>summary{cursor:pointer;font-weight:700;min-height:44px;display:flex;align-items:center}
 details.more{margin-top:10px}
@@ -256,7 +257,7 @@ p.trend{margin:0 0 8px;white-space:normal}
 .ach li.on .em{filter:none;opacity:1}
 .ach .track{height:8px}
 .wkline{margin:4px 0 0}
-a.card.closing{display:grid;grid-template-columns:32px minmax(0,1fr) auto;gap:10px;align-items:center;text-decoration:none;color:inherit;border:2px solid var(--day,var(--accent))}
+a.card.closing{display:grid;grid-template-columns:32px minmax(0,1fr) auto;gap:10px;align-items:center;text-decoration:none;color:inherit;background:var(--tint);border-color:transparent}
 a.card.closing .em{font-size:24px}
 a.card.closing b{display:block;font-size:17px}
 a.card.closing small{display:block;color:var(--muted);font-size:13.5px}

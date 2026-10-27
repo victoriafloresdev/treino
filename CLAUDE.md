@@ -40,6 +40,8 @@ Especificação da versão atual em desenvolvimento: `docs/v2-especificacao.md`.
 
 ## Interface
 
+- Design system em `docs/design.md` (tipografia, cor, forma, ícones, movimento e o que evitar). Tokens em `css/tokens.css`.
+
 - Português do Brasil, frases em caixa normal, segunda pessoa ("você"), aspas “ ”, números em formato pt-BR (1.700; 0,5).
 - Botões dizem exatamente o que fazem ("Salvar peso", "Marcar como feito").
 - Seletores são radio groups nativos (`fieldset` + `input type="radio"`) estilizados como chips ou segmented control. Nada de dropdown para poucas opções.
