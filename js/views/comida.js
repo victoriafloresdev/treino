@@ -1,6 +1,6 @@
 // Aba Comida: Semana, Trocas, Refeição livre e Dicas (porte do Plano da Vic).
 import { esc, todayStr, fmtShort, addDays, weekStart, isoWeek } from '../util.js';
-import { app, main, setBar, on, onChange, subTabs } from '../ui.js';
+import { app, main, setBar, on, onChange, subTabs, openSheet, closeSheet } from '../ui.js';
 import { db } from '../db.js';
 import { DAYS, DAY_IDS, OPTS, CATS, CALC, PRESETS, TROCA_REGRAS, DICAS, RODAPE, LIVRE_CALLOUT, LIVRE_DEFAULT_KCAL } from '../data/nutricao.js';
 import { fmt, fmt1, mealOf, getOpt, weekNumbers, weekNote, weightTrend, calcTroca, calcGoalK, refeicaoLivre, txt } from '../nutri.js';
@@ -51,28 +51,27 @@ async function renderSemana() {
       <button class="icon-btn" type="button" data-act="weekNext" aria-label="Próxima semana">${icon('caret-right')}</button>
     </div>
     ${thisWeek ? '' : '<p class="past-note"><span>Vendo outra semana.</span><button class="linkbtn" type="button" data-act="weekNow">Voltar para esta semana</button></p>'}
-    <p class="lead">O tipo de cada dia vem da ficha de treino e muda sozinho quando você registra um treino ou cardio. Toque em outro tipo para trocar só aquela data.</p>
-    <div class="legend">${DAY_IDS.map(k => `<span style="color:var(--day-${k})">${icon(DAY_ICON[k])}<span style="color:var(--muted)">${esc(DAYS[k].name)}</span></span>`).join('')}</div>
-    <div class="week">${days.map((x, i) => `
-      <div class="wk-row ${x.date === today ? 'today' : ''}">
-        <div class="wk-d"><b>${WD[i]}</b><small>${x.date === today ? 'hoje' : fmtShort(x.date)}</small></div>
-        <fieldset class="wk-opts" data-on="weekOverride" data-date="${x.date}"><legend class="sr">Tipo de ${WD[i]}, ${fmtShort(x.date)}</legend>
-          ${DAY_IDS.map(t => `<label style="--wk:var(--day-${t})"><input type="radio" name="wk-${x.date}" value="${t}" ${t === x.type ? 'checked' : ''} aria-label="${esc(DAYS[t].name)}"><span aria-hidden="true">${icon(DAY_ICON[t])}</span></label>`).join('')}
-        </fieldset>
-        <div class="wk-k"><b>${fmt(x.planned[0])}</b><small>kcal</small></div>
-        <div class="wk-src">${SOURCES[x.source]}${x.manual ? ` · <button class="linkbtn" type="button" data-act="weekAuto" data-date="${x.date}">voltar ao previsto</button>` : ''}</div>
-      </div>`).join('')}
-    </div>
-    <div class="callout">${weekNote(w)}</div>
+    <ul class="wk-list">${days.map((x, i) => `
+      <li><button class="wk-line ${x.date === today ? 'today' : ''}" type="button" data-act="weekDay" data-date="${x.date}" data-i="${i}" style="--wk:var(--day-${x.type})">
+        <span class="wk-d"><b>${WD[i]}</b><small>${x.date === today ? 'hoje' : fmtShort(x.date)}</small></span>
+        <span class="wk-t">${icon(DAY_ICON[x.type])}<span><b>${esc(DAYS[x.type].name)}</b>${x.source !== 'ficha' ? `<small>${SOURCES[x.source]}</small>` : ''}</span></span>
+        <span class="wk-k num">${fmt(x.planned[0])}</span>
+      </button></li>`).join('')}
+    </ul>
+    <p class="small muted">Toque num dia para trocar o tipo só naquela data.</p>
     <div class="kpis">
       <div class="kpi"><div class="v">${fmt(w.avgKcal)}</div><div class="l">kcal por dia, em média</div></div>
-      <div class="kpi"><div class="v">~${fmt(w.avgDef)}</div><div class="l">déficit médio por dia</div></div>
-      <div class="kpi"><div class="v">${fmt1(w.fatLo)}–${fmt1(w.fatHi)}</div><div class="l">kg de gordura por semana (estimativa)</div></div>
-      <div class="kpi"><div class="v">${w.cardio} + ${w.musc}</div><div class="l">cardios e musculações</div></div>
+      <div class="kpi"><div class="v">~${fmt(w.avgDef)}</div><div class="l">déficit médio por dia (estimativa)</div></div>
     </div>
-    <p class="small muted">Contas com as refeições escolhidas em cada dia. Calorias e gasto são estimativas (cerca de ±200 kcal).</p>
+    <div class="callout">${weekNote(w)}</div>
+    <details class="card more-card"><summary>Mais números da semana</summary>
+      <div class="kpis">
+        <div class="kpi"><div class="v">${fmt1(w.fatLo)}–${fmt1(w.fatHi)}</div><div class="l">kg de gordura por semana (estimativa)</div></div>
+        <div class="kpi"><div class="v">${w.cardio} + ${w.musc}</div><div class="l">cardios e musculações</div></div>
+      </div>
+      <p class="small muted">Contas com as refeições escolhidas em cada dia. Calorias e gasto são estimativas (cerca de ±200 kcal).</p></details>
     <div class="card"><h3>Peso da semana</h3>
-      <p class="small muted">Pese de manhã, depois do banheiro. Compare médias de 7 dias, nunca um dia com o outro. Registre na tela Hoje.</p>
+      <p class="small muted">Compare médias de 7 dias, nunca um dia com o outro.</p>
       ${!tr.w1 ? '<p class="note">Registre pelo menos 3 pesagens nesta semana para a média ficar confiável.</p>' : `
       <div class="kpis">
         <div class="kpi"><div class="v">${fmt1(tr.w1.avg)} kg</div><div class="l">média dos últimos 7 dias (${tr.w1.n} ${tr.w1.n === 1 ? 'pesagem' : 'pesagens'})</div></div>
@@ -190,7 +189,17 @@ function renderDicas(profile) {
 
 /* ---------- ações ---------- */
 on({
-  async weekAuto(el) { await setOverride(el.dataset.date, null); await renderSemana(); },
+  async weekAuto(el) { await setOverride(el.dataset.date, null); closeSheet(); await renderSemana(); },
+  // escolher o tipo de um dia da semana (só aquela data)
+  async weekDay(el) {
+    const date = el.dataset.date, x = (await weekInfo(weekStart(date))).find(d => d.date === date);
+    openSheet(`<h2>${WD[Number(el.dataset.i)]}, ${fmtShort(date)}</h2>
+      <fieldset class="chipset" data-on="weekOverride" data-date="${date}"><legend>Tipo desse dia</legend><div class="segr c2 ic-top">
+        ${DAY_IDS.map(t => `<label><input type="radio" name="wk-${date}" value="${t}" ${t === x.type ? 'checked' : ''}><span>${icon(DAY_ICON[t])}${esc(DAYS[t].name)}<small class="num">${fmt(DAYS[t].target)} kcal</small></span></label>`).join('')}
+      </div></fieldset>
+      <p class="small muted">${SOURCES[x.source]}. A escolha vale só para essa data.</p>
+      ${x.manual ? `<div class="form-actions"><button class="btn block" type="button" data-act="weekAuto" data-date="${date}">Voltar ao previsto</button></div>` : ''}`);
+  },
   weekPrev() { C.weekOf = addDays(C.weekOf || weekStart(todayStr()), -7); renderSemana(); },
   weekNext() { C.weekOf = addDays(C.weekOf || weekStart(todayStr()), 7); renderSemana(); },
   weekNow() { C.weekOf = null; renderSemana(); }
@@ -199,6 +208,7 @@ onChange({
   async weekOverride(el, e) {
     await setOverride(el.dataset.date, e.target.value);
     if (el.dataset.date === todayStr()) applyDayColor(e.target.value);
+    closeSheet();
     await renderSemana();
   },
   trocaCat(el, e) { C.cat = e.target.value; renderTrocas(C.today); },

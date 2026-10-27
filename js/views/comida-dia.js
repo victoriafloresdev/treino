@@ -10,7 +10,7 @@ import { icon } from '../ui/icons.js';
 import { dayTagHTML, applyDayColor } from './dia.js';
 import { viewDate, isPast, dateNavHTML } from '../ui/dia-ativo.js';
 
-const D = { open: new Set(), date: null, info: null };
+const D = { open: new Set(), date: null, info: null, resumo: false };
 const hourNow = () => { const n = new Date(); return n.getHours() + n.getMinutes() / 60; };
 
 export async function renderDia(box) {
@@ -20,11 +20,15 @@ export async function renderDia(box) {
     ${dateNavHTML()}
     <section id="diaDay" aria-label="Tipo de dia"></section>
     <section class="card dia-panel" aria-label="Resumo do dia">
-      <div class="plate-wrap" id="diaPlate">${plateSVG()}</div>
-      <div id="diaSummary"></div>
+      <div id="diaQuick"></div>
+      <details class="dia-more" id="diaMore" ${D.resumo ? 'open' : ''}><summary>Relógio do dia, macros e psyllium ${icon('caret-down')}</summary>
+        <div class="plate-wrap" id="diaPlate">${plateSVG()}</div>
+        <div id="diaSummary"></div>
+      </details>
     </section>
     <h2 class="section-title">Refeições</h2>
     <ol class="meals" id="diaMeals"></ol>`;
+  document.getElementById('diaMore').addEventListener('toggle', e => { D.resumo = e.target.open; });
   app.refresh = refreshDia;
   await refreshDia();
 }
@@ -41,6 +45,7 @@ export async function refreshDia() {
   setBar('Comida', `<span class="num">${fmt(info.eaten[0])}</span> de ${fmt(info.d.target)} kcal`);
   document.getElementById('diaDay').innerHTML = dayTagHTML(info);
   updatePlate(document.getElementById('diaPlate'), info);
+  document.getElementById('diaQuick').innerHTML = quickHTML(info);
   document.getElementById('diaSummary').innerHTML = summaryHTML(info);
   document.getElementById('diaMeals').innerHTML = info.visible.map(s => slotHTML(s, info)).join('');
   if (D.scrollTo) { document.getElementById('meal-' + D.scrollTo)?.scrollIntoView({ block: 'start' }); D.scrollTo = null; }
@@ -55,10 +60,25 @@ function bar(label, color, val, max, right, goal) {
   return `<div class="mbar"><div class="bl"><span><i class="sw" style="background:${color}"></i>${label}</span><span class="num">${right}</span></div>
     <div class="track" role="img" aria-label="${label}: ${right}"><div class="fill" style="width:${pct}%;background:${color}"></div>${g}</div></div>`;
 }
+// sempre à vista: o que foi comido, proteína e água
+function quickHTML(info) {
+  const { d, planned: t, eaten } = info, goal = waterGoalCups(d);
+  return `<div class="quick">
+      <div class="q-k"><span><b class="num">${fmt(eaten[0])}</b> de ${fmt(t[0])} kcal planejadas</span><span class="muted">meta ${fmt(d.target)}</span></div>
+      <div class="track" role="img" aria-label="Comido: ${fmt(eaten[0])} de ${fmt(t[0])} kcal"><div class="fill" style="width:${Math.min(100, eaten[0] / (t[0] || 1) * 100)}%;background:var(--day)"></div></div>
+      <div class="q-k"><span>Proteína <b class="num">${fmt(eaten[1])}</b> de ${TARGET_P} g</span></div>
+      <div class="track" role="img" aria-label="Proteína: ${fmt(eaten[1])} de ${TARGET_P} g"><div class="fill" style="width:${Math.min(100, eaten[1] / TARGET_P * 100)}%;background:var(--p)"></div></div>
+    </div>
+    <div class="water">
+      <div class="water-t"><b>Água</b><span class="small muted num">${info.water} de ${goal} copos · ${fmt1(info.water * 0.25)} de ${fmt1(d.water)} L</span></div>
+      <div class="stepper"><button class="icon-btn" type="button" data-act="water" data-v="-1" aria-label="Tirar um copo">${icon('minus')}</button>
+        <button class="icon-btn solid" type="button" data-act="water" data-v="1" aria-label="Adicionar um copo de 250 ml">${icon('plus')}</button></div>
+    </div>`;
+}
 function summaryHTML(info) {
   const { d, planned: t, eaten } = info;
   const s = status(t[0], d), df = deficit(t[0], d);
-  const kc = t[0] || 1, goal = waterGoalCups(d);
+  const kc = t[0] || 1;
   return `
     <p class="status ${s.on ? 'on' : ''}" role="status">${s.on ? icon('check-circle-fill') : ''}${s.text} <span class="muted">${isPast() ? 'no plano desse dia' : 'no plano de hoje'}</span></p>
     <dl class="facts">
@@ -75,12 +95,7 @@ function summaryHTML(info) {
     <p class="small muted">Estimativas, com margem de cerca de ±200 kcal. As calorias do relógio não entram na meta.</p>
     <div class="switch-row"><span>${esc(PSY.name)}</span>
       <button class="switch" type="button" role="switch" aria-checked="${!!info.st.psy}" data-act="psy" aria-label="Incluir psyllium"></button></div>
-    <div class="water">
-      <div class="water-t"><b>Água</b><span class="small muted num">${info.water} de ${goal} copos · ${fmt1(info.water * 0.25)} de ${fmt1(d.water)} L</span></div>
-      <div class="stepper"><button class="icon-btn" type="button" data-act="water" data-v="-1" aria-label="Tirar um copo">${icon('minus')}</button>
-        <button class="icon-btn solid" type="button" data-act="water" data-v="1" aria-label="Adicionar um copo de 250 ml">${icon('plus')}</button></div>
-      <div class="drops" aria-hidden="true">${Array.from({ length: Math.max(goal, info.water) }, (_, i) => `<i class="${i < info.water ? 'on' : ''}"></i>`).join('')}</div>
-    </div>`;
+`;
 }
 
 /* ---------- refeições ---------- */

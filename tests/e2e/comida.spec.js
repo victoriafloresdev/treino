@@ -92,7 +92,7 @@ test('refeições: escolher, montar o prato, marcar como feito, água e psyllium
   await page.locator('#hojeNext').getByRole('button', { name: 'Ver no plano' }).click();
   await expect(page.locator('#meal-almoco .meal-head')).toHaveAttribute('aria-expanded', 'true');
   await expect(page.locator('.facts')).toContainText('414');
-  await expect(page.locator('#diaSummary')).toContainText('1 de 14 copos');
+  await expect(page.locator('#diaQuick')).toContainText('1 de 14 copos');
 
   // o check marca sem abrir o card
   await page.locator('#meal-lanche .meal-check').click();
@@ -101,6 +101,7 @@ test('refeições: escolher, montar o prato, marcar como feito, água e psyllium
 
   // psyllium soma 15 kcal ao planejado
   const before = Number((await kcalPlanejada(page)).replace('.', ''));
+  await page.locator('#diaMore > summary').click();
   await page.getByRole('switch', { name: 'Incluir psyllium' }).click();
   await expect(page.locator('#pK')).toHaveText((before + 15).toLocaleString('pt-BR'));
 
@@ -117,19 +118,24 @@ test('refeições: escolher, montar o prato, marcar como feito, água e psyllium
   await page.reload();
   await expect(page.locator('#meal-cafe .meal-k b')).toHaveText('414');
   await expect(page.locator('#meal-cafe .meal-check')).toHaveAttribute('aria-pressed', 'false');
-  await expect(page.locator('#diaSummary')).toContainText('0 de 14 copos');
+  await expect(page.locator('#diaQuick')).toContainText('0 de 14 copos');
   expect(errors).toEqual([]);
 });
 
 test('Comida: semana, trocas, refeição livre e dicas', async ({ page }) => {
   const errors = watchErrors(page);
   await open(page, 'comida/semana');
-  const qua = page.locator('.wk-row').nth(2);
-  await expect(qua).toContainText('previsto na semana');
-  await qua.locator('label:has(input[value="D"])').click();
-  await expect(page.locator('.wk-row').nth(2)).toContainText('escolhido por você');
-  await page.locator('.wk-row').nth(2).getByRole('button', { name: 'voltar ao previsto' }).click();
-  await expect(page.locator('.wk-row').nth(2)).toContainText('previsto na semana');
+  const qua = page.locator('.wk-line').nth(2);
+  await expect(qua).toContainText('Cardio + musculação');
+  await expect(qua).not.toContainText('previsto');
+  await qua.click();
+  await expect(page.locator('#sheet')).toContainText('previsto na semana');
+  await page.locator('#sheet label:has(input[value="D"])').click();
+  await expect(page.locator('.wk-line').nth(2)).toContainText('Descanso');
+  await expect(page.locator('.wk-line').nth(2)).toContainText('escolhido por você');
+  await page.locator('.wk-line').nth(2).click();
+  await page.locator('#sheet').getByRole('button', { name: 'Voltar ao previsto' }).click();
+  await expect(page.locator('.wk-line').nth(2)).toContainText('Cardio + musculação');
   await expect(page.locator('.callout')).toContainText('Boa distribuição');
 
   await page.getByRole('link', { name: 'Trocas' }).click();
@@ -189,11 +195,11 @@ test('semana modelo editável em Mais', async ({ page }) => {
   await page.locator('fieldset[data-i="5"] label:has(input[value="D"])').click();
   await expect(page.getByRole('button', { name: 'Voltar ao modelo padrão' })).toBeVisible();
   await page.goto('/index.html#comida/semana');
-  await expect(page.locator('.wk-row').nth(5).locator('input[value="D"]')).toBeChecked();
+  await expect(page.locator('.wk-line').nth(5)).toContainText('Descanso');
   await page.goto('/index.html#mais');
   await page.getByRole('button', { name: 'Voltar ao modelo padrão' }).click();
   await page.goto('/index.html#comida/semana');
-  await expect(page.locator('.wk-row').nth(5).locator('input[value="B"]')).toBeChecked();
+  await expect(page.locator('.wk-line').nth(5)).toContainText('Só cardio');
 });
 
 test('trocar de tela rápido: a última tela aberta é a que fica', async ({ page }) => {
