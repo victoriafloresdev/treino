@@ -4,17 +4,18 @@ App web instalável (PWA) para o dia a dia: musculação, cardio, refeições, �
 
 ## O que o app faz
 
-- **Hoje.** Mostra a linha do tempo do dia: remédio (com o perfil de saúde), cardio, refeições, musculação e sono.
+- **Hoje.** Resumo e acesso rápido:
   - **Tipo do dia:** A, B, C ou D, com a origem ("previsto pela ficha", "ajustado pelo registro" ou "escolhido por você").
-  - **Card "agora":** a próxima coisa a fazer.
-  - **Prato-relógio:** calorias e macros planejados.
-  - **Resumo:** consumo do dia, água e psyllium.
-  - **Hábitos do dia** e da semana.
-  - Um campo rápido para o peso.
+  - **Mensagem do dia**, sobre hábito e sem culpa.
+  - **Próxima refeição:** a seguinte à última marcada como feita (ou a da hora, se nada foi marcado), com "Marcar como feito".
+  - **Anéis** de calorias, proteína e água. Tocar no da água soma um copo.
+  - **Treinos de hoje:** musculação e cardio, com atalho para começar.
+  - **Hábitos do dia** e da semana, e o peso.
 - **Treino**
-  - **Musculação:** registro série por série (carga, repetições, fácil/médio/difícil), cronômetro de descanso, sugestão de progressão e tendência de cada exercício.
+  - **Musculação:** seletor dos 4 treinos, que abre no do dia ou no próximo da sequência. Registro série por série (carga com ± 2,5 kg, repetições, fácil/médio/difícil), cronômetro de descanso, desenho dos músculos, sugestão de progressão e tendência de cada exercício.
   - **Cardio:** timer de intervalos com bip e tela ligada, registro, pergunta sobre dor no dia seguinte e progressão da corrida por etapas.
 - **Comida**
+  - **Dia:** o plano alimentar do dia. Prato-relógio, macros, água e psyllium; refeições em linhas com check de um toque e troca de opção.
   - **Semana:** tipo de cada dia e médias.
   - **Trocas:** porções equivalentes e calculadora.
   - **Refeição livre:** impacto na semana sem culpa.
@@ -134,8 +135,11 @@ npm test
 ```
 index.html               casca do app, navegação, cronômetro
 sw.js                    cache offline e atualização
-css/app.css              tokens (claro, escuro, cor do tipo de dia) e componentes
-css/comida.css           tela Hoje, comida, cardio e progresso
+css/tokens.css           tokens de design (OKLCH, claro/escuro, cor do tipo de dia)
+css/app.css              base e componentes
+css/telas.css            estilos de cada tela
+docs/design.md           regras de design (tipografia, cor, forma, ícones, movimento)
+icons/sprite.svg         ícones Phosphor (gerados por tools/icones.py)
 js/app.js                rotas e eventos globais
 js/db.js                 IndexedDB v2: migração, uid, registros apagados, exportar e importar
 js/plan.js               a ficha de musculação
@@ -147,6 +151,7 @@ js/cardio.js             etapas da corrida, timer e progressão
 js/progress.js           tendência, recordes, semanas consistentes, conquistas
 js/stats.js              números agregados para gráficos e fechamento
 js/habitos.js            hábitos do dia
+js/proximo.js            próxima refeição e mensagem do dia
 js/views/                uma tela por arquivo
 tools/consolidar.py      junta os backups no PC
 tests/                   testes (Node e Playwright)
@@ -157,6 +162,7 @@ privado/                 dados pessoais; fora do git
 
 - Fotos dos exercícios: [Free Exercise DB](https://github.com/yuhonas/free-exercise-db), domínio público (Unlicense).
 - Gráficos: [Chart.js](https://www.chartjs.org/), licença MIT (`vendor/chartjs-LICENSE.md`).
-- Fonte: Archivo, SIL Open Font License (`fonts/OFL-LICENSE.txt`).
+- Fontes: Bricolage Grotesque e Atkinson Hyperlegible Next, SIL Open Font License (`fonts/OFL-*.txt`).
+- Ícones: [Phosphor Icons](https://phosphoricons.com), licença MIT (`vendor/phosphor-LICENSE.txt`).
 
 Este app organiza treino e alimentação; não substitui nutricionista nem médico. Dor ou aperto no peito, falta de ar desproporcional, palpitação forte, desmaio ou tontura que não passa: pare e procure avaliação médica.

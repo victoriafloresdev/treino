@@ -7,6 +7,7 @@ import { ACHIEVEMENTS, evalAchievements, CONSISTENT } from '../progress.js';
 import { achievementStats, checkAchievements, closingSummary, weekUid } from '../stats.js';
 import { fmt, fmt1 } from '../nutri.js';
 import { PROG_TABS } from './progresso.js';
+import { icon } from '../ui/icons.js';
 import { shareJSON } from './mais.js';
 
 const pct = (d, t) => (t ? Math.round(100 * d / t) : 0);
@@ -17,7 +18,7 @@ export async function announceAchievements() {
   try {
     const fresh = await checkAchievements();
     const meta = Object.fromEntries(ACHIEVEMENTS.map(a => [a.id, a]));
-    for (const a of fresh) celebrate(`${meta[a.id].e} ${meta[a.id].title}`);
+    for (const a of fresh) celebrate(meta[a.id].title);
   } catch (e) { console.warn(e); }
 }
 
@@ -42,7 +43,7 @@ export async function viewConquistas() {
       <span class="track"><span class="fill ${w.total && w.done / w.total >= CONSISTENT ? 'full' : ''}" style="width:${pct(w.done, w.total)}%"></span></span>
       <span class="num">${pct(w.done, w.total)}%</span></li>`).join('')}</ul></div>` : ''}
     <h2 class="section-title">Conquistas</h2>
-    <ul class="ach">${list.map(a => `<li class="${a.unlocked ? 'on' : ''}"><span class="em" aria-hidden="true">${a.e}</span>
+    <ul class="ach">${list.map(a => `<li class="${a.unlocked ? 'on' : ''}"><span class="em">${icon(a.ic)}</span>
       <div><b>${esc(a.title)}</b><span class="small muted">${esc(a.desc)}</span>
         ${a.unlocked ? `<span class="small okline">✓ ${got[a.id] ? 'desde ' + fmtShort(got[a.id].date) : 'conquistada'}</span>`
           : a.progress ? `<span class="track"><span class="fill" style="width:${pct(a.progress[0], a.progress[1])}%"></span></span><span class="small muted">${a.progress[0]} de ${a.progress[1]}</span>` : '<span class="small muted">ainda não</span>'}</div></li>`).join('')}</ul>
@@ -50,7 +51,7 @@ export async function viewConquistas() {
     <div class="card">${weekly.length ? `<ul class="rows">${weekly.map(w => `<li><div><b>Semana de ${range(w.start)}</b>
       <span class="small muted">${w.summary.habits.done} de ${w.summary.habits.total} hábitos · ${w.summary.workouts} treinos · ${w.summary.cardio.count} cardios${w.backupAt ? ' · backup ✓' : ''}</span></div>
       <a class="btn sm" href="#fechar/${w.start}">Ver</a></li>`).join('')}</ul>` : '<p class="empty">Nenhuma semana fechada ainda. No domingo, a tela Hoje mostra o card “Fechar a semana”.</p>'}</div>`;
-  for (const a of fresh) celebrate(`${a.e} ${a.title}`);
+  for (const a of fresh) celebrate(a.title);
 }
 
 /* ---------- fechar a semana ---------- */
@@ -83,7 +84,7 @@ export async function viewFechar(ws) {
       ${sm.loadsUp.length ? `<ul class="plain">${sm.loadsUp.map(x => `<li>${esc(x.name)}: ${fmtN(x.from)} → <b>${fmtN(x.to)} kg</b></li>`).join('')}</ul>` : '<p class="muted small">Nenhuma nesta semana. Manter a carga com boa técnica também é progresso.</p>'}
       ${sm.easier.length ? `<h3>Ficando mais fáceis</h3><p class="small">↗ ${esc(sm.easier.join(', '))}</p>` : ''}
       ${sm.harder.length ? `<h3>Ficando mais difíceis</h3><p class="small">↘ ${esc(sm.harder.join(', '))}</p>` : ''}
-      ${sm.achievements.length ? `<h3>Conquistas</h3><p class="small">${sm.achievements.map(id => { const a = ACHIEVEMENTS.find(x => x.id === id); return a ? `${a.e} ${esc(a.title)}` : ''; }).join(' · ')}</p>` : ''}
+      ${sm.achievements.length ? `<h3>Conquistas</h3><p class="small">${sm.achievements.map(id => { const a = ACHIEVEMENTS.find(x => x.id === id); return a ? esc(a.title) : ''; }).join(' · ')}</p>` : ''}
     </div>
     <div class="card"><h3>Como foi a semana?</h3>
       ${radios('energia', 'Energia', [['baixa', 'Pouca energia'], ['ok', 'Normal'], ['alta', 'Muita energia']], f.energia)}

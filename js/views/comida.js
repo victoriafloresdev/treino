@@ -6,7 +6,10 @@ import { DAYS, DAY_IDS, OPTS, CATS, CALC, PRESETS, TROCA_REGRAS, DICAS, RODAPE, 
 import { fmt, fmt1, mealOf, getOpt, weekNumbers, weekNote, weightTrend, calcTroca, calcGoalK, refeicaoLivre, txt } from '../nutri.js';
 import { WD, SOURCES } from '../daytype.js';
 import { weekInfo, dayInfo, setOverride } from '../days.js';
-import { applyDayColor } from './dia.js';
+import { applyDayColor, DAY_ICON } from './dia.js';
+import { icon } from '../ui/icons.js';
+// ícone de cada dica (o emoji fica só na comida)
+const TIP_ICON = { agua: 'drop', remedio: 'pill', cardio: 'sneaker-move', pretreino: 'barbell', fibra: 'leaf', temperos: 'bowl-food', molhos: 'bowl-food', receitas: 'book-open', fora: 'fork-knife', funcionando: 'chart-line-up', medico: 'heartbeat' };
 import { renderDia } from './comida-dia.js';
 
 const TABS = [['dia', 'Dia'], ['semana', 'Semana'], ['trocas', 'Trocas'], ['livre', 'Livre'], ['dicas', 'Dicas']];
@@ -42,12 +45,12 @@ async function renderSemana() {
   if (tok !== app.seq || !box) return;
   box.innerHTML = `
     <p class="lead">O tipo de cada dia vem da ficha de treino e muda sozinho quando você registra um treino ou cardio. Toque em outro tipo para trocar só aquela data.</p>
-    <div class="legend">${DAY_IDS.map(k => `<span><i class="dot" style="background:var(--day-${k})"></i>${DAYS[k].e} ${esc(DAYS[k].name)}</span>`).join('')}</div>
+    <div class="legend">${DAY_IDS.map(k => `<span style="color:var(--day-${k})">${icon(DAY_ICON[k])}<span style="color:var(--muted)">${esc(DAYS[k].name)}</span></span>`).join('')}</div>
     <div class="week">${days.map((x, i) => `
       <div class="wk-row ${x.date === today ? 'today' : ''}">
         <div class="wk-d"><b>${WD[i]}</b><small>${x.date === today ? 'hoje' : fmtShort(x.date)}</small></div>
         <fieldset class="wk-opts" data-on="weekOverride" data-date="${x.date}"><legend class="sr">Tipo de ${WD[i]}, ${fmtShort(x.date)}</legend>
-          ${DAY_IDS.map(t => `<label style="--wk:var(--day-${t})"><input type="radio" name="wk-${x.date}" value="${t}" ${t === x.type ? 'checked' : ''} aria-label="${esc(DAYS[t].name)}"><span aria-hidden="true">${DAYS[t].e}</span></label>`).join('')}
+          ${DAY_IDS.map(t => `<label style="--wk:var(--day-${t})"><input type="radio" name="wk-${x.date}" value="${t}" ${t === x.type ? 'checked' : ''} aria-label="${esc(DAYS[t].name)}"><span aria-hidden="true">${icon(DAY_ICON[t])}</span></label>`).join('')}
         </fieldset>
         <div class="wk-k"><b>${fmt(x.planned[0])}</b><small>kcal</small></div>
         <div class="wk-src">${SOURCES[x.source]}${x.manual ? ` · <button class="linkbtn" type="button" data-act="weekAuto" data-date="${x.date}">voltar ao previsto</button>` : ''}</div>
@@ -173,7 +176,7 @@ function renderDicas(profile) {
   if (tok !== app.seq || !box) return;
   box.innerHTML = `
     <p class="lead">Tudo que não cabe numa refeição: água, horários, molhos, receitinhas e como saber se o plano está funcionando.</p>
-    <div class="tips">${tips.map(t => `<details class="tip" id="dica-${t.id}"><summary><span class="disc" aria-hidden="true">${t.e}</span><span><b>${esc(t.title)}</b><small>${txt(t.small, profile)}</small></span></summary>
+    <div class="tips">${tips.map(t => `<details class="tip" id="dica-${t.id}"><summary><span class="disc tip-ic" aria-hidden="true">${icon(TIP_ICON[t.id] || 'lightbulb')}</span><span><b>${esc(t.title)}</b><small>${txt(t.small, profile)}</small></span></summary>
       <div class="tip-b">${txt(t.html, profile)}</div></details>`).join('')}</div>
     <p class="small muted foot">${txt(RODAPE, profile)}</p>`;
 }

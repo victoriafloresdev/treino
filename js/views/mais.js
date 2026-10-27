@@ -4,6 +4,8 @@ import { program, phaseLabel } from '../training.js';
 import { app, main, setBar, toast, openSheet, on, onChange } from '../ui.js';
 import { db } from '../db.js';
 import { DAYS, DAY_IDS } from '../data/nutricao.js';
+import { icon } from '../ui/icons.js';
+import { DAY_ICON } from './dia.js';
 import { WD, weekModelFromPlan } from '../daytype.js';
 import { getModel, setModel, getProfile, importProfileFile, removeProfile } from '../days.js';
 
@@ -30,7 +32,7 @@ export async function viewMais() {
       <p class="small muted" style="margin:4px 0 10px">O tipo previsto de cada dia da semana. Vem da ficha de treino: musculação seg, ter, qui e sex; cardio de segunda a sábado.</p>
       <div class="week">${WD.map((w, i) => `<div class="wk-row"><div class="wk-d"><b>${w}</b></div>
         <fieldset class="wk-opts" data-on="modelDay" data-i="${i}"><legend class="sr">Tipo previsto de ${w}</legend>
-          ${DAY_IDS.map(t => `<label style="--wk:var(--day-${t})"><input type="radio" name="model-${i}" value="${t}" ${t === model[i] ? 'checked' : ''} aria-label="${esc(DAYS[t].name)}"><span aria-hidden="true">${DAYS[t].e}</span></label>`).join('')}
+          ${DAY_IDS.map(t => `<label style="--wk:var(--day-${t})"><input type="radio" name="model-${i}" value="${t}" ${t === model[i] ? 'checked' : ''} aria-label="${esc(DAYS[t].name)}"><span aria-hidden="true">${icon(DAY_ICON[t])}</span></label>`).join('')}
         </fieldset><div class="wk-k"><small>${esc(DAYS[model[i]].short)}</small></div></div>`).join('')}</div>
       ${model.join() !== fromPlan.join() ? `<div class="form-actions"><button class="btn block" type="button" data-act="modelReset">Voltar ao modelo da ficha</button></div>` : ''}
     </div>
@@ -40,7 +42,7 @@ export async function viewMais() {
       <div class="row"><label class="btn ${profile ? '' : 'solid'}" style="cursor:pointer">Importar perfil de saúde<input type="file" id="profileFile" accept="application/json,.json" hidden></label>
         ${profile ? '<button class="btn danger" type="button" data-act="profileRemove">Remover perfil</button>' : ''}</div>
     </div>
-    <a class="card" href="#guia" style="display:block;text-decoration:none;color:inherit"><h2>Guia rápido ›</h2><p class="muted" style="margin:0">RIR, quando subir a carga, cardio e quando parar.</p></a>
+    <a class="card link-row" href="#guia">${icon('book-open', 'lead-ic')}<span><b>Guia rápido</b><small>RIR, quando subir a carga, cardio e quando parar.</small></span>${icon('caret-right')}</a>
     <div class="card"><h2>Backup</h2>
       <p class="muted" style="margin:4px 0 12px">Os dados ficam só neste celular. Exporte de tempos em tempos e guarde o arquivo no iCloud Drive ou no Google Drive. Último backup: <b>${lastBackup ? fmtShort(lastBackup) : 'nunca'}</b>.</p>
       <div class="row"><button class="btn solid" data-act="export">Exportar dados</button>

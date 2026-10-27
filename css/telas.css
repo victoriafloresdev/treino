@@ -215,7 +215,14 @@ button.ring:active{transform:scale(.97)}
 /* ---------- Comida › Semana ---------- */
 .lead{color:var(--muted);margin:0 0 12px}
 .legend .dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px}
-.legend{flex-wrap:wrap}
+.legend{flex-wrap:wrap;gap:6px 14px}
+.legend>span{display:inline-flex;align-items:center;gap:5px}
+.tip-ic{color:var(--accent)}
+.tip-ic .ic{width:22px;height:22px}
+a.link-row{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;text-decoration:none;color:inherit}
+a.link-row b{display:block;font-size:17px}
+a.link-row small{display:block;color:var(--muted);font-size:14px}
+a.link-row>.ic:last-child{color:var(--muted)}
 .week{display:grid;gap:8px;margin:10px 0}
 .wk-row{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:8px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:8px 10px}
 .card .wk-row{background:var(--surface2)}
@@ -225,8 +232,10 @@ button.ring:active{transform:scale(.97)}
 .wk-opts{border:0;margin:0;padding:0;display:flex;gap:6px;min-width:0}
 .wk-opts label{position:relative;flex:1 1 0;min-width:0;max-width:52px}
 .wk-opts input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}
-.wk-opts span{display:grid;place-items:center;height:44px;border-radius:12px;border:1.5px solid var(--line);font-size:20px;background:var(--surface)}
-.wk-opts input:checked+span{border:2.5px solid var(--wk);background:color-mix(in srgb,var(--wk) 22%,var(--surface))}
+.wk-opts span{display:grid;place-items:center;height:44px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);color:var(--muted)}
+.wk-opts span .ic{width:22px;height:22px}
+.wk-opts input:checked+span{color:var(--wk)}
+.wk-opts input:checked+span{border:2px solid var(--wk);background:color-mix(in oklch,var(--wk) 16%,var(--surface))}
 .wk-opts input:focus-visible+span{outline:3px solid var(--accent);outline-offset:2px}
 .wk-k{text-align:right;line-height:1.1}
 .wk-k b{display:block;font-size:17px;font-variant-numeric:tabular-nums}
@@ -315,15 +324,15 @@ p.trend{margin:0 0 8px;white-space:normal}
 .ach{list-style:none;margin:0;padding:0;display:grid;gap:8px}
 .ach li{display:grid;grid-template-columns:44px minmax(0,1fr);gap:10px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px 12px}
 .ach li>div{min-width:0;display:grid;gap:3px}
-.ach li .em{font-size:28px;text-align:center;filter:grayscale(1);opacity:.5}
-.ach li.on{border-color:var(--ok)}
-.ach li.on .em{filter:none;opacity:1}
+.ach li .em{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:var(--surface2);color:var(--muted)}
+.ach li .em .ic{width:24px;height:24px}
+.ach li.on .em{background:var(--tint-strong);color:var(--accent)}
 .ach .track{height:8px}
 ul.plain{margin:4px 0 10px;padding-left:20px}
 .celebrate{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 70px);transform:translateX(-50%);z-index:60;display:grid;justify-items:center;gap:2px;
   background:var(--surface);border:2px solid var(--ok);border-radius:18px;padding:12px 20px;box-shadow:0 10px 30px rgba(0,0,0,.25);max-width:calc(100vw - 32px);text-align:center;
   animation:celebrate .5s ease-out}
-.celebrate span:first-child{font-size:30px}
+.celebrate>.ic{width:30px;height:30px;color:var(--ok)}
 .celebrate b{color:var(--ok);font-size:13px}
 @keyframes celebrate{0%{transform:translateX(-50%) scale(.6);opacity:0}100%{transform:translateX(-50%) scale(1);opacity:1}}
 @media (prefers-reduced-motion:reduce){.celebrate{animation:none}}

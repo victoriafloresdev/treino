@@ -6,6 +6,8 @@ import { mealOf, included, fmt } from '../nutri.js';
 const CIRC = 2 * Math.PI * 70;
 const pt = (h, r) => { const a = h / 24 * 2 * Math.PI; return [r * Math.sin(a), -r * Math.cos(a)]; };
 const f = n => n.toFixed(1);
+// ícone do sprite centrado no ponto p
+const useIc = (name, p, size, color) => `<use href="icons/sprite.svg#i-${name}" x="${f(p[0] - size / 2)}" y="${f(p[1] - size / 2)}" width="${size}" height="${size}" fill="${color}"/>`;
 function arcPath(h1, h2, r) {
   const p1 = pt(h1, r), p2 = pt(h2, r);
   let span = ((h2 - h1) + 24) % 24; if (span === 0) span = 24;
@@ -52,15 +54,19 @@ export function updatePlate(root, info) {
   for (const s of visible) if (s.kind === 'activity') {
     acts += `<path d="${arcPath(s.h(d), s.end, 126)}" fill="none" stroke="var(--day, var(--accent))" stroke-width="16" stroke-linecap="round"/>`;
     const p = pt((s.h(d) + s.end) / 2, 155);
-    acts += `<text x="${f(p[0])}" y="${f(p[1])}" font-size="17" text-anchor="middle" dominant-baseline="central">${s.e}</text>`;
+    acts += useIc(s.id === 'musc' ? 'barbell' : 'sneaker-move', p, 20, 'var(--accent)');
   }
   root.querySelector('#pActs').innerHTML = acts;
 
   const moon = pt(2.25, 126);
-  let em = `<text x="${f(moon[0])}" y="${f(moon[1])}" font-size="14" text-anchor="middle" dominant-baseline="central">🌙</text>`;
+  let em = useIc('moon', moon, 16, 'var(--muted)');
   for (const s of visible) {
     let e = null, hh = null;
-    if (s.id === 'remedio') { e = info.profile.remedio.e || '💊'; hh = info.profile.remedio.h; }
+    if (s.id === 'remedio') {
+      const p = pt(info.profile.remedio.h, 126);
+      em += `<circle cx="${f(p[0])}" cy="${f(p[1])}" r="13" fill="var(--surface)" stroke="var(--line)"/>` + useIc('pill', p, 16, 'var(--accent)');
+      continue;
+    }
     if (s.kind === 'meal') {
       if (!included(s, st)) continue;
       const mm = mealOf(s.id, d, st);

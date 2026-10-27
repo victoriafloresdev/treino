@@ -88,13 +88,13 @@ export function backupStreak(weekly) {
 /* ---------- conquistas ---------- */
 // s: { workouts, fullWeeks, prs, stagesDone: [n...], streakBest, backupBest }
 export const ACHIEVEMENTS = [
-  { id: 'semana-completa', e: '📅', title: 'Primeira semana completa', desc: 'Os quatro treinos de musculação numa mesma semana.', ok: s => s.fullWeeks >= 1 },
-  { id: 'treinos-10', e: '🏋️‍♀️', title: '10 treinos', desc: 'Dez sessões de musculação registradas.', ok: s => s.workouts >= 10, prog: s => [s.workouts, 10] },
-  { id: 'treinos-25', e: '🏋️‍♀️', title: '25 treinos', desc: 'Vinte e cinco sessões de musculação.', ok: s => s.workouts >= 25, prog: s => [s.workouts, 25] },
-  { id: 'treinos-50', e: '🏆', title: '50 treinos', desc: 'Cinquenta sessões de musculação.', ok: s => s.workouts >= 50, prog: s => [s.workouts, 50] },
-  { id: 'recorde', e: '💪', title: 'Novo recorde de força', desc: 'A força estimada de um exercício passou do seu melhor.', ok: s => s.prs >= 1 },
-  ...[0, 1, 2, 3].map(n => ({ id: `corrida-${n + 1}`, e: '🏃‍♀️', title: `Etapa ${n + 1} da corrida`, desc: 'Uma sessão completa da etapa.', ok: s => s.stagesDone.includes(n) })),
-  { id: 'semanas-4', e: '🔥', title: '4 semanas consistentes', desc: '4 semanas seguidas com 80% ou mais dos hábitos.', ok: s => s.streakBest >= 4, prog: s => [Math.min(s.streakBest, 4), 4] },
-  { id: 'backup-4', e: '💾', title: '4 fechamentos com backup', desc: '4 semanas seguidas fechadas com o arquivo exportado.', ok: s => s.backupBest >= 4, prog: s => [Math.min(s.backupBest, 4), 4] }
+  { id: 'semana-completa', ic: 'calendar-check', title: 'Primeira semana completa', desc: 'Os quatro treinos de musculação numa mesma semana.', ok: s => s.fullWeeks >= 1 },
+  { id: 'treinos-10', ic: 'barbell', title: '10 treinos', desc: 'Dez sessões de musculação registradas.', ok: s => s.workouts >= 10, prog: s => [s.workouts, 10] },
+  { id: 'treinos-25', ic: 'barbell', title: '25 treinos', desc: 'Vinte e cinco sessões de musculação.', ok: s => s.workouts >= 25, prog: s => [s.workouts, 25] },
+  { id: 'treinos-50', ic: 'trophy', title: '50 treinos', desc: 'Cinquenta sessões de musculação.', ok: s => s.workouts >= 50, prog: s => [s.workouts, 50] },
+  { id: 'recorde', ic: 'target', title: 'Novo recorde de força', desc: 'A força estimada de um exercício passou do seu melhor.', ok: s => s.prs >= 1 },
+  ...[0, 1, 2, 3].map(n => ({ id: `corrida-${n + 1}`, ic: 'sneaker-move', title: `Etapa ${n + 1} da corrida`, desc: 'Uma sessão completa da etapa.', ok: s => s.stagesDone.includes(n) })),
+  { id: 'semanas-4', ic: 'list-checks', title: '4 semanas consistentes', desc: '4 semanas seguidas com 80% ou mais dos hábitos.', ok: s => s.streakBest >= 4, prog: s => [Math.min(s.streakBest, 4), 4] },
+  { id: 'backup-4', ic: 'download-simple', title: '4 fechamentos com backup', desc: '4 semanas seguidas fechadas com o arquivo exportado.', ok: s => s.backupBest >= 4, prog: s => [Math.min(s.backupBest, 4), 4] }
 ];
 export const evalAchievements = s => ACHIEVEMENTS.map(a => ({ ...a, unlocked: a.ok(s), progress: a.prog ? a.prog(s) : null }));

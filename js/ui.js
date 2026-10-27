@@ -69,9 +69,27 @@ export function mkChart(canvas, cfg) {
   const ink = cssVar('--muted'), line = cssVar('--line');
   Chart.defaults.font.family = '"Atkinson Hyperlegible Next", system-ui, sans-serif';
   Chart.defaults.color = ink;
+  // estilo dos gráficos: sem borda de eixo, grade só horizontal e suave, legenda com ponto pequeno
+  Chart.defaults.scale.border.display = false;
+  Chart.defaults.scale.grid.color = line;
+  Chart.defaults.scale.grid.tickLength = 0;
+  Chart.defaults.scale.ticks.padding = 6;
+  Chart.defaults.plugins.legend.labels.usePointStyle = true;
+  Chart.defaults.plugins.legend.labels.pointStyle = 'circle';
+  Chart.defaults.plugins.legend.labels.boxWidth = 8;
+  Chart.defaults.plugins.legend.labels.boxHeight = 8;
+  Chart.defaults.plugins.legend.align = 'start';
+  Chart.defaults.plugins.tooltip.backgroundColor = cssVar('--ink');
+  Chart.defaults.plugins.tooltip.titleColor = cssVar('--bg');
+  Chart.defaults.plugins.tooltip.bodyColor = cssVar('--bg');
+  Chart.defaults.plugins.tooltip.cornerRadius = 10;
+  Chart.defaults.plugins.tooltip.padding = 10;
+  Chart.defaults.elements.line.borderWidth = 2.5;
+  Chart.defaults.elements.point.radius = 2.5;
+  Chart.defaults.elements.bar.borderRadius = 6;
   cfg.options = Object.assign({
     responsive: true, maintainAspectRatio: false, animation: false, locale: 'pt-BR',
-    plugins: { legend: { labels: { boxWidth: 12, boxHeight: 12 } }, tooltip: { intersect: false, mode: 'index' } },
+    plugins: { tooltip: { intersect: false, mode: 'index' } },
     scales: { x: { grid: { display: false } }, y: { grid: { color: line }, beginAtZero: false } }
   }, cfg.options || {});
   charts.push(new Chart(canvas, cfg));
@@ -129,8 +147,8 @@ export function celebrate(text) {
   const el = document.createElement('div');
   el.className = 'celebrate'; el.setAttribute('role', 'status');
   // várias de uma vez ficam empilhadas
-  el.style.marginTop = `${document.querySelectorAll('.celebrate').length * 96}px`;
-  el.innerHTML = `<span aria-hidden="true">🎉</span><b>Conquista</b><span></span>`;
+  el.style.marginTop = `${document.querySelectorAll('.celebrate').length * 112}px`;
+  el.innerHTML = `<svg class="ic" aria-hidden="true"><use href="icons/sprite.svg#i-trophy"></use></svg><b>Conquista</b><span></span>`;
   el.lastChild.textContent = text;
   document.body.appendChild(el);
   setTimeout(() => el.remove(), 3600);
