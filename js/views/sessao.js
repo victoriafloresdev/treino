@@ -1,14 +1,29 @@
 // Sessão de treino: registro série por série.
 import { $, esc, todayStr, fmtShort, fmtLong, num, fmtN } from '../util.js';
-import { e1rm, planById, EFFORT, isTimed, range, rirFor, program, phaseLabel, loadAll, lastSetsFor, suggestion } from '../training.js';
-import { app, main, setBar, toast, openSheet, unlockAudio, startTimer, announceAchievements } from '../ui.js';
+import { e1rm, planById, EFFORT, isTimed, range, rirFor, program, phaseLabel, loadAll, lastSetsFor, suggestion, doneThisWeek } from '../training.js';
+import { app, main, setBar, toast, openSheet, unlockAudio, startTimer, announceAchievements, on, onChange } from '../ui.js';
+import { icon } from '../ui/icons.js';
 import { db } from '../db.js';
 import { exSessions, trendOf } from '../progress.js';
-import { MUSCLES } from '../plan.js';
+import { MUSCLES, PLAN } from '../plan.js';
 import { bodyMap } from '../bodymap.js';
 
 /* ================= tela: sessão de treino ================= */
-export const S = { plan: null, session: null, sets: [], last: {}, open: new Set(), phase: 0 };
+export const S = { plan: null, session: null, sets: [], last: {}, open: new Set(), phase: 0, pick: null };
+
+// Sub-abas da aba Treino (também usadas pelo Cardio)
+export function treinoNav(cur) {
+  return `<nav class="subtabs" aria-label="Partes do treino">
+    <a href="#treino" ${cur === 'musc' ? 'aria-current="page"' : ''}>Musculação</a>
+    <a href="#treino/cardio" ${cur === 'cardio' ? 'aria-current="page"' : ''}>Cardio</a></nav>`;
+}
+// Seletor dos 4 treinos (radio nativo); check nos que já foram feitos na semana
+function pickerHTML(planId, done) {
+  return `<fieldset class="wpick" data-on="pickWorkout"><legend class="sr">Treino</legend>
+    ${PLAN.map(p => `<label><input type="radio" name="pickWorkout" value="${p.id}" ${p.id === planId ? 'checked' : ''}>
+      <span><b>${esc(p.name)}</b><small>${done[p.id] ? `${icon('check-circle-fill')} feito` : esc(p.day.toLowerCase())}</small></span></label>`).join('')}
+  </fieldset>`;
+}
 
 export async function viewSessao(planId) {
   // descarta o desenho se outra tela foi aberta enquanto este esperava o banco
@@ -29,9 +44,11 @@ export async function viewSessao(planId) {
     const firstPending = pl.items.find(it => doneCount(it) < it.sets[S.phase]);
     if (firstPending) S.open.add(firstPending.id);
   }
+  const done = doneThisWeek(await loadAll());
   if (tok !== app.seq) return;
-  setBar(pl.name, phaseLabel(p), 'treino');
-  if (tok !== app.seq) return;
+  S.pick = planId;
+  setBar('Treino', phaseLabel(p));
+  main.innerHTML = treinoNav('musc') + pickerHTML(planId, done) + '<div id="sessao"></div>';
   renderSessao();
 }
 export const setsOf = exId => S.sets.filter(s => s.exId === exId).sort((a, b) => a.setIndex - b.setIndex);
@@ -42,17 +59,17 @@ export function renderSessao() {
   const total = pl.items.reduce((a, it) => a + it.sets[ph], 0);
   const doneSets = pl.items.reduce((a, it) => a + Math.min(doneCount(it), it.sets[ph]), 0);
   let html = `
-    <div class="wk-head"><div><div class="kind ${pl.kind}">${pl.focus}</div></div>
-      <div class="small muted">${doneSets} de ${total} séries</div></div>
+    <div class="wk-head"><div><h2 class="wk-name">${esc(pl.name)}</h2><div class="kind">${esc(pl.focus)} · ${pl.items.length} exercícios · ${pl.time[ph]}</div></div>
+      <div class="wk-count"><span class="num">${doneSets}</span>/<span class="num">${total}</span><small>séries</small></div></div>
     <div class="progressbar"><i style="width:${total ? (100 * doneSets / total) : 0}%"></i></div>
-    ${S.session?.finishedAt ? `<p class="small" style="color:var(--ok);font-weight:700">✓ Finalizado às ${new Date(S.session.finishedAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}. Você ainda pode adicionar séries.</p>` : ''}
+    ${S.session?.finishedAt ? `<p class="small okline">${icon('check-circle-fill')} Finalizado às ${new Date(S.session.finishedAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}. Você ainda pode adicionar séries.</p>` : ''}
     <details class="warm"><summary>Aquecimento (5–8 min)</summary>
       <p>3–5 min de bicicleta ou elíptico leve. No primeiro exercício, 2 séries leves: ~50% da carga × 10 e ~75% × 5. Aquecimento não conta como série, então não registre.</p></details>`;
   pl.items.forEach(it => {
     html += `<div class="ex ${S.open.has(it.id) ? 'open' : ''} ${doneCount(it) >= it.sets[ph] ? 'done' : ''}" id="ex-${it.id}">${exCardInner(it)}</div>`;
   });
   html += `<div style="margin:22px 0 8px"><button class="btn solid block" data-act="finish" ${S.sets.length ? '' : 'disabled style="opacity:.5"'}>${S.session?.finishedAt ? 'Atualizar e ver resumo' : 'Finalizar treino'}</button></div>`;
-  main.innerHTML = html;
+  (document.getElementById('sessao') || main).innerHTML = html;
 }
 
 export function exCardInner(it) {
@@ -68,13 +85,15 @@ export function exCardInner(it) {
   const fr = it.frames || [0, 1];
   return `
     <button class="ex-top" type="button" data-toggle="${it.id}" aria-expanded="${S.open.has(it.id)}">
-      <span class="n">${it.n}</span>
+      <span class="n">${doneCount(it) >= target ? icon('check-circle-fill') : it.n}</span>
       <span><span class="t">${esc(it.name)}</span><span class="s" style="display:block">${target} × ${esc(it.reps)} · RIR ${esc(rirFor(it, ph))}</span></span>
       <span class="c">${saved.length}/${target}</span>
     </button>
     <div class="ex-body">
       <div class="media"><img src="img/ex/${it.img}-${fr[0]}.jpg" alt="${esc(it.name)}: posição inicial" loading="lazy">
         ${fr[0] !== fr[1] ? `<img class="f2" src="img/ex/${it.img}-${fr[1]}.jpg" alt="" loading="lazy">` : ''}</div>
+      <div class="ex-map">${bodyMap(it.prim, it.sec, 'Músculos: ' + it.prim.map(m => MUSCLES[m]).join(', '))}
+        <p><b>Principal:</b> ${esc(it.prim.map(m => MUSCLES[m]).join(', '))}${it.sec.length ? `<br><span class="muted"><b>Ajudam:</b> ${esc(it.sec.map(m => MUSCLES[m]).join(', '))}</span>` : ''}</p></div>
       <dl class="ex-meta">
         <div><dt>Séries</dt><dd>${target}</dd></div><div><dt>Reps</dt><dd>${esc(it.reps)}</dd></div>
         <div><dt>RIR</dt><dd>${esc(rirFor(it, ph).replace('Pare ao perder o alinhamento', 'técnica'))}</dd></div><div><dt>Descanso</dt><dd>${esc(it.rest.replace('90 s–2 min', '1,5–2 min'))}</dd></div>
@@ -88,21 +107,24 @@ export function exCardInner(it) {
           <span class="small muted">Série ${s.setIndex + 1}</span>
           <span class="sv">${timed ? `${s.secs} s` : `${fmtN(s.kg)} kg × ${s.reps}`}</span>
           <span class="tag ${s.effort || 'none'}">${s.effort ? EFFORT[s.effort].l : 'sem nota'}</span>
-          <button class="x" type="button" data-delset="${s.id}">apagar</button>
+          <button class="x" type="button" data-delset="${s.id}" aria-label="Apagar série ${s.setIndex + 1}">${icon('trash')}</button>
         </div>`).join('')}
       ${nextIdx < target || S.extra === it.id ? `
         <div class="set" data-setform="${it.id}">
           <div class="set-h"><span>Série ${nextIdx + 1}${nextIdx >= target ? ' (extra)' : ` de ${target}`}</span><span>${timed ? 'segure em posição' : 'como foi?'}</span></div>
           <div class="set-in ${timed ? 'single' : ''}">
             ${timed ? `<label>Segundos<input name="secs" inputmode="numeric" placeholder="${repHint}"></label>` :
-            `<label>Carga (kg)<input name="kg" inputmode="decimal" value="${prevKg === '' ? '' : String(prevKg).replace('.', ',')}" placeholder="kg"></label>
+            `<div class="kg-field"><label for="kg-${it.id}">Carga (kg)</label>
+               <div class="kg-step"><button type="button" data-act="kgStep" data-ex="${it.id}" data-v="-2.5" aria-label="Menos 2,5 kg">${icon('minus')}</button>
+                 <input id="kg-${it.id}" name="kg" inputmode="decimal" value="${prevKg === '' ? '' : String(prevKg).replace('.', ',')}" placeholder="kg">
+                 <button type="button" data-act="kgStep" data-ex="${it.id}" data-v="2.5" aria-label="Mais 2,5 kg">${icon('plus')}</button></div></div>
              <label>Repetições<input name="reps" inputmode="numeric" placeholder="${repHint}"></label>`}
           </div>
-          <div class="effort" role="group" aria-label="Dificuldade da série">
-            <button type="button" data-e="facil" aria-pressed="false">Fácil</button>
-            <button type="button" data-e="medio" aria-pressed="false">Médio</button>
-            <button type="button" data-e="dificil" aria-pressed="false">Difícil</button>
-            <button type="button" class="save" data-save="${it.id}" aria-label="Salvar série">✓</button>
+          <div class="effort-row">
+            <fieldset class="effort"><legend class="sr">Como foi a série</legend>
+              ${['facil', 'medio', 'dificil'].map(e => `<label class="e-${e}"><input type="radio" name="eff-${it.id}" value="${e}"><span>${EFFORT[e].l}</span></label>`).join('')}
+            </fieldset>
+            <button type="button" class="save" data-save="${it.id}" aria-label="Salvar série">${icon('check')}</button>
           </div>
           <p class="small muted" style="margin:6px 0 0">Fácil = sobrariam 4+ reps · Médio = 2–3 · Difícil = 0–1</p>
         </div>` : `<button class="add-set" type="button" data-extra="${it.id}">+ Série extra</button>`}
@@ -113,7 +135,7 @@ export async function saveSet(exId) {
   const it = S.plan.items.find(i => i.id === exId);
   const form = $(`[data-setform="${exId}"]`);
   const timed = isTimed(it);
-  const effort = $('.effort [aria-pressed="true"]', form)?.dataset.e || null;
+  const effort = form.querySelector(`input[name="eff-${exId}"]:checked`)?.value || null;
   let kg = null, reps = null, secs = null;
   if (timed) {
     secs = num($('[name=secs]', form).value) ?? num($('[name=secs]', form).placeholder);
@@ -210,3 +232,15 @@ export function howSheet(it) {
     <p><b>Aparelho ocupado?</b> ${esc(it.alt)}</p>
     <a class="btn block" href="https://www.youtube.com/results?search_query=${encodeURIComponent(it.q)}" target="_blank" rel="noopener">Ver vídeos da execução no YouTube</a>`);
 }
+
+on({
+  // ± 2,5 kg na carga da série
+  kgStep(el) {
+    const inp = document.getElementById('kg-' + el.dataset.ex);
+    const v = Math.max(0, (num(inp.value) || 0) + Number(el.dataset.v));
+    inp.value = String(Math.round(v * 100) / 100).replace('.', ',');
+  }
+});
+onChange({
+  pickWorkout(el, e) { S.pick = e.target.value; S.open = new Set(); location.hash = 'treino/' + e.target.value; }
+});

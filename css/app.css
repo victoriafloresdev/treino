@@ -129,19 +129,47 @@ details.warm p{margin:0 0 12px;font-size:15px}
 .set-in input{box-sizing:border-box;min-width:0;font-family:var(--font-display);font-variant-numeric:tabular-nums;font-size:22px;font-weight:600;padding:8px 6px;
   border:1.5px solid var(--line);border-radius:var(--r-field);background:var(--surface2);color:var(--ink);width:100%;min-height:50px;text-align:center}
 .set-in label{min-width:0;font-size:13px;color:var(--muted);font-weight:600;display:flex;flex-direction:column;gap:3px}
-.effort{display:grid;grid-template-columns:repeat(3,minmax(0,1fr)) minmax(48px,64px);gap:6px}
-.effort button{min-width:0;padding:0 4px;min-height:48px;border-radius:10px;border:1.5px solid var(--line);background:var(--surface);font-weight:700;font-size:14.5px;cursor:pointer;color:var(--ink)}
-.effort button[aria-pressed="true"]{border-color:currentColor;background:color-mix(in oklch,currentColor 12%,var(--surface))}
-.effort button[data-e="facil"][aria-pressed="true"]{color:var(--ok)}
-.effort button[data-e="medio"][aria-pressed="true"]{color:var(--accent)}
-.effort button[data-e="dificil"][aria-pressed="true"]{color:var(--hard)}
-.effort .save{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.effort-row{display:grid;grid-template-columns:minmax(0,1fr) 56px;gap:6px}
+.effort{border:0;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;min-width:0}
+.effort label{position:relative;display:block;min-width:0}
+.effort input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}
+.effort label>span{display:grid;place-items:center;min-height:48px;padding:0 4px;border-radius:10px;border:1.5px solid var(--line);background:var(--surface);font-weight:700;font-size:14.5px}
+.effort input:checked+span{border-color:currentColor;background:color-mix(in oklch,currentColor 12%,var(--surface))}
+.effort input:focus-visible+span{outline:3px solid var(--accent);outline-offset:2px}
+.effort .e-facil input:checked+span{color:var(--ok)}
+.effort .e-medio input:checked+span{color:var(--accent)}
+.effort .e-dificil input:checked+span{color:var(--hard)}
+.effort-row .save{min-height:48px;border-radius:10px;border:0;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;cursor:pointer}
+.effort-row .save .ic{width:24px;height:24px}
+.kg-field{display:flex;flex-direction:column;gap:3px;min-width:0}
+.kg-field label{font-size:13px;color:var(--muted);font-weight:600}
+.kg-step{display:grid;grid-template-columns:40px minmax(0,1fr) 40px;gap:4px}
+.kg-step button{border:0;border-radius:var(--r-field);background:var(--surface2);color:var(--ink);display:grid;place-items:center;cursor:pointer;min-height:50px}
+.set-in .kg-step input{min-width:0}
+.ex-map{display:grid;grid-template-columns:minmax(0,150px) minmax(0,1fr);gap:12px;align-items:center;margin:0 0 10px;font-size:14.5px}
+.ex-map svg{max-width:150px}
+.ex-map p{margin:0}
+.ex-top .n .ic{color:var(--ok);width:24px;height:24px}
+.wk-name{margin:0;font-size:24px;line-height:1.1;letter-spacing:-.02em}
+.wk-count{text-align:right;font-family:var(--font-display);font-size:18px;font-weight:650;line-height:1.05;white-space:nowrap}
+.wk-count small{display:block;font-family:var(--font-ui);font-size:12.5px;font-weight:500;color:var(--muted)}
+/* seletor dos 4 treinos */
+.wpick{border:0;margin:0 0 6px;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+@media (min-width:560px){.wpick{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.wpick label{position:relative;display:block;min-width:0}
+.wpick input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}
+.wpick label>span{display:block;padding:9px 12px;border-radius:12px;background:var(--surface);border:1.5px solid color-mix(in oklch,var(--line) 70%,transparent);min-height:56px}
+.wpick b{display:block;font-size:15.5px}
+.wpick small{display:flex;align-items:center;gap:4px;font-size:13px;color:var(--muted)}
+.wpick small .ic{color:var(--ok);width:15px;height:15px}
+.wpick input:checked+span{border-color:var(--accent);background:var(--tint)}
+.wpick input:focus-visible+span{outline:3px solid var(--accent);outline-offset:2px}
 .set.saved{display:flex;justify-content:space-between;align-items:center;gap:10px}
 .set.saved>*{min-width:0}
 .set.saved .sv{font-family:var(--font-display);font-variant-numeric:tabular-nums;font-weight:600;font-size:18px}
 .set.saved .tag{font-size:13.5px;font-weight:700;color:var(--muted)}
 .tag.facil{color:var(--ok)} .tag.medio{color:var(--accent)} .tag.dificil{color:var(--hard)}
-.set.saved .x{border:0;background:none;color:var(--muted);font-size:14px;text-decoration:underline;cursor:pointer;padding:6px;min-height:44px}
+.set.saved .x{border:0;background:none;color:var(--muted);cursor:pointer;min-width:44px;min-height:44px;display:grid;place-items:center}
 .add-set{border:0;background:none;color:var(--accent);font-weight:700;padding:8px 0;cursor:pointer;min-height:44px}
 
 /* cronômetro de descanso */

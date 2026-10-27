@@ -106,8 +106,8 @@ test('dia de caminhada e domingo', async ({ page }) => {
   await open(page, 'cardio', { time: new Date('2026-10-27T07:30:00') });
   await expect(page.locator('main h2').first()).toHaveText('Caminhada');
   await expect(page.locator('#cTimer .tm-big')).toHaveText('30:00');
-  await page.goto('/index.html#treino');
-  await expect(page.locator('.cardio-link')).toContainText('Caminhada leve, 25–30 min');
+  await page.goto('/index.html#treino/cardio');
+  await expect(page.locator('main')).toContainText('Caminhada leve, 25–30 min');
   await page.clock.setFixedTime(new Date('2026-11-01T08:00:00'));
   await page.goto('/index.html#cardio');
   await page.reload();

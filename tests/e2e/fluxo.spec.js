@@ -15,7 +15,7 @@ test('registrar treino, cardio, corpo, exportar e importar', async ({ page }) =>
   const form = page.locator('[data-setform="ia1"]');
   await form.locator('[name=kg]').fill('100');
   await form.locator('[name=reps]').fill('10');
-  await form.getByRole('button', { name: 'Médio' }).click();
+  await form.locator('label.e-medio').click();
   await form.getByRole('button', { name: 'Salvar série' }).click();
   await expect(page.locator('#ex-ia1 .ex-top .c')).toHaveText('1/2');
   await expect(page.locator('#timer')).toHaveClass(/on/);

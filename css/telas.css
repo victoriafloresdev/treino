@@ -5,7 +5,7 @@
   background:var(--surface2);border-radius:var(--r-pill)}
 .subtabs a{display:flex;align-items:center;justify-content:center;text-align:center;min-height:42px;padding:2px 6px;border-radius:var(--r-pill);
   font-weight:700;font-size:14.5px;line-height:1.1;color:var(--muted);text-decoration:none;min-width:0}
-.subtabs a[aria-current="page"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px oklch(20% .03 var(--h) / .14)}
+.subtabs a[aria-current="page"]{background:light-dark(var(--surface),oklch(36% .02 var(--h)));color:var(--ink);box-shadow:0 1px 3px oklch(20% .03 var(--h) / .14)}
 
 /* ---------- tipo do dia ---------- */
 .daytag{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;margin:12px 0}

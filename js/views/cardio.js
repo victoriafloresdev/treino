@@ -3,6 +3,7 @@ import { $, esc, todayStr, fmtShort, num, pad2, DIAS, parseDate, addDays } from 
 import { program, phaseLabel } from '../training.js';
 import { app, main, setBar, on, onChange, openSheet, closeSheet, toast, beep, unlockAudio, announceAchievements } from '../ui.js';
 import { db } from '../db.js';
+import { treinoNav } from './sessao.js';
 import { STAGES, LAST_STAGE, PAIN, painLabel, weekStage, cardioOfDay, totalSecs, timerAt, progression, pendingPainCheck } from '../cardio.js';
 
 /* ---------- etapa atual ---------- */
@@ -84,9 +85,9 @@ export async function viewCardio() {
   const run = await loadRun();
   const pending = pendingPainCheck(recs, today);
   if (tok !== app.seq) return;
-  setBar('Cardio', phaseLabel(p), 'treino');
+  setBar('Treino', phaseLabel(p));
   const total = totalSecs(c.segs);
-  main.innerHTML = `
+  main.innerHTML = treinoNav('cardio') + `
     ${pending ? painCardHTML(pending, today) : ''}
     <div class="card"><div class="spread"><h2>${c.kind === 'corrida' ? `Corrida · ${esc(c.label)} de ${STAGES.length}` : c.kind === 'descanso' ? 'Domingo' : 'Caminhada'}</h2></div>
       <p style="margin:6px 0 0">${esc(c.text)}</p>
