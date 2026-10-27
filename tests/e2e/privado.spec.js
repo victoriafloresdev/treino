@@ -21,8 +21,8 @@ test('perfil de saúde privado importa e todas as chaves de texto existem no app
     return Object.keys(p.textos).filter(k => !src.includes(k)).concat(Object.keys(p.dicas).filter(k => !N.DICAS.some(d => d.perfil === k)));
   });
   expect(orphan).toEqual([]);
-  await page.goto('/index.html#hoje');
-  await expect(page.locator('#hojeTimeline .marker-box').first()).toBeVisible();
+  await page.goto('/index.html#comida/dia');
+  await expect(page.locator('#diaMeals .mark').first()).toBeVisible();
 });
 
 test('dados iniciais privados importam e não duplicam', async ({ page }) => {

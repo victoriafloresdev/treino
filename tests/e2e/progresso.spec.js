@@ -73,8 +73,8 @@ test('conquistas: desbloqueia, comemora uma vez só e nada ligado a peso', async
 test('fechar a semana no domingo', async ({ page }) => {
   const errors = watchErrors(page);
   await open(page, 'hoje', { time: DOM, seed: seedSessions([['2026-10-27', 'inferior-a', [['ia1', 100, 10, 'medio']]], ['2026-10-20', 'inferior-a', [['ia1', 95, 10, 'medio']]]]) });
-  await expect(page.locator('a.card.closing')).toContainText('Fechar a semana');
-  await page.locator('a.card.closing').click();
+  await expect(page.locator('a.notice.link')).toContainText('Fechar a semana');
+  await page.locator('a.notice.link').click();
   await expect(page.locator('#title')).toHaveText('Fechar a semana');
   await expect(page.locator('main')).toContainText('Semana 44');
   await expect(page.locator('main')).toContainText('Leg press 45°: 95 → 100 kg');
@@ -87,13 +87,13 @@ test('fechar a semana no domingo', async ({ page }) => {
   expect(rec).toMatchObject({ start: '2026-10-26', end: '2026-11-01', feeling: { energia: 'alta', nota: 'Semana boa, canela ok.' } });
   expect(rec.summary.workouts).toBe(1);
   await page.goto('/index.html#hoje');
-  await expect(page.locator('a.card.closing')).toHaveCount(0);
+  await expect(page.locator('a.notice.link')).toHaveCount(0);
   expect(errors).toEqual([]);
 });
 
 test('na segunda, oferece fechar a semana anterior', async ({ page }) => {
   await open(page, 'hoje', { time: new Date('2026-11-02T09:00:00'), seed: async () => { const { db } = await import('/js/db.js'); await db.setSetting('v2Since', '2026-10-20'); } });
-  await expect(page.locator('a.card.closing')).toContainText('26/10 a 01/11');
+  await expect(page.locator('a.notice.link')).toContainText('26/10 a 01/11');
 });
 
 test('fechar e exportar a semana gera bem-estar-AAAA-Sww.json e marca o backup', async ({ page }) => {

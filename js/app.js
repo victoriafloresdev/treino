@@ -81,18 +81,20 @@ document.addEventListener('click', async e => {
 /* ================= rotas ================= */
 async function route() {
   const my = ++app.seq;
+  app.refresh = null;
   closeSheet(); destroyCharts();
   const [r, arg] = (location.hash.slice(1) || 'hoje').split('/');
   // endereço antigo da aba Corpo
   if (r === 'corpo') { location.replace('#progresso/corpo'); return; }
+  if (r === 'cardio') { location.replace('#treino/cardio'); return; }
   const tab = { guia: 'mais', cardio: 'treino', fechar: 'hoje' }[r] || r;
   $$('.nav a').forEach(a => a.setAttribute('aria-current', a.dataset.r === tab ? 'page' : 'false'));
   // a cor de destaque segue o tipo de hoje em todas as telas
   if (r !== 'hoje' && r !== 'comida') dayInfo().then(i => applyDayColor(i.type)).catch(() => {});
   try {
-    if (r === 'treino' && arg) await viewSessao(arg);
+    if (r === 'treino' && arg === 'cardio') await viewCardio();
+    else if (r === 'treino' && arg) await viewSessao(arg);
     else if (r === 'treino') await viewTreinoLista();
-    else if (r === 'cardio') await viewCardio();
     else if (r === 'comida') await viewComida(arg);
     else if (r === 'progresso' && arg === 'corpo') await viewCorpo();
     else if (r === 'progresso' && arg === 'conquistas') await viewConquistas();

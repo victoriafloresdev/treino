@@ -6,21 +6,23 @@ import { DAYS, DAY_IDS, OPTS, CATS, CALC, PRESETS, TROCA_REGRAS, DICAS, RODAPE, 
 import { fmt, fmt1, mealOf, getOpt, weekNumbers, weekNote, weightTrend, calcTroca, calcGoalK, refeicaoLivre, txt } from '../nutri.js';
 import { WD, SOURCES } from '../daytype.js';
 import { weekInfo, dayInfo, setOverride } from '../days.js';
-import { applyDayColor } from './hoje.js';
+import { applyDayColor } from './dia.js';
+import { renderDia } from './comida-dia.js';
 
-const TABS = [['semana', 'Semana'], ['trocas', 'Trocas'], ['livre', 'Refeição livre'], ['dicas', 'Dicas']];
+const TABS = [['dia', 'Dia'], ['semana', 'Semana'], ['trocas', 'Trocas'], ['livre', 'Livre'], ['dicas', 'Dicas']];
 const C = { cat: 'prot', calc: 'protA', k: '', p: '', lv: { repl: 'jantar', strat: 'seguir', days: 3, kcal: LIVRE_DEFAULT_KCAL, preset: null } };
 
 export async function viewComida(sub) {
   // descarta o desenho se outra tela foi aberta enquanto este esperava o banco
   const tok = app.seq;
-  if (!TABS.some(t => t[0] === sub)) sub = 'semana';
+  if (!TABS.some(t => t[0] === sub)) sub = 'dia';
   if (tok !== app.seq) return;
   setBar('Comida', '');
   const today = await dayInfo(todayStr());
   applyDayColor(today.type);
   if (tok !== app.seq) return;
   main.innerHTML = subTabs('comida', TABS, sub) + `<div id="comidaBody"></div>`;
+  if (sub === 'dia') await renderDia(document.getElementById('comidaBody'));
   if (sub === 'semana') await renderSemana();
   if (sub === 'trocas') renderTrocas(today);
   if (sub === 'livre') await renderLivre();

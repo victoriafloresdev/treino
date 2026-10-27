@@ -1,5 +1,7 @@
 /* Base e componentes. Tokens em tokens.css; regras em docs/design.md. */
 *,*::before,*::after{box-sizing:border-box}
+/* hidden sempre esconde, mesmo com display definido na classe */
+[hidden]{display:none!important}
 html,body{margin:0;background:var(--bg);color:var(--ink)}
 html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 body{font-family:var(--font-ui);font-size:16.5px;line-height:1.45;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent;overscroll-behavior-y:none}
@@ -26,7 +28,6 @@ table{overflow-wrap:normal}
 .appbar.scrolled{border-bottom-color:var(--line)}
 .appbar h1{margin:0;font-weight:700;font-size:30px;line-height:1.05;letter-spacing:-.02em}
 .appbar .ctx{font-size:13.5px;color:var(--muted);text-align:right;line-height:1.25}
-.appbar .back[hidden]{display:none}
 .appbar .back{border:0;background:none;color:var(--accent);font-weight:700;padding:6px 0;margin-bottom:2px;cursor:pointer;display:inline-flex;align-items:center;gap:4px;min-height:36px}
 
 main{max-width:680px;margin:0 auto;padding:4px 16px calc(var(--nav-h) + env(safe-area-inset-bottom,0px) + 90px)}

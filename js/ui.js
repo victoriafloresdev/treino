@@ -3,7 +3,9 @@ import { $, pad2 } from './util.js';
 
 // O app.js preenche app.route; as telas chamam app.route() para redesenhar.
 // app.seq conta as navegações: uma tela que termina de carregar depois de outra ter sido aberta não desenha nada.
-export const app = { route: () => {}, seq: 0 };
+export const app = { route: () => {}, seq: 0, refresh: null };
+// atualiza a tela atual no lugar (se ela souber) ou redesenha a rota
+export const refreshView = () => (app.refresh || app.route)();
 
 // Cada tela registra os próprios botões (data-act) e campos (data-on): o app.js só despacha.
 export const actions = {};
