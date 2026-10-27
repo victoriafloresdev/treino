@@ -47,8 +47,8 @@ test('migração v1 → v2 preserva tudo e preenche uid e updatedAt', async ({ p
     return { out, idb };
   });
 
-  expect(after.idb.version).toBe(2);
-  expect(after.idb.stores).toEqual(['achievements', 'body', 'cardio', 'comps', 'daytypes', 'meals', 'profile', 'sessions', 'sets', 'settings', 'water', 'weekly']);
+  expect(after.idb.version).toBe(3);
+  expect(after.idb.stores).toEqual(['achievements', 'body', 'cardio', 'comps', 'daytypes', 'meals', 'photos', 'profile', 'sessions', 'sets', 'settings', 'water', 'weekly']);
   for (const s of V1_STORES) {
     // a v2 pode criar ajustes próprios (ex.: v2Since); os da v1 precisam continuar todos lá
     const mine = s === 'settings' ? after.out[s].filter(r => v1.settings.some(o => o.key === r.key)) : after.out[s];
@@ -120,7 +120,7 @@ test('exportar v2 e juntar no mesmo aparelho ou em outro não duplica', async ({
     await db.importAll(b, 'merge');
     return b;
   });
-  expect(backup.version).toBe(2);
+  expect(backup.version).toBe(3);
   const same = await page.evaluate(async () => {
     const { db } = await import('/js/db.js');
     return { body: (await db.all('body')).length, water: (await db.all('water')).length };
@@ -176,4 +176,39 @@ test('apagar vira tombstone: some da tela, vai no backup e se propaga ao juntar'
   }, { before: r.before, after: r.after });
   expect(vis).toEqual([1, 0]);
   await ctx.close();
+});
+
+// v2 → v3: só acrescenta o store de fotos; tudo o que havia na v2 continua igual.
+test('migração v2 → v3 preserva tudo e cria o store de fotos', async ({ page }) => {
+  const errors = watchErrors(page);
+  await page.goto('/tests/fixtures/v2.html');
+  await page.waitForFunction(() => window.v2Ready);
+  const v2 = await page.evaluate(async () => {
+    const db = window.dbV2;
+    const sid = await db.add('sessions', { date: '2026-10-26', planId: 'superior-a', startedAt: 1, finishedAt: 2 });
+    await db.add('sets', { sessionId: sid, date: '2026-10-26', planId: 'superior-a', exId: 'sa1', setIndex: 0, kg: 30, reps: null, effort: 'medio', rir: 2.5, perExercise: true, ts: 5 });
+    await db.add('body', { date: '2026-10-26', weight: 81, waist: null, note: '' });
+    await db.put('meals', { uid: 'meal:2026-10-26:cafe', date: '2026-10-26', slot: 'cafe', optionId: 'salgado', done: true, skip: { opt: 'salgado', idx: [1] } });
+    await db.put('water', { uid: 'water:2026-10-26', date: '2026-10-26', cups: 8 });
+    await db.setSetting('startDate', '2026-10-05');
+    return db.exportAll();
+  });
+  expect(v2.version).toBe(2);
+  await openApp(page);
+  const after = await page.evaluate(async () => {
+    const { db } = await import('/js/db.js');
+    const out = {};
+    for (const s of ['sessions', 'sets', 'body', 'meals', 'water', 'settings', 'photos']) out[s] = await db.allRaw(s);
+    const idb = await new Promise(r => { const q = indexedDB.open('treino-app'); q.onsuccess = () => { r(q.result.version); q.result.close(); }; });
+    return { out, idb };
+  });
+  expect(after.idb).toBe(3);
+  expect(after.out.photos).toEqual([]);
+  for (const s of ['sessions', 'sets', 'body', 'meals', 'water']) expect(after.out[s], s).toEqual(v2[s]);
+  for (const old of v2.settings) expect(after.out.settings.find(r => r.key === old.key), old.key).toEqual(old);
+  // backup v2 (sem fotos) continua importando na v3
+  await page.evaluate(async b => { const { db } = await import('/js/db.js'); await db.importAll(b, 'merge'); }, v2);
+  await page.goto('/index.html#progresso/fotos');
+  await expect(page.locator('main')).not.toContainText('Algo deu errado');
+  expect(errors).toEqual([]);
 });

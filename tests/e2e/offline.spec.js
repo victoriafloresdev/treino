@@ -21,7 +21,7 @@ test('abre offline depois do primeiro carregamento', async ({ page, context }) =
   await page.waitForSelector('main > *');
 
   await context.setOffline(true);
-  for (const r of ['hoje', 'treino', 'treino/inferior-b', 'cardio', 'comida/semana', 'comida/dicas', 'progresso', 'progresso/corpo', 'mais', 'guia']) {
+  for (const r of ['hoje', 'treino', 'treino/inferior-b', 'cardio', 'comida/semana', 'comida/dicas', 'progresso', 'progresso/fotos', 'progresso/corpo', 'mais', 'guia']) {
     await go(page, '/index.html#' + r, true);
     await expect(page.locator('main')).not.toContainText('Algo deu errado');
   }

@@ -25,6 +25,8 @@ ICONES = [
     'bowl-food', 'heartbeat', 'target', 'list-checks', 'book-open', 'user-circle', 'question', 'barbell-fill',
     # aparência
     'sun', 'circle-half', 'palette',
+    # fotos
+    'camera', 'images',
 ]
 BASE = f'https://unpkg.com/@phosphor-icons/core@{VERSAO}/assets'
 ROOT = Path(__file__).resolve().parent.parent

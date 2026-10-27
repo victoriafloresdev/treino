@@ -20,6 +20,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+# 'photos' (fotos de progresso, v3) fica de fora de propósito: a consolidação é de números, não de imagens
 STORES = ['sessions', 'sets', 'body', 'comps', 'cardio', 'settings', 'meals', 'water', 'daytypes', 'profile', 'achievements', 'weekly']
 CONTROL = {'id', 'uid', 'updatedAt', 'deleted'}
 

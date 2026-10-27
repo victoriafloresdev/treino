@@ -83,7 +83,7 @@ export async function viewMais(sub) {
   }
   if (sub === 'backup') {
     main.innerHTML = `<div class="card">
-      <p class="muted" style="margin:0 0 12px">Os dados ficam só neste celular. Exporte toda semana (o aviso aparece aos domingos) e guarde o arquivo no iCloud Drive ou no Google Drive. Último backup: <b>${lastBackup ? fmtShort(lastBackup) : 'nunca'}</b>.</p>
+      <p class="muted" style="margin:0 0 12px">Os dados ficam só neste celular. Exporte toda semana (o aviso aparece aos domingos) e guarde o arquivo no iCloud Drive ou no Google Drive. As fotos de progresso vão junto, então o arquivo cresce cerca de 1 MB por semana com fotos. Último backup: <b>${lastBackup ? fmtShort(lastBackup) : 'nunca'}</b>.</p>
       <div class="row"><button class="btn solid" data-act="export">Exportar dados</button>
         <label class="btn" style="cursor:pointer">Importar arquivo<input type="file" id="importFile" accept="application/json,.json" hidden></label></div>
     </div>`;

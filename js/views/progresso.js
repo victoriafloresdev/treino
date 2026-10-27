@@ -9,7 +9,7 @@ import { TARGET_P } from '../data/nutricao.js';
 import { STAGES } from '../cardio.js';
 import { dailySeries, weeklyDeficit, trendsAll, recoveryNote } from '../stats.js';
 
-export const PROG_TABS = [['treino', 'Treino'], ['comida', 'Comida'], ['corpo', 'Corpo'], ['conquistas', 'Conquistas']];
+export const PROG_TABS = [['treino', 'Treino'], ['comida', 'Comida'], ['corpo', 'Corpo'], ['fotos', 'Fotos'], ['conquistas', 'Conquistas']];
 // datas com ano quando o período passa de 6 meses
 const dlabel = dates => { const long = dates.length > 1 && (parseDate(dates[dates.length - 1]) - parseDate(dates[0])) / 864e5 > 183; return d => fmtShort(d) + (long ? '/' + d.slice(2, 4) : ''); };
 const xNoGrid = { x: { grid: { display: false } }, y: { beginAtZero: true } };

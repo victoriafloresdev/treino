@@ -115,7 +115,7 @@ test('fechar e exportar a semana gera bem-estar-AAAA-Sww.json e marca o backup',
   const [dl] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: 'Fechar e exportar semana' }).click()]);
   expect(dl.suggestedFilename()).toBe('bem-estar-2026-S44.json');
   const file = JSON.parse(await (await import('node:fs/promises')).readFile(await dl.path(), 'utf8'));
-  expect(file).toMatchObject({ app: 'treino-app', version: 2 });
+  expect(file).toMatchObject({ app: 'treino-app', version: 3 });
   expect(file.sets.length).toBe(1);
   await expect(page.locator('#title')).toHaveText('Progresso');
   await expect(page.locator('main')).toContainText('backup ✓');

@@ -24,6 +24,17 @@ const SCREENS = [
   { name: 'progresso', hash: 'progresso' },
   { name: 'corpo', hash: 'progresso/corpo' },
   { name: 'conquistas', hash: 'progresso/conquistas' },
+  { name: 'fotos', hash: 'progresso/fotos', run: async p => {
+    await p.evaluate(async () => {
+      const { db } = await import('/js/db.js'); const { weekStart, todayStr, addDays } = await import('/js/util.js');
+      const img = c => { const cv = document.createElement('canvas'); cv.width = 300; cv.height = 400; const x = cv.getContext('2d'); x.fillStyle = c; x.fillRect(0, 0, 300, 400); return cv.toDataURL('image/jpeg'); };
+      const ws = weekStart(todayStr()), prev = addDays(ws, -14);
+      for (const [w, pose, c] of [[ws, 'frente', '#c66'], [ws, 'lado', '#6a6'], [prev, 'frente', '#66c'], [prev, 'lado', '#ca6']])
+        await db.put('photos', { uid: `photo:${w}:${pose}`, date: w, pose, takenOn: w, img: img(c), w: 300, h: 400 });
+      (await import('/js/ui.js')).app.route();
+    });
+    await p.waitForSelector('.ph-cmp figure');
+  } },
   { name: 'fechar', hash: 'fechar' },
   { name: 'mais', hash: 'mais' },
   { name: 'mais-treino', hash: 'mais/treino' },

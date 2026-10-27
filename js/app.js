@@ -13,6 +13,7 @@ import { viewCorpo } from './views/corpo.js';
 import { viewMais, viewGuia, exportData, importFile } from './views/mais.js';
 import { viewCardio } from './views/cardio.js';
 import { viewConquistas, viewFechar } from './views/conquistas.js';
+import { viewFotos } from './views/fotos.js';
 import { db, STORES } from './db.js';
 
 /* ================= eventos ================= */
@@ -89,6 +90,7 @@ async function route() {
     else if (r === 'comida') await viewComida(arg);
     else if (r === 'progresso' && arg === 'corpo') await viewCorpo();
     else if (r === 'progresso' && arg === 'conquistas') await viewConquistas();
+    else if (r === 'progresso' && arg === 'fotos') await viewFotos();
     else if (r === 'fechar') await viewFechar(arg);
     else if (r === 'progresso') await viewProgresso(arg);
     else if (r === 'mais') await viewMais(arg);

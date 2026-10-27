@@ -1,13 +1,15 @@
 // Armazenamento local (IndexedDB). Os dados ficam só neste aparelho.
 // Regras: mudanças só por DB_VERSION + onupgradeneeded aditivo; nunca apagar nem renomear stores ou campos.
 const DB_NAME = 'treino-app';
-const DB_VERSION = 2;
+const DB_VERSION = 3;
 // v1: chave numérica autoincremental (settings usa `key`)
 export const STORES_V1 = ['sessions', 'sets', 'body', 'comps', 'cardio', 'settings'];
 // v2: chave `uid`, determinística por data quando faz sentido (ex.: water:2026-10-27)
 export const STORES_V2 = ['meals', 'water', 'daytypes', 'profile', 'achievements', 'weekly'];
-export const STORES = [...STORES_V1, ...STORES_V2];
-const KEY_UID = new Set(STORES_V2);
+// v3: fotos de progresso (uma por semana e ângulo: photo:2026-10-26:frente), imagem em data URL
+export const STORES_V3 = ['photos'];
+export const STORES = [...STORES_V1, ...STORES_V2, ...STORES_V3];
+const KEY_UID = new Set([...STORES_V2, ...STORES_V3]);
 
 /* ---------- uid e carimbo de data ---------- */
 export function newUid() {
@@ -95,6 +97,13 @@ function open() {
           st.createIndex('date', 'date');
         }
       }
+      if (e.oldVersion < 3) {
+        for (const name of STORES_V3) {
+          if (db.objectStoreNames.contains(name)) continue;
+          const st = db.createObjectStore(name, { keyPath: 'uid' });
+          st.createIndex('date', 'date');
+        }
+      }
     };
     req.onsuccess = () => {
       const db = req.result;
@@ -146,7 +155,7 @@ export const db = {
     return data;
   },
 
-  // Aceita backups v1 (sem uid) e v2.
+  // Aceita backups v1 (sem uid), v2 e v3 (v3 traz as fotos).
   // 'replace' apaga os stores presentes no arquivo e grava o backup no lugar.
   // 'merge' junta por uid: registro novo entra; o que já existe só é trocado se o do arquivo for mais recente.
   async importAll(data, mode = 'replace') {

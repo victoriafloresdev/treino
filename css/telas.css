@@ -439,3 +439,24 @@ details.more-card[open]>summary::after{transform:rotate(-135deg) translateY(-1px
 .check-row b{display:block;font-weight:600}
 .check-row small{display:block;color:var(--muted);font-size:13px}
 .check-row .num{font-size:14px;color:var(--muted)}
+/* Progresso › Fotos */
+.ph-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:4px 0 10px}
+@media (min-width:600px){.ph-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.ph-slot{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;aspect-ratio:3/4;min-width:0;
+  border-radius:var(--r-block);border:1.5px dashed var(--line);background:var(--surface);color:var(--muted);cursor:pointer;overflow:hidden;padding:0;font:inherit}
+.ph-slot>.ic{width:28px;height:28px;color:var(--accent)}
+.ph-slot>span{font-weight:700;color:var(--ink)}
+.ph-slot>small{font-size:13px}
+.ph-slot input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.ph-slot input:focus-visible{opacity:1;outline:3px solid var(--accent)}
+.ph-slot.has{border:0;background:var(--surface2)}
+.ph-slot.has img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.ph-slot .ph-l{position:absolute;left:8px;bottom:8px;padding:3px 9px;border-radius:99px;background:oklch(20% .01 var(--h) / .72);color:#fff;font-size:13.5px;font-weight:700}
+.ph-big{display:block;width:100%;max-height:65vh;object-fit:contain;border-radius:var(--r-block);background:var(--surface2);margin:6px 0}
+.ph-cmp{display:grid;gap:14px}
+.ph-cmp figure{margin:0}
+.ph-cmp figcaption{font-weight:700;margin-bottom:6px}
+.ph-pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.ph-pair div{min-width:0}
+.ph-pair img{display:block;width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:12px;background:var(--surface2)}
+.ph-pair small{display:block;text-align:center;color:var(--muted);font-size:13px;margin-top:3px}
