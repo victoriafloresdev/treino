@@ -10,6 +10,9 @@ const SCREENS = [
   { name: 'treino', hash: 'treino' },
   { name: 'sessao', hash: 'treino/inferior-a', open: true },
   { name: 'sessao-timer', hash: 'treino/inferior-a', open: true, timer: true },
+  { name: 'cardio', hash: 'cardio' },
+  { name: 'cardio-timer', hash: 'cardio', run: async p => { await p.getByRole('button', { name: 'Começar' }).click().catch(() => {}); } },
+  { name: 'cardio-registro', hash: 'cardio', sheet: '[data-act="cardioForm"]', run: async p => { await p.locator('#sheet details.more > summary').click(); } },
   { name: 'comida-semana', hash: 'comida/semana' },
   { name: 'comida-trocas', hash: 'comida/trocas', run: async p => { await p.locator('#cK').fill('180'); await p.locator('#cP').fill('22'); } },
   { name: 'comida-livre', hash: 'comida/livre', run: async p => { await p.locator('label:has(input[name="lvStrat"][value="diluir"])').click(); } },
@@ -18,7 +21,6 @@ const SCREENS = [
   { name: 'corpo', hash: 'progresso/corpo' },
   { name: 'mais', hash: 'mais' },
   { name: 'guia', hash: 'guia' },
-  { name: 'cardio-form', hash: 'hoje', sheet: '.h-now [data-act="cardioForm"], .h-timeline [data-act="cardioForm"]' },
   { name: 'como-fazer', hash: 'treino/inferior-a', sheet: '[data-how]' }
 ];
 

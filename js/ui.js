@@ -67,12 +67,12 @@ export function destroyChartOn(id) { charts = charts.filter(c => { if (c.canvas.
 
 /* ================= cronômetro de descanso ================= */
 export const timer = { end: 0, int: null, ctx: null };
-export function beep() {
+export function beep(freq = 880) {
   try {
     const c = timer.ctx; if (!c) return;
     [0, 0.25].forEach(t => {
       const o = c.createOscillator(), g = c.createGain();
-      o.frequency.value = 880; o.connect(g); g.connect(c.destination);
+      o.frequency.value = freq; o.connect(g); g.connect(c.destination);
       g.gain.setValueAtTime(0.0001, c.currentTime + t);
       g.gain.exponentialRampToValueAtTime(0.3, c.currentTime + t + 0.02);
       g.gain.exponentialRampToValueAtTime(0.0001, c.currentTime + t + 0.18);

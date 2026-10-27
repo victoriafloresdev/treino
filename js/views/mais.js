@@ -79,6 +79,7 @@ export function viewGuia() {
    <tr><td>3–4</td><td>5 min caminhando, 7 × (1 min trote + 2 min caminhada), 4 min</td><td>Caminhada 30 min</td></tr>
    <tr><td>5–6</td><td>5 min caminhando, 6 × (2 min trote + 2 min caminhada), 1 min</td><td>Caminhada 30 min</td></tr>
    <tr><td>7–8</td><td>5 min caminhando, 5 × (3 min trote + 1,5 min caminhada), 2,5 min</td><td>Caminhada 30 min</td></tr></tbody></table></div>
+  <p>As semanas da tabela são o mais cedo que cada etapa começa. O app só sugere avançar depois de 2 sessões completas da etapa atual sem dor no dia seguinte, e a mudança é sempre um toque seu em Treino › Cardio.</p>
   <p>Só avance de etapa se, no dia seguinte, não houver dor em canela, joelho ou tendão de Aquiles. Se o sono cair abaixo de 7 h, corte primeiro as caminhadas de terça e sexta.</p>
   <h3>Pare a série quando</h3>
   <ul><li>a técnica mudar (lombar descolando, tronco balançando, amplitude encurtando);</li>
@@ -90,19 +91,6 @@ export function viewGuia() {
   </div>`;
 }
 
-/* ================= formulários ================= */
-export function cardioForm() {
-  openSheet(`<h2>Registrar cardio</h2>
-    <label class="f" style="margin-top:8px">Data<input type="date" id="kDate" value="${todayStr()}"></label>
-    <p class="small muted" style="margin:12px 0 4px">Tipo</p>
-    <div class="seg" id="kType"><button type="button" data-v="caminhada" aria-pressed="true">Caminhada</button><button type="button" data-v="intervalado" aria-pressed="false">Intercalado</button><button type="button" data-v="corrida" aria-pressed="false">Corrida</button></div>
-    <label class="f" style="margin-top:12px">Minutos<input id="kMin" inputmode="numeric" value="30"></label>
-    <p class="small muted" style="margin:12px 0 4px">Como foi</p>
-    <div class="seg" id="kEff"><button type="button" data-v="leve" aria-pressed="false">Leve</button><button type="button" data-v="moderado" aria-pressed="true">Moderado</button><button type="button" data-v="forte" aria-pressed="false">Forte</button></div>
-    <label class="f" style="margin-top:12px">Observação<input id="kNote" placeholder="ex.: canela ok, inclinação 5%"></label>
-    <div class="form-actions"><button class="btn solid block" data-act="saveCardio">Salvar cardio</button></div>`);
-}
-export const segVal = id => $(`#${id} [aria-pressed="true"]`)?.dataset.v;
 
 export async function exportData() {
   const data = await db.exportAll();

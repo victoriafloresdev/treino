@@ -32,6 +32,8 @@ export async function seed(page) {
       await db.add('cardio', { date, type: 'caminhada', minutes: 30, effort: 'moderado', note: 'canela ok, inclinação 5% e uma observação bem comprida para testar quebra' });
       await db.add('body', { date, weight: 82 - w * 0.4, waist: 88, note: '' });
     }
+    // corrida de ontem ainda sem resposta sobre dor (mostra a pergunta na tela Hoje)
+    await db.add('cardio', { date: d(1), type: 'intervalado', minutes: 30, effort: 'moderado', note: '', stage: 1, completed: 'sim' });
     // perfil fictício, só para exercitar os textos que vêm do perfil
     await db.put('profile', { uid: 'profile:main', nome: 'Teste', importedAt: new Date().toISOString(),
       remedio: { rotulo: 'Remédio de teste com água', sub: 'Texto de exemplo de um lembrete com várias palavras.', hora: '06h00', h: 6, e: '💊' },

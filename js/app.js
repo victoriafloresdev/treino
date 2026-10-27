@@ -9,7 +9,8 @@ import { viewTreinoLista } from './views/treino.js';
 import { S, viewSessao, setsOf, renderSessao, saveSet, finishSession, howSheet } from './views/sessao.js';
 import { viewProgresso } from './views/progresso.js';
 import { viewCorpo } from './views/corpo.js';
-import { viewMais, viewGuia, cardioForm, segVal, exportData, importFile } from './views/mais.js';
+import { viewMais, viewGuia, exportData, importFile } from './views/mais.js';
+import { viewCardio } from './views/cardio.js';
 import { db, STORES } from './db.js';
 
 /* ================= eventos ================= */
@@ -52,10 +53,6 @@ document.addEventListener('click', async e => {
   if (act === 'setStart') { const v = $('#startDate').value; if (!v) return; await db.setSetting('startDate', v); toast('Data de início salva.'); route(); }
   if (act === 'saveWeight') { const w = num($('#wQuick').value); if (!w) { toast('Informe o peso.'); return; }
     await db.add('body', { date: todayStr(), weight: w, waist: null, note: '' }); toast('Peso salvo.'); route(); }
-  if (act === 'cardioForm') cardioForm();
-  if (act === 'saveCardio') { const m = num($('#kMin').value); if (!m) { toast('Informe os minutos.'); return; }
-    await db.add('cardio', { date: $('#kDate').value || todayStr(), type: segVal('kType'), minutes: m, effort: segVal('kEff'), note: $('#kNote').value.trim() });
-    closeSheet(); toast('Cardio salvo.'); route(); }
   if (act === 'saveBody') { const w = num($('#bW').value), waist = num($('#bWaist').value);
     if (w == null && waist == null) { toast('Informe o peso ou a cintura.'); return; }
     await db.add('body', { date: $('#bDate').value || todayStr(), weight: w, waist, note: $('#bNote').value.trim() }); toast('Medida salva.'); route(); }
@@ -87,13 +84,14 @@ async function route() {
   const [r, arg] = (location.hash.slice(1) || 'hoje').split('/');
   // endereço antigo da aba Corpo
   if (r === 'corpo') { location.replace('#progresso/corpo'); return; }
-  const tab = { guia: 'mais' }[r] || r;
+  const tab = { guia: 'mais', cardio: 'treino' }[r] || r;
   $$('.nav a').forEach(a => a.setAttribute('aria-current', a.dataset.r === tab ? 'page' : 'false'));
   // a cor de destaque segue o tipo de hoje em todas as telas
   if (r !== 'hoje' && r !== 'comida') dayInfo().then(i => applyDayColor(i.type)).catch(() => {});
   try {
     if (r === 'treino' && arg) await viewSessao(arg);
     else if (r === 'treino') await viewTreinoLista();
+    else if (r === 'cardio') await viewCardio();
     else if (r === 'comida') await viewComida(arg);
     else if (r === 'progresso' && arg === 'corpo') await viewCorpo();
     else if (r === 'progresso') await viewProgresso();

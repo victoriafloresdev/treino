@@ -1,8 +1,8 @@
 // Tela Hoje: a linha do tempo do dia (remédio, cardio, refeições, musculação, sono) com o prato-relógio.
 import { esc, todayStr, parseDate, fmtLong, fmtN } from '../util.js';
-import { planById, program, phaseLabel, cardioPlan, loadAll, doneThisWeek, nextInSequence, avg7 } from '../training.js';
+import { planById, program, phaseLabel, loadAll, doneThisWeek, nextInSequence, avg7 } from '../training.js';
 import { app, main, setBar, on, onChange, openSheet, closeSheet, toast } from '../ui.js';
-import { cardioForm } from './mais.js';
+import { cardioToday, pendingPain, painCardHTML } from './cardio.js';
 import { db } from '../db.js';
 import { WEEK } from '../plan.js';
 import { DAYS, DAY_IDS, OPTS, PROT, CARB, MOLHO, PSY, TARGET_P, FAT_RANGE, FIBER_RANGE } from '../data/nutricao.js';
@@ -35,7 +35,7 @@ export async function viewHoje() {
   const all = await loadAll();
   const needBackup = all.sets.length > 0 && (!lastBackup || (parseDate(today) - parseDate(lastBackup)) / 864e5 > 14);
   const askProfile = !(await getProfile()) && !(await db.setting('profilePromptHidden'));
-  H.ctx = { p, all };
+  H.ctx = { p, all, cardio: await cardioToday(today), pain: await pendingPain(today) };
 
   if (tok !== app.seq) return;
   main.innerHTML = `
@@ -50,6 +50,7 @@ export async function viewHoje() {
       <p class="small muted">Ele traz o lembrete do remédio, as suas notas e as dicas pessoais. Fica só neste celular e vai junto nos backups. É uma vez só.</p>
       <div class="row"><label class="btn solid" style="cursor:pointer">Importar perfil de saúde<input type="file" id="profileFileHoje" accept="application/json,.json" hidden></label>
         <button class="btn" type="button" data-act="profileLater">Agora não</button></div></div>` : ''}
+    ${H.ctx.pain ? painCardHTML(H.ctx.pain, today) : ''}
     <div class="hoje-grid">
       <section class="h-day" id="hojeDay" aria-label="Tipo de dia"></section>
       <section class="h-now" id="hojeNow" aria-label="Agora"></section>
@@ -196,8 +197,8 @@ function nowHTML(info) {
   }
   if (next.id === 'cardio') {
     return `<div class="now"><span class="k">Próximo · ${time}</span><h2><span aria-hidden="true">🏃‍♀️</span> Cardio</h2>
-      <p>${esc(cardioPlan(Math.max(H.ctx.p.week, 1), new Date().getDay()))}</p>
-      <div class="row"><button class="btn solid" type="button" data-act="cardioForm">Registrar cardio</button></div></div>`;
+      <p>${esc(H.ctx.cardio.text)}</p>
+      <div class="row"><a class="btn solid" href="#cardio">Abrir o timer</a><button class="btn" type="button" data-act="cardioForm">Registrar cardio</button></div></div>`;
   }
   const w = workoutToday();
   return `<div class="now"><span class="k">Próximo · ${time}</span><h2><span aria-hidden="true">🏋️‍♀️</span> ${w.plan ? esc(w.plan.name) : 'Musculação'}</h2>
@@ -217,9 +218,9 @@ function slotHTML(s, info) {
   if (s.id === 'cardio') {
     const c = H.ctx.all.cardio.filter(x => x.date === info.date);
     return `<li class="tl activity"><div class="time">${s.time(d)}</div><div class="marker-box"><span class="em" aria-hidden="true">${s.e}</span>
-      <div><b>Cardio</b><br>${esc(cardioPlan(Math.max(H.ctx.p.week, 1), new Date().getDay()))}
+      <div><b>Cardio${H.ctx.cardio.label ? ' · ' + esc(H.ctx.cardio.label) : ''}</b><br>${esc(H.ctx.cardio.text)}
       ${info.reg.cardio ? `<p class="okline">✓ Registrado${c.length ? ': ' + c.map(x => `${x.minutes} min de ${esc(x.type)}`).join(', ') : ''}</p>`
-        : `<div class="row" style="margin-top:8px"><button class="btn sm" type="button" data-act="cardioForm">Registrar cardio</button></div>`}</div></div></li>`;
+        : `<div class="row" style="margin-top:8px"><a class="btn sm solid" href="#cardio">Abrir o timer</a><button class="btn sm" type="button" data-act="cardioForm">Registrar cardio</button></div>`}</div></div></li>`;
   }
   if (s.id === 'musc') {
     const w = workoutToday();
