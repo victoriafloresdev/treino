@@ -21,6 +21,12 @@ Direção: **orgânico suave**. Calmo e tátil, para uso diário. As cores vêm 
 - Nunca como fundo inteiro de card, borda lateral colorida ou gradiente. Para um fundo suave, use `--tint` (12% da cor do dia).
 - Macros com cores fixas (`--p`, `--c`, `--g`, `--f`), sempre acompanhadas de texto ou número.
 
+## Tema e paletas
+
+- Em Mais › Aparência: modo **Automático** (segue o sistema), **Claro** ou **Escuro**, e uma de cinco paletas (Comida, a padrão; Oceano; Floresta; Lavanda; Grafite). Fica guardado no aparelho (`localStorage`), não no backup.
+- O modo troca o `color-scheme` da raiz (`data-theme`); todos os tokens usam `light-dark()`, então nenhum CSS deve depender de `@media (prefers-color-scheme)` direto.
+- Cada paleta define 4 cores distintas para os tipos de dia (`--day-A` a `--day-D`) e, no dia atual, `--h` e `--accent`. Paleta nova precisa passar no teste de contraste (`tests/unit/contraste.test.js`).
+
 ## Forma
 
 | Elemento | Raio |

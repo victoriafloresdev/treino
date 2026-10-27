@@ -26,7 +26,10 @@ const SCREENS = [
   { name: 'fechar', hash: 'fechar' },
   { name: 'mais', hash: 'mais' },
   { name: 'guia', hash: 'guia' },
-  { name: 'como-fazer', hash: 'treino/inferior-a', sheet: '[data-how]' }
+  { name: 'como-fazer', hash: 'treino/inferior-a', sheet: '[data-how]' },
+  // por último, porque a paleta fica salva no aparelho
+  { name: 'hoje-floresta', hash: 'hoje', run: async p => { await p.evaluate(async () => (await import('/js/ui/aparencia.js')).setAppearance({ palette: 'floresta' })); } },
+  { name: 'comida-dia-lavanda', hash: 'comida/dia', run: async p => { await p.evaluate(async () => (await import('/js/ui/aparencia.js')).setAppearance({ palette: 'lavanda' })); } }
 ];
 
 for (const size of SIZES) for (const scheme of SCHEMES) {

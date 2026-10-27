@@ -68,3 +68,58 @@ html[data-day="A"]{--h:30;--day:var(--day-A);--accent:light-dark(oklch(50% .15 3
 html[data-day="B"]{--h:62;--day:var(--day-B);--accent:light-dark(oklch(50% .12 55),oklch(80% .12 65))}
 html[data-day="C"]{--h:320;--day:var(--day-C);--accent:light-dark(oklch(46% .13 320),oklch(76% .1 320))}
 html[data-day="D"]{--h:145;--day:var(--day-D);--accent:light-dark(oklch(45% .1 145),oklch(78% .12 145))}
+
+/* ---------- aparência escolhida em Mais (sem escolha, segue o sistema) ---------- */
+html[data-theme="light"]{color-scheme:light}
+html[data-theme="dark"]{color-scheme:dark}
+
+/* ---------- paletas: cada uma tem 4 cores bem distintas para os tipos de dia ----------
+   --day-X: cor do tipo (legendas, marcadores); no dia atual, --h tinge os neutros e
+   --accent é a versão forte para texto e botão (contraste AA testado em tests/unit/contraste.test.js) */
+/* a padrão, também como bloco, para as amostras em Mais */
+[data-palette="comida"]{
+  --day-A:light-dark(oklch(62% .14 30),oklch(72% .13 30));
+  --day-B:light-dark(oklch(70% .13 60),oklch(78% .12 65));
+  --day-C:light-dark(oklch(48% .12 320),oklch(72% .11 320));
+  --day-D:light-dark(oklch(60% .11 145),oklch(74% .12 145))}
+[data-palette="oceano"]{
+  --day-A:light-dark(oklch(55% .13 250),oklch(72% .11 250));
+  --day-B:light-dark(oklch(64% .11 195),oklch(78% .1 195));
+  --day-C:light-dark(oklch(50% .13 285),oklch(72% .11 285));
+  --day-D:light-dark(oklch(62% .09 165),oklch(78% .1 165))}
+html[data-palette="oceano"][data-day="A"]{--h:250;--day:var(--day-A);--accent:light-dark(oklch(48% .13 250),oklch(78% .1 250))}
+html[data-palette="oceano"][data-day="B"]{--h:195;--day:var(--day-B);--accent:light-dark(oklch(46% .09 200),oklch(80% .1 195))}
+html[data-palette="oceano"][data-day="C"]{--h:285;--day:var(--day-C);--accent:light-dark(oklch(46% .14 285),oklch(78% .1 285))}
+html[data-palette="oceano"][data-day="D"]{--h:165;--day:var(--day-D);--accent:light-dark(oklch(45% .08 165),oklch(80% .1 165))}
+
+[data-palette="floresta"]{
+  --day-A:light-dark(oklch(54% .1 150),oklch(72% .11 150));
+  --day-B:light-dark(oklch(68% .12 90),oklch(80% .12 90));
+  --day-C:light-dark(oklch(50% .07 50),oklch(72% .07 55));
+  --day-D:light-dark(oklch(60% .06 200),oklch(76% .07 200))}
+html[data-palette="floresta"][data-day="A"]{--h:150;--day:var(--day-A);--accent:light-dark(oklch(45% .1 150),oklch(78% .11 150))}
+html[data-palette="floresta"][data-day="B"]{--h:90;--day:var(--day-B);--accent:light-dark(oklch(46% .09 85),oklch(82% .12 90))}
+html[data-palette="floresta"][data-day="C"]{--h:50;--day:var(--day-C);--accent:light-dark(oklch(45% .07 50),oklch(78% .07 55))}
+html[data-palette="floresta"][data-day="D"]{--h:200;--day:var(--day-D);--accent:light-dark(oklch(45% .06 210),oklch(80% .07 200))}
+
+[data-palette="lavanda"]{
+  --day-A:light-dark(oklch(57% .14 355),oklch(74% .12 355));
+  --day-B:light-dark(oklch(70% .1 40),oklch(80% .09 40));
+  --day-C:light-dark(oklch(54% .12 300),oklch(74% .1 300));
+  --day-D:light-dark(oklch(62% .08 230),oklch(78% .08 230))}
+html[data-palette="lavanda"][data-day="A"]{--h:355;--day:var(--day-A);--accent:light-dark(oklch(48% .15 355),oklch(78% .11 355))}
+html[data-palette="lavanda"][data-day="B"]{--h:40;--day:var(--day-B);--accent:light-dark(oklch(48% .11 40),oklch(82% .09 40))}
+html[data-palette="lavanda"][data-day="C"]{--h:300;--day:var(--day-C);--accent:light-dark(oklch(46% .13 300),oklch(78% .1 300))}
+html[data-palette="lavanda"][data-day="D"]{--h:230;--day:var(--day-D);--accent:light-dark(oklch(46% .09 235),oklch(80% .08 230))}
+
+/* grafite: neutros frios e quase sem cor; as cores dos dias ficam discretas (o ícone e o nome continuam dizendo o tipo) */
+[data-palette="grafite"]{--h:260;
+  --day-A:light-dark(oklch(52% .07 30),oklch(72% .06 30));
+  --day-B:light-dark(oklch(62% .07 75),oklch(78% .06 75));
+  --day-C:light-dark(oklch(50% .06 300),oklch(72% .05 300));
+  --day-D:light-dark(oklch(56% .06 160),oklch(74% .05 160))}
+html[data-palette="grafite"][data-day]{--h:260}
+html[data-palette="grafite"][data-day="A"]{--day:var(--day-A);--accent:light-dark(oklch(40% .02 260),oklch(86% .01 260))}
+html[data-palette="grafite"][data-day="B"]{--day:var(--day-B);--accent:light-dark(oklch(40% .02 260),oklch(86% .01 260))}
+html[data-palette="grafite"][data-day="C"]{--day:var(--day-C);--accent:light-dark(oklch(40% .02 260),oklch(86% .01 260))}
+html[data-palette="grafite"][data-day="D"]{--day:var(--day-D);--accent:light-dark(oklch(40% .02 260),oklch(86% .01 260))}

@@ -27,11 +27,25 @@ function token(block, name, hue) {
   });
 }
 const root = css.slice(css.indexOf(':root{'), css.indexOf('}', css.indexOf('--nav-h')));
-const dayBlock = d => css.match(new RegExp(`html\\[data-day="${d}"\\]\\{([^}]*)\\}`))[1];
-const DAYS = { padrão: [255, root], A: [30, dayBlock('A')], B: [62, dayBlock('B')], C: [320, dayBlock('C')], D: [145, dayBlock('D')] };
+const dayBlock = (d, pal) => {
+  const sel = pal ? `html[data-palette="${pal}"][data-day="${d}"]{` : `\nhtml[data-day="${d}"]{`;
+  const i = css.indexOf(sel);
+  assert.ok(i >= 0, sel);
+  return css.slice(i + sel.length, css.indexOf('}', i));
+};
+// matiz dos neutros: o do bloco do dia, senão o da paleta, senão o padrão
+const hueOf = (block, pal) => {
+  const own = block.match(/--h:(\d+)/);
+  if (own) return Number(own[1]);
+  const i = pal ? css.indexOf(`[data-palette="${pal}"]{--h:`) : -1;
+  return i >= 0 ? Number(css.slice(i).match(/--h:(\d+)/)[1]) : 255;
+};
+const DAYS = { 'padrão': [255, root] };
+for (const pal of [null, 'oceano', 'floresta', 'lavanda', 'grafite'])
+  for (const d of ['A', 'B', 'C', 'D']) { const blk = dayBlock(d, pal); DAYS[`${pal || 'comida'} ${d}`] = [hueOf(blk, pal), blk]; }
 
 for (const [day, [hue, block]] of Object.entries(DAYS)) {
-  test(`contraste AA no tipo de dia ${day}`, () => {
+  test(`contraste AA: ${day}`, () => {
     const t = n => token(n === 'accent' ? block : root, n, hue);
     const [bgL, bgD] = t('bg'), [surL, surD] = t('surface'), [s2L, s2D] = t('surface2');
     const [inkL, inkD] = t('ink'), [mutL, mutD] = t('muted'), [accL, accD] = t('accent'), [aiL, aiD] = token(root, 'accent-ink', hue);

@@ -289,8 +289,7 @@ details.tip>summary small{display:block;font-size:13px;color:var(--muted)}
 .tm{display:grid;gap:8px;justify-items:center}
 .tm .row{justify-content:center}
 .tm-seg{font-weight:650;font-size:20px;padding:4px 14px;border-radius:999px;background:var(--surface2)}
-.tm-seg.trote{background:var(--day,var(--accent));color:#fff}
-@media (prefers-color-scheme:dark){.tm-seg.trote{color:#0E1320}}
+.tm-seg.trote{background:var(--accent);color:var(--accent-ink)}
 .tm-seg.done{color:var(--ok)}
 .tm-big{font-size:72px;line-height:1;font-weight:650;font-variant-numeric:tabular-nums}
 .tm-sub,.tm-next{margin:0;color:var(--muted);font-size:14px}
@@ -336,3 +335,20 @@ ul.plain{margin:4px 0 10px;padding-left:20px}
 .celebrate b{color:var(--ok);font-size:13px}
 @keyframes celebrate{0%{transform:translateX(-50%) scale(.6);opacity:0}100%{transform:translateX(-50%) scale(1);opacity:1}}
 @media (prefers-reduced-motion:reduce){.celebrate{animation:none}}
+
+/* ---------- Mais › Aparência ---------- */
+.segr label>span .ic{width:20px;height:20px}
+/* ícone em cima do texto, sem quebrar palavra no meio */
+.segr label>span{overflow-wrap:normal}
+.segr.ic-top label>span{flex-direction:column;gap:3px;min-height:62px;font-size:14.5px}
+.pal-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+@media (min-width:560px){.pal-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.pal-grid label{position:relative;display:block;min-width:0}
+.pal-grid input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}
+.pal-grid label>span{display:grid;gap:3px;padding:10px 12px;border-radius:12px;background:var(--surface2);border:2px solid transparent;min-height:44px;height:100%}
+.pal-grid input:checked+span{border-color:var(--accent);background:var(--tint)}
+.pal-grid input:focus-visible+span{outline:3px solid var(--accent);outline-offset:2px}
+.pal-grid b{font-size:15.5px}
+.pal-grid small{font-size:12.5px;color:var(--muted);line-height:1.3}
+.pal-dots{display:flex;gap:4px;margin-bottom:4px}
+.pal-dots i{width:18px;height:18px;border-radius:50%}

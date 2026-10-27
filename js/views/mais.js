@@ -6,6 +6,7 @@ import { db } from '../db.js';
 import { DAYS, DAY_IDS } from '../data/nutricao.js';
 import { icon } from '../ui/icons.js';
 import { DAY_ICON } from './dia.js';
+import { THEMES, PALETTES, getAppearance, setAppearance } from '../ui/aparencia.js';
 import { WD, weekModelFromPlan } from '../daytype.js';
 import { getModel, setModel, getProfile, importProfileFile, removeProfile } from '../days.js';
 
@@ -22,7 +23,19 @@ export async function viewMais() {
   const standalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
   const model = await getModel(), fromPlan = weekModelFromPlan(), profile = await getProfile();
   if (tok !== app.seq) return;
+  const ap = getAppearance();
   main.innerHTML = `
+    <div class="card"><h2>Aparência</h2>
+      <fieldset class="chipset" data-on="themeMode"><legend>Tema</legend><div class="segr c3 ic-top">
+        ${THEMES.map(([v, l, ic]) => `<label><input type="radio" name="themeMode" value="${v}" ${v === ap.theme ? 'checked' : ''}><span>${icon(ic)}${l}</span></label>`).join('')}
+      </div></fieldset>
+      <fieldset class="chipset" data-on="palette"><legend>Paleta de cores</legend><div class="pal-grid">
+        ${PALETTES.map(p => `<label><input type="radio" name="palette" value="${p.id}" ${p.id === ap.palette ? 'checked' : ''}>
+          <span><span class="pal-dots" data-palette="${p.id}" aria-hidden="true">${['A', 'B', 'C', 'D'].map(d => `<i style="background:var(--day-${d})"></i>`).join('')}</span>
+          <b>${p.name}</b><small>${p.desc}</small></span></label>`).join('')}
+      </div></fieldset>
+      <p class="small muted" style="margin:10px 0 0">A paleta muda a cor de cada tipo de dia; o ícone e o nome continuam dizendo o tipo. Vale só neste aparelho.</p>
+    </div>
     <div class="card"><h2>Programa</h2>
       <label class="f" style="margin-top:8px">Data de início<input type="date" id="startDate" value="${p.start || todayStr()}"></label>
       <div class="form-actions"><button class="btn block" data-act="setStart">Salvar data de início</button></div>
@@ -134,5 +147,7 @@ on({
   async profileRemove() { if (!confirm('Remover o perfil de saúde deste aparelho?')) return; await removeProfile(); toast('Perfil removido.'); app.route(); }
 });
 onChange({
+  themeMode(el, e) { setAppearance({ theme: e.target.value }); },
+  palette(el, e) { setAppearance({ palette: e.target.value }); },
   async modelDay(el, e) { const m = await getModel(); m[Number(el.dataset.i)] = e.target.value; await setModel(m); app.route(); }
 });

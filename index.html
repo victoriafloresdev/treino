@@ -18,7 +18,10 @@
 <link rel="stylesheet" href="css/tokens.css">
 <link rel="stylesheet" href="css/app.css">
 <link rel="stylesheet" href="css/telas.css">
-<script>try { var t = localStorage.getItem('dayType'); if (/^[ABCD]$/.test(t)) document.documentElement.dataset.day = t; } catch (e) {}</script>
+<script>try { var h = document.documentElement, t = localStorage.getItem('dayType'), m = localStorage.getItem('theme'), p = localStorage.getItem('palette');
+  if (/^[ABCD]$/.test(t)) h.dataset.day = t;
+  if (m === 'light' || m === 'dark') h.dataset.theme = m;
+  if (/^(oceano|floresta|lavanda|grafite)$/.test(p)) h.dataset.palette = p; } catch (e) {}</script>
 </head>
 <body>
 <header class="appbar" id="appbar">

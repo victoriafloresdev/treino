@@ -77,6 +77,22 @@ export async function findOverflow(page) {
         bad.push(`${label(el)} sai de ${label(p)} (${Math.round(r.left)}–${Math.round(r.right)} vs ${Math.round(inL)}–${Math.round(inR)})`);
       if (r.right > vw + 1) bad.push(`${label(el)} passa da tela`);
     }
+    // controles cortados por um ancestral que esconde o excesso (ex.: classe com altura fixa aplicada sem querer)
+    for (const el of document.querySelectorAll('button, a, label, input:not([type=radio]):not([type=checkbox]):not([type=file])')) {
+      const cs = getComputedStyle(el);
+      if (cs.display === 'none' || cs.visibility === 'hidden' || el.closest('.sr, [hidden]')) continue;
+      const r = el.getBoundingClientRect();
+      if (!r.width || !r.height) continue;
+      for (let a = el.parentElement; a && a !== document.body; a = a.parentElement) {
+        const o = getComputedStyle(a);
+        if (o.overflowX === 'visible' && o.overflowY === 'visible') continue;
+        if (a.matches(SCROLL_X) || o.overflowY === 'auto' || o.overflowY === 'scroll') break; // área que rola: o conteúdo é alcançável
+        const ar = a.getBoundingClientRect();
+        if (r.bottom > ar.bottom + 1 || r.top < ar.top - 1 || r.right > ar.right + 1 || r.left < ar.left - 1) {
+          bad.push(`${label(el)} cortado por ${label(a)}`); break;
+        }
+      }
+    }
     // texto que vaza da própria caixa (palavra longa, número grande)
     const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
     for (let n = walker.nextNode(); n; n = walker.nextNode()) {

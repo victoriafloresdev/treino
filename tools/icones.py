@@ -23,6 +23,8 @@ ICONES = [
     # temas
     'drop', 'drop-fill', 'scales', 'calendar-check', 'calendar-dots', 'trophy', 'lightbulb', 'swap', 'pizza',
     'bowl-food', 'heartbeat', 'target', 'list-checks', 'book-open', 'user-circle', 'question', 'barbell-fill',
+    # aparência
+    'sun', 'circle-half', 'palette',
 ]
 BASE = f'https://unpkg.com/@phosphor-icons/core@{VERSAO}/assets'
 ROOT = Path(__file__).resolve().parent.parent

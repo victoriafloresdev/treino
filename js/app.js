@@ -5,6 +5,7 @@ import { app, main, toast, closeSheet, destroyCharts, actions } from './ui.js';
 import { viewHoje, applyDayColor } from './views/hoje.js';
 import { viewComida } from './views/comida.js';
 import { dayInfo } from './days.js';
+import { applyAppearance } from './ui/aparencia.js';
 import { viewTreinoLista } from './views/treino.js';
 import { S, viewSessao, setsOf, renderSessao, saveSet, finishSession, howSheet } from './views/sessao.js';
 import { viewProgresso } from './views/progresso.js';
@@ -114,6 +115,7 @@ window.addEventListener('hashchange', () => {
   const r = location.hash; if (r !== lastRoute) { lastRoute = r; window.scrollTo(0, 0); route(); }
 });
 app.route = route;
+applyAppearance();
 lastRoute = location.hash; route();
 
 /* ================= service worker (offline e atualização) ================= */

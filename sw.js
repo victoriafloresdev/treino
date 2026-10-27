@@ -1,6 +1,6 @@
 // Service worker: guarda o app em cache para funcionar offline.
 // Sempre que mudar qualquer arquivo do app, aumente o número da versão abaixo.
-const CACHE = 'treino-v17';
+const CACHE = 'treino-v19';
 const ASSETS = [
   './',
   './css/app.css',
@@ -72,6 +72,7 @@ const ASSETS = [
   './js/daytype.js',
   './js/habitos.js',
   './js/nutri.js',
+  './js/ui/aparencia.js',
   './js/ui/icons.js',
   './js/ui/plate.js',
   './js/bodymap.js',
