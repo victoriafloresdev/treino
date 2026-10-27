@@ -80,7 +80,7 @@ test('fechar a semana no domingo', async ({ page }) => {
   await expect(page.locator('main')).toContainText('Leg press 45°: 95 → 100 kg');
   await page.locator('label:has(input[name="energia"][value="alta"])').click();
   await page.locator('#wkNote').fill('Semana boa, canela ok.');
-  await page.getByRole('button', { name: 'Fechar a semana' }).click();
+  await page.getByRole('button', { name: 'Só fechar, sem exportar' }).click();
   await expect(page.locator('#title')).toHaveText('Progresso');
   await expect(page.locator('main')).toContainText('Semana de 26/10 a 01/11');
   const rec = await page.evaluate(async () => { const { db } = await import('/js/db.js'); return db.get('weekly', 'week:2026-W44'); });
@@ -94,4 +94,23 @@ test('fechar a semana no domingo', async ({ page }) => {
 test('na segunda, oferece fechar a semana anterior', async ({ page }) => {
   await open(page, 'hoje', { time: new Date('2026-11-02T09:00:00'), seed: async () => { const { db } = await import('/js/db.js'); await db.setSetting('v2Since', '2026-10-20'); } });
   await expect(page.locator('a.card.closing')).toContainText('26/10 a 01/11');
+});
+
+test('fechar e exportar a semana gera bem-estar-AAAA-Sww.json e marca o backup', async ({ page }) => {
+  const errors = watchErrors(page);
+  await open(page, 'fechar/2026-10-26', { time: DOM, seed: seedSessions([['2026-10-27', 'inferior-a', [['ia1', 100, 10, 'medio']]]]) });
+  await page.evaluate(() => { navigator.canShare = () => false; });
+  await page.locator('label:has(input[name="sono"][value="bom"])').click();
+  const [dl] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: 'Fechar e exportar semana' }).click()]);
+  expect(dl.suggestedFilename()).toBe('bem-estar-2026-S44.json');
+  const file = JSON.parse(await (await import('node:fs/promises')).readFile(await dl.path(), 'utf8'));
+  expect(file).toMatchObject({ app: 'treino-app', version: 2 });
+  expect(file.sets.length).toBe(1);
+  await expect(page.locator('#title')).toHaveText('Progresso');
+  await expect(page.locator('main')).toContainText('backup ✓');
+  const r = await page.evaluate(async () => { const { db } = await import('/js/db.js'); return { w: await db.get('weekly', 'week:2026-W44'), last: await db.setting('lastBackup') }; });
+  expect(typeof r.w.backupAt).toBe('number');
+  expect(r.w.feeling.sono).toBe('bom');
+  expect(r.last).toBe('2026-11-01');
+  expect(errors).toEqual([]);
 });

@@ -1,119 +1,156 @@
-# Treino
+# Treino e bem-estar
 
-App web instalável (PWA) para seguir a ficha de musculação Upper/Lower 4x, registrar cargas e acompanhar a evolução. Funciona offline, foi pensado para o celular e não precisa de servidor nem de conta: tudo fica salvo no próprio aparelho.
+App web instalável (PWA) para o dia a dia: musculação, cardio, refeições, água, peso, composição corporal e progresso. Funciona offline, foi pensado para o iPhone e não precisa de servidor nem de conta: tudo fica salvo no próprio aparelho.
 
 ## O que o app faz
 
-- **Hoje:** mostra o treino do dia (ou o próximo da sequência, se você perdeu um), o cardio planejado para a manhã e um campo rápido para registrar o peso.
-- **Treino:** cada exercício tem foto animada, séries, faixa de repetições, RIR e descanso da fase atual. Você registra carga, repetições e dificuldade (fácil, médio, difícil) série por série. O cronômetro de descanso começa sozinho, e o app sugere se é hora de subir, manter ou reduzir a carga.
-- **Como fazer:** mapa dos músculos trabalhados, onde sentir, execução, cuidados de postura, alternativa se o aparelho estiver ocupado e link para vídeos.
-- **Progresso:** treinos por semana, aderência, séries por músculo contra a meta, evolução de carga e força estimada por exercício, peso com média de 7 dias, % de gordura por método e minutos de cardio.
-- **Corpo:** registro de peso, cintura e avaliações de composição (dobras cutâneas ou bioimpedância).
-- **Mais:** data de início do programa, backup (exportar e importar), guia rápido.
+- **Hoje.** Mostra a linha do tempo do dia: remédio (com o perfil de saúde), cardio, refeições, musculação e sono.
+  - **Tipo do dia:** A, B, C ou D, com a origem ("previsto pela ficha", "ajustado pelo registro" ou "escolhido por você").
+  - **Card "agora":** a próxima coisa a fazer.
+  - **Prato-relógio:** calorias e macros planejados.
+  - **Resumo:** consumo do dia, água e psyllium.
+  - **Hábitos do dia** e da semana.
+  - Um campo rápido para o peso.
+- **Treino**
+  - **Musculação:** registro série por série (carga, repetições, fácil/médio/difícil), cronômetro de descanso, sugestão de progressão e tendência de cada exercício.
+  - **Cardio:** timer de intervalos com bip e tela ligada, registro, pergunta sobre dor no dia seguinte e progressão da corrida por etapas.
+- **Comida**
+  - **Semana:** tipo de cada dia e médias.
+  - **Trocas:** porções equivalentes e calculadora.
+  - **Refeição livre:** impacto na semana sem culpa.
+  - **Dicas.**
+- **Progresso**
+  - **Gráficos:** treinos, séries por músculo, cargas, calorias, proteína, água, déficit estimado, peso, composição e cardio.
+  - **Corpo:** peso, cintura e avaliações.
+  - **Conquistas e fechamentos semanais.**
+- **Mais.** Data de início, semana modelo, perfil de saúde, backup e o guia rápido.
 
-A dificuldade de cada série corresponde ao RIR da ficha: **Fácil** = sobrariam 4 ou mais repetições; **Médio** = 2–3; **Difícil** = 0–1.
+O tipo de dia vem da ficha de treino: musculação + cardio = A, só cardio = B, só musculação = C, descanso = D. Ele define a meta de calorias, o jantar, a água e a cor do app.
+
+Calorias e gasto são **estimativas** (cerca de ±200 kcal). A gamificação premia hábitos, nunca o peso.
 
 ---
 
-## 1. Publicar no GitHub Pages
+## 1. Atualizar da versão 1 para a 2
 
-1. Crie uma conta em [github.com](https://github.com), se ainda não tiver.
-2. Clique em **New repository**. Dê um nome curto, por exemplo `treino`, e deixe-o **Public**. Não marque a opção de criar README.
-3. Na página do repositório vazio, clique em **uploading an existing file**.
-4. Arraste **o conteúdo** desta pasta (os arquivos `index.html`, `sw.js`, `manifest.webmanifest`, `.nojekyll` e as pastas `css`, `js`, `img`, `icons`, `fonts`, `vendor`), não a pasta em si. Clique em **Commit changes**.
-   - O arquivo `.nojekyll` começa com ponto e pode ficar oculto no Finder ou no Explorer. No Mac, `Cmd + Shift + .` mostra arquivos ocultos. Se ele não subir, o app funciona do mesmo jeito.
-5. Vá em **Settings → Pages**. Em *Build and deployment*, escolha **Deploy from a branch**, branch **main**, pasta **/ (root)**, e clique em **Save**.
-6. Espere 1–2 minutos e recarregue a página de configurações. O endereço vai aparecer, no formato:
-   `https://SEU-USUARIO.github.io/treino/`
+1. **Antes de tudo, exporte um backup** no app atual: **Mais → Exportar dados** → salve em Arquivos.
+2. Depois que a nova versão for publicada, abra o app pelo ícone. Vai aparecer "Nova versão disponível". Toque para atualizar.
+3. Os dados antigos (treinos, séries, peso, avaliações, cardio) migram sozinhos. Nada é apagado.
+4. Importe o **perfil de saúde** (próxima seção).
 
-**Pelo terminal**, se preferir:
+## 2. Perfil de saúde (só no aparelho)
 
-```bash
-cd treino-app
-git init
-git add .
-git commit -m "Primeira versão do app de treino"
-git branch -M main
-git remote add origin https://github.com/SEU-USUARIO/treino.git
-git push -u origin main
-```
+O repositório é público, então textos com dados de saúde (nome do remédio, pontos dos exames, metas pessoais) **não ficam no código**. Eles ficam no arquivo `privado/perfil-saude.json`, que só existe no seu computador.
 
-Depois, ative o Pages como no passo 5.
+1. Mande o arquivo para o iPhone por AirDrop (ou iCloud Drive) e salve em **Arquivos**.
+2. No app, toque em **Importar perfil de saúde**. O botão aparece na tela Hoje até você importar, e fica sempre em **Mais**.
+3. É uma vez só. O perfil vai junto nos backups: restaurar um backup traz o perfil de volta.
 
-**Repositório privado:** no plano gratuito, o GitHub Pages só publica repositórios públicos. Com o [GitHub Student Developer Pack](https://education.github.com/pack), disponível para estudantes com e-mail da universidade, você ganha o GitHub Pro e pode publicar a partir de um repositório privado. O endereço do site continua acessível a quem tiver o link, mas o código fica privado.
+Sem o perfil, o app funciona igual, com textos genéricos.
 
-## 2. Instalar no iPhone
+## 3. Fechamento semanal e backup
 
-Instale pelo **Safari**. No iPhone, o Chrome usa o mesmo motor do Safari, então não há vantagem em usá-lo, e o caminho de instalação do Safari é o mais confiável.
+No domingo, ou na primeira abertura da semana seguinte, a tela Hoje mostra **Fechar a semana**. Ele traz o resumo (treinos, cardio, médias de kcal, proteína e água, peso médio, cargas que subiram) e o campo "Como foi a semana?".
 
-1. Abra o endereço do seu GitHub Pages no Safari.
-2. Toque em **Compartilhar** (o quadrado com a seta para cima).
-3. Escolha **Adicionar à Tela de Início** e confirme.
-4. A partir daí, **abra sempre pelo ícone da tela inicial**.
+**Fechar e exportar semana** gera o arquivo `bem-estar-AAAA-Sww.json` (ano e semana) com todos os dados e abre o compartilhar do iPhone. Escolha **Salvar em Arquivos** e uma pasta do iCloud Drive ou do Google Drive. Use sempre a mesma pasta, por exemplo `Bem-estar`.
 
-**Importante sobre os dados no iPhone:**
+**Mais → Exportar dados** continua gerando um backup completo a qualquer momento.
 
-- O app instalado guarda os dados separados da aba do Safari. O que você registrar pelo ícone não aparece se abrir o site no navegador, e vice-versa.
-- **Se você apagar o ícone da tela inicial, o iOS apaga os dados junto.** Exporte um backup antes.
-- O app funciona sem internet depois de aberto uma vez.
+## 4. Levar os dados para o computador
 
-## 3. Primeiro uso
+Os arquivos que você salvou no iCloud Drive ou no Google Drive aparecem no computador.
 
-1. Na tela **Hoje**, defina a **data de início** do programa. Ela calcula a semana atual, a fase (semanas 1–2 com volume reduzido) e o cardio do dia.
-2. **Opcional:** importe suas avaliações anteriores. O arquivo `dados-iniciais-PRIVADO.json`, que veio fora desta pasta, tem as duas avaliações por dobras cutâneas (fev/2025 e jan/2026).
-   - Mande o arquivo para o iPhone (AirDrop, iCloud Drive ou e-mail para você mesma) e salve em **Arquivos**.
-   - No app: **Mais → Importar arquivo →** escolha o arquivo **→ Juntar com os dados atuais**.
-   - **Não suba esse arquivo para o GitHub.** O `.gitignore` já ajuda a evitar isso.
+**Windows**
+- iCloud Drive: instale o app **iCloud para Windows** (Microsoft Store) e entre com seu Apple ID. A pasta fica em `C:\Users\<seu usuário>\iCloudDrive\Bem-estar`.
+- Google Drive: instale o **Google Drive para computador**. A pasta fica em `G:\Meu Drive\Bem-estar`.
+- Sem nenhum dos dois: no iPhone, abra o arquivo em Arquivos → Compartilhar → envie por e-mail para você mesma e salve numa pasta do PC.
 
-## 4. Backup (faça a cada 1–2 semanas)
+**Mac**
+- iCloud Drive: aparece no Finder, na barra lateral. O caminho é `~/Library/Mobile Documents/com~apple~CloudDocs/Bem-estar`.
+- AirDrop: os arquivos vão para **Downloads**. Mova para uma pasta só deles.
 
-**Mais → Exportar dados.** No iPhone, abre o menu de compartilhamento: escolha **Salvar em Arquivos** e uma pasta do iCloud Drive. O app avisa na tela Hoje quando faz mais de 14 dias desde o último backup.
-
-Para restaurar em outro aparelho: instale o app, vá em **Mais → Importar arquivo →** escolha o backup **→ Substituir tudo**.
-
-## 5. Atualizar o app
-
-1. Edite os arquivos (no próprio site do GitHub ou no seu computador).
-2. Em `sw.js`, aumente a versão do cache: `const CACHE = 'treino-v1';` passa para `'treino-v2'`. **Sem isso, o celular continua mostrando a versão antiga.**
-3. Faça o commit. Em 1–2 minutos o Pages atualiza.
-4. Abra o app: aparece "Nova versão disponível". Toque para atualizar. Seus dados não são afetados.
-
-Se acrescentar arquivos novos (por exemplo, uma imagem), inclua o caminho na lista `ASSETS` do `sw.js` para que funcione offline.
-
-**Mudar a ficha:** exercícios, séries, faixas de repetição, descanso e textos ficam em `js/plan.js`. Cada exercício tem um `id`, como `ia1`. Se trocar um exercício por outro, **dê a ele um id novo**: o histórico fica ligado ao id, e reaproveitar um id misturaria cargas de exercícios diferentes.
-
-## 6. Testar no computador
-
-Módulos JavaScript não funcionam abrindo o `index.html` direto do disco. Rode um servidor local dentro da pasta:
+**Juntar tudo em planilhas.** Precisa do Python 3. No Windows, use `python`; no Mac, `python3`.
 
 ```bash
-cd treino-app
-python3 -m http.server 8000
+python tools/consolidar.py "C:\Users\<seu usuário>\iCloudDrive\Bem-estar"
 ```
 
-Depois, abra `http://localhost:8000` no navegador. No Chrome, as ferramentas de desenvolvedor (F12) mostram o banco em **Application → IndexedDB → treino-app**.
+O programa lê todos os backups da pasta, deduplica (vale o registro mais recente), respeita o que foi apagado no celular e grava em `privado/historico/`:
 
-## 7. Privacidade
+- `historico.json`: tudo junto;
+- `series.csv`, `treinos.csv`, `cardio.csv`, `refeicoes.csv`, `agua.csv`, `peso.csv`, `composicao.csv`: abrem no Excel (separador `;`, vírgula decimal);
+- `relatorio-semanal.md`: os números da última semana.
 
-- Nenhum dado pessoal está no código. Peso, cargas e avaliações ficam no IndexedDB do seu aparelho e só saem dele quando você exporta.
-- O app não envia nada para servidores. A única saída é o botão de vídeos, que abre uma busca no YouTube.
-- Os textos de postura da ficha são genéricos, mas, se o repositório for público, qualquer pessoa pode ler a ficha.
+A pasta `privado/` está no `.gitignore` e não vai para o GitHub.
+
+## 5. Instalar no iPhone
+
+Instale pelo **Safari**: abra o endereço do site → **Compartilhar** → **Adicionar à Tela de Início**. Use sempre o ícone.
+
+- O app instalado guarda os dados separados da aba do Safari.
+- **Se você apagar o ícone, o iOS apaga os dados junto.** Exporte um backup antes.
+- Funciona sem internet depois de aberto uma vez.
+
+## 6. Publicar e atualizar
+
+O site é publicado pelo GitHub Pages a partir da branch `main` (pasta raiz). A cada mudança em arquivo do app:
+
+1. aumente `CACHE` em `sw.js` (sem isso, o celular continua na versão antiga);
+2. se criou um arquivo novo, inclua o caminho em `ASSETS` no `sw.js`;
+3. faça o commit e o push. Em 1–2 minutos o Pages atualiza, e o app mostra "Nova versão disponível".
+
+O trabalho novo é feito numa branch separada. A `main` é o que está no celular.
+
+**Mudar a ficha:** exercícios, séries e textos ficam em `js/plan.js`. O `id` de cada exercício é a chave do histórico: exercício novo recebe id novo, e um id nunca é reaproveitado.
+
+**Mudar o plano alimentar:** opções, porções e textos ficam em `js/data/nutricao.js`.
+
+## 7. Testar no computador
+
+Módulos JavaScript não funcionam abrindo o `index.html` direto do disco. Sirva a pasta:
+
+```bash
+python -m http.server 8000
+```
+
+e abra `http://localhost:8000`.
+
+**Testes automáticos** (Node e Playwright, na pasta `tests/`; nada disso vai para o site):
+
+```bash
+cd tests
+npm install
+npx playwright install chromium webkit
+npm test
+```
+
+- `npm run unit` roda os testes de lógica, entre eles os números do plano alimentar, o tipo de dia, o cardio, as conquistas, o `consolidar.py` e uma varredura de dados de saúde nos arquivos versionados. Essa varredura usa a lista em `privado/termos-proibidos.txt`.
+- `npm run e2e` roda os testes de tela em 375, 402 e 440 px, claro e escuro, no Chromium e no WebKit (o motor do Safari). Eles cobrem layout, fluxos, migração v1 → v2 e uso offline.
+
+**Testar no iPhone antes de publicar:** sirva na rede de casa com `python -m http.server 8000 --bind 0.0.0.0` e abra `http://<IP do computador>:8000` no Safari. Nesse endereço o service worker não roda (precisa de HTTPS), e os dados ficam separados dos do app instalado.
 
 ## Estrutura
 
 ```
-index.html             casca do app, navegação e cronômetro
-manifest.webmanifest   nome, ícone e modo de tela cheia
-sw.js                  cache offline e atualização
-css/app.css            estilos (claro e escuro)
-js/app.js              telas e lógica
-js/db.js               banco local (IndexedDB), exportar e importar
-js/plan.js             a ficha: exercícios, séries, textos
-js/bodymap.js          mapa muscular em SVG
-img/ex/                fotos dos exercícios (2 quadros cada)
-icons/                 ícones do app
-fonts/                 fonte Archivo (OFL)
-vendor/chart.umd.js    Chart.js 4.4.1 (MIT)
+index.html               casca do app, navegação, cronômetro
+sw.js                    cache offline e atualização
+css/app.css              tokens (claro, escuro, cor do tipo de dia) e componentes
+css/comida.css           tela Hoje, comida, cardio e progresso
+js/app.js                rotas e eventos globais
+js/db.js                 IndexedDB v2: migração, uid, registros apagados, exportar e importar
+js/plan.js               a ficha de musculação
+js/data/nutricao.js      o plano alimentar (dados e textos)
+js/nutri.js              cálculos do plano alimentar
+js/daytype.js            tipo de dia (ficha, registro, escolha)
+js/days.js               refeições, água e tipo de dia por data
+js/cardio.js             etapas da corrida, timer e progressão
+js/progress.js           tendência, recordes, semanas consistentes, conquistas
+js/stats.js              números agregados para gráficos e fechamento
+js/habitos.js            hábitos do dia
+js/views/                uma tela por arquivo
+tools/consolidar.py      junta os backups no PC
+tests/                   testes (Node e Playwright)
+privado/                 dados pessoais; fora do git
 ```
 
 ## Créditos
@@ -122,4 +159,4 @@ vendor/chart.umd.js    Chart.js 4.4.1 (MIT)
 - Gráficos: [Chart.js](https://www.chartjs.org/), licença MIT (`vendor/chartjs-LICENSE.md`).
 - Fonte: Archivo, SIL Open Font License (`fonts/OFL-LICENSE.txt`).
 
-Este app organiza o treino; não substitui avaliação profissional. Dor articular, tontura, dor no peito ou falta de ar fora do normal são motivo para parar e procurar avaliação médica.
+Este app organiza treino e alimentação; não substitui nutricionista nem médico. Dor ou aperto no peito, falta de ar desproporcional, palpitação forte, desmaio ou tontura que não passa: pare e procure avaliação médica.

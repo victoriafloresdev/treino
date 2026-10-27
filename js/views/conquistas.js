@@ -7,6 +7,7 @@ import { ACHIEVEMENTS, evalAchievements, CONSISTENT } from '../progress.js';
 import { achievementStats, checkAchievements, closingSummary, weekUid } from '../stats.js';
 import { fmt, fmt1 } from '../nutri.js';
 import { PROG_TABS } from './progresso.js';
+import { shareJSON } from './mais.js';
 
 const pct = (d, t) => (t ? Math.round(100 * d / t) : 0);
 const range = ws => `${fmtShort(ws)} a ${fmtShort(addDays(ws, 6))}`;
@@ -88,20 +89,41 @@ export async function viewFechar(ws) {
       ${radios('energia', 'Energia', [['baixa', 'Pouca energia'], ['ok', 'Normal'], ['alta', 'Muita energia']], f.energia)}
       ${radios('sono', 'Sono', [['ruim', 'Sono ruim'], ['ok', 'Sono ok'], ['bom', 'Sono bom']], f.sono)}
       <label class="f">Dores ou observações<textarea id="wkNote" rows="3" placeholder="opcional">${esc(f.nota || '')}</textarea></label>
-      <div class="form-actions"><button class="btn solid block" type="button" data-act="closeWeek" data-ws="${ws}">${rec?.closedAt ? 'Atualizar fechamento' : 'Fechar a semana'}</button></div>
-      <p class="small muted">Os números ficam guardados como estavam no fechamento. Na próxima etapa entra o botão de exportar a semana para o computador.</p>
+      <div class="form-actions" style="display:grid;gap:10px">
+        <button class="btn solid block" type="button" data-act="exportWeek" data-ws="${ws}">${rec?.backupAt ? 'Exportar semana de novo' : 'Fechar e exportar semana'}</button>
+        <button class="btn block" type="button" data-act="closeWeek" data-ws="${ws}">${rec?.closedAt ? 'Atualizar fechamento' : 'Só fechar, sem exportar'}</button></div>
+      <p class="small muted">Exportar gera o arquivo ${esc(weekFile(ws))} com todos os seus dados e abre o compartilhar: salve no iCloud Drive ou no Google Drive. No computador, o programa tools/consolidar.py junta os arquivos em planilhas.${rec?.backupAt ? ` Último envio: ${fmtShort(new Date(rec.backupAt).toISOString().slice(0, 10))}.` : ''}</p>
     </div>`;
   viewFechar.summary = sm;
 }
 
+// bem-estar-AAAA-Sww.json, pela semana ISO
+export const weekFile = ws => { const w = isoWeek(ws); return `bem-estar-${w.year}-S${String(w.week).padStart(2, '0')}.json`; };
+
+async function saveClosing(ws, extra = {}) {
+  const val = n => document.querySelector(`input[name="${n}"]:checked`)?.value || null;
+  const note = document.getElementById('wkNote')?.value.trim() || '';
+  const cur = await db.get('weekly', weekUid(ws));
+  const summary = cur?.summary || viewFechar.summary || await closingSummary(ws);
+  await db.put('weekly', { ...(cur || {}), uid: weekUid(ws), id: isoWeek(ws).id, start: ws, end: addDays(ws, 6), summary,
+    feeling: { energia: val('energia'), sono: val('sono'), nota: note }, closedAt: cur?.closedAt || Date.now(), ...extra });
+}
+
 on({
   async closeWeek(el) {
-    const ws = el.dataset.ws, val = n => document.querySelector(`input[name="${n}"]:checked`)?.value || null;
-    const cur = await db.get('weekly', weekUid(ws));
-    const summary = cur?.summary || viewFechar.summary || await closingSummary(ws);
-    await db.put('weekly', { ...(cur || {}), uid: weekUid(ws), id: isoWeek(ws).id, start: ws, end: addDays(ws, 6), summary,
-      feeling: { energia: val('energia'), sono: val('sono'), nota: document.getElementById('wkNote').value.trim() }, closedAt: cur?.closedAt || Date.now() });
+    await saveClosing(el.dataset.ws);
     toast('Semana fechada.');
+    await announceAchievements();
+    location.hash = 'progresso/conquistas';
+  },
+  async exportWeek(el) {
+    const ws = el.dataset.ws;
+    // o compartilhar precisa vir logo depois do toque: gera e envia primeiro, grava depois
+    const ok = await shareJSON(await db.exportAll(), weekFile(ws), 'Fechamento da semana');
+    if (!ok) return;
+    await saveClosing(ws, { backupAt: Date.now() });
+    await db.setSetting('lastBackup', todayStr());
+    toast('Semana fechada e exportada.');
     await announceAchievements();
     location.hash = 'progresso/conquistas';
   }

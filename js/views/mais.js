@@ -7,7 +7,7 @@ import { DAYS, DAY_IDS } from '../data/nutricao.js';
 import { WD, weekModelFromPlan } from '../daytype.js';
 import { getModel, setModel, getProfile, importProfileFile, removeProfile } from '../days.js';
 
-export const VERSION = '1.0.0';
+export const VERSION = '2.0.0';
 
 /* ================= tela: Mais / Guia ================= */
 export async function viewMais() {
@@ -92,22 +92,27 @@ export function viewGuia() {
 }
 
 
-export async function exportData() {
-  const data = await db.exportAll();
-  const name = `treino-backup-${todayStr()}.json`;
+// Abre a folha de compartilhamento do iOS com o arquivo (iCloud Drive, Google Drive, AirDrop);
+// sem ela, baixa o arquivo. Devolve true se o arquivo saiu. Chamar logo depois do toque: o
+// Safari só abre o compartilhar dentro do gesto da usuária.
+export async function shareJSON(data, name, title) {
   const blob = new Blob([JSON.stringify(data, null, 1)], { type: 'application/json' });
   const file = new File([blob], name, { type: 'application/json' });
   try {
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      await navigator.share({ files: [file], title: 'Backup do treino' });
+      await navigator.share({ files: [file], title });
     } else {
       const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
       document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
     }
-    await db.setSetting('lastBackup', todayStr());
-    toast('Backup exportado.');
-    app.route();
-  } catch (e) { if (e.name !== 'AbortError') toast('Não foi possível exportar: ' + e.message); }
+    return true;
+  } catch (e) { if (e.name !== 'AbortError') toast('Não foi possível exportar: ' + e.message); return false; }
+}
+export async function exportData() {
+  if (!await shareJSON(await db.exportAll(), `treino-backup-${todayStr()}.json`, 'Backup do treino')) return;
+  await db.setSetting('lastBackup', todayStr());
+  toast('Backup exportado.');
+  app.route();
 }
 export async function importFile(f) {
   if (!f) return;
