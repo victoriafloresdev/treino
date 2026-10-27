@@ -371,3 +371,11 @@ ul.plain{margin:4px 0 10px;padding-left:20px}
 .order li:last-child{border-bottom:0}
 .order .num{color:var(--muted);font-family:var(--font-display);font-weight:600}
 .order .icon-btn:disabled{opacity:.3;cursor:default}
+/* cardio: registro em destaque, cronômetro opcional */
+.cardio-hoje h2{margin:0 0 4px}
+.cardio-hoje .cardio-txt{margin:0 0 6px;font-size:16.5px}
+.cardio-hoje .okline{display:flex;align-items:center;gap:6px;margin:8px 0 0}
+.tm-open{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;min-height:44px;margin-top:6px;text-decoration:none}
+.more-hist>summary{cursor:pointer;font-weight:700;color:var(--accent);min-height:44px;display:flex;align-items:center}
+.more-hist[open]>summary{margin-bottom:6px}
+.more-hist .chipset{margin-top:12px}

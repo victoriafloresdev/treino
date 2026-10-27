@@ -5,6 +5,7 @@ import { app, main, setBar, on, onChange, openSheet, closeSheet, toast, beep, un
 import { db } from '../db.js';
 import { treinoNav } from './sessao.js';
 import { viewDate } from '../ui/dia-ativo.js';
+import { icon } from '../ui/icons.js';
 import { STAGES, LAST_STAGE, PAIN, painLabel, weekStage, cardioOfDay, totalSecs, timerAt, progression, pendingPainCheck } from '../cardio.js';
 
 /* ---------- etapa atual ---------- */
@@ -75,6 +76,11 @@ function timerInner(r, t) {
 function startTicking() { clearInterval(T.int); T.lastIdx = -1; tick(); T.int = setInterval(tick, 250); }
 
 /* ---------- tela ---------- */
+// O cronômetro é opcional (a esteira já mede): só aparece quando você pede ou quando já está rodando.
+const V = { timer: false };
+const histRow = r => `<li><div><b>${fmtShort(r.date)} · ${r.minutes} min de ${esc(r.type)}</b>
+      <span class="small muted">${[r.stage != null ? STAGES[r.stage]?.label + (r.completed ? ` (${{ sim: 'completa', parcial: 'parcial', nao: 'não completou' }[r.completed]})` : '') : '', r.effort, r.distanceKm ? String(r.distanceKm).replace('.', ',') + ' km' : '', r.painNextDay ? 'dor no dia seguinte: ' + painLabel(r.painNextDay).toLowerCase() : ''].filter(Boolean).join(' · ')}</span></div>
+      <button class="del x" data-del="cardio:${r.id}" aria-label="Apagar cardio de ${fmtShort(r.date)}" title="Apagar">${icon('x')}</button></li>`;
 export async function viewCardio() {
   const tok = app.seq;
   const p = await program();
@@ -88,32 +94,38 @@ export async function viewCardio() {
   if (tok !== app.seq) return;
   setBar('Treino', phaseLabel(p));
   const total = totalSecs(c.segs);
+  const doneToday = recs.filter(r => r.date === today);
+  const showTimer = !!run || V.timer;
+  const title = c.kind === 'corrida' ? `Corrida · ${esc(c.label)} de ${STAGES.length}` : c.kind === 'descanso' ? 'Descanso' : 'Caminhada';
   main.innerHTML = treinoNav('cardio') + `
     ${pending ? painCardHTML(pending, today) : ''}
-    <div class="card"><div class="spread"><h2>${c.kind === 'corrida' ? `Corrida · ${esc(c.label)} de ${STAGES.length}` : c.kind === 'descanso' ? 'Domingo' : 'Caminhada'}</h2></div>
-      <p style="margin:6px 0 0">${esc(c.text)}</p>
-      ${c.kind === 'corrida' ? `<p class="small muted" style="margin:6px 0 0">Trote leve: dá para falar frases curtas. Caminhada: conversa normal.</p>` : ''}
-    </div>
+    <section class="card cardio-hoje" aria-label="Cardio de hoje">
+      <h2>${title}</h2>
+      <p class="cardio-txt">${esc(c.kind === 'descanso' ? 'Descanso completo. Se quiser se mexer, uma caminhada leve e curta.' : c.text)}</p>
+      ${c.kind === 'corrida' ? `<p class="small muted">Trote leve: dá para falar frases curtas. Caminhada: conversa normal.</p>` : ''}
+      ${doneToday.length ? `<p class="okline">${icon('check-circle-fill')} Feito hoje: ${doneToday.map(r => `${r.minutes} min`).join(' + ')}</p>` : ''}
+      <div class="form-actions"><button class="btn ${doneToday.length || c.kind === 'descanso' ? '' : 'solid'} block" type="button" data-act="cardioForm">${c.kind === 'descanso' ? 'Registrar cardio mesmo assim' : doneToday.length ? 'Registrar outro cardio' : 'Registrar cardio'}</button></div>
+      ${c.kind !== 'descanso' && !showTimer ? `<button class="linkbtn tm-open" type="button" data-act="timerShow">${icon('timer')} Usar cronômetro</button>` : ''}
+    </section>
     ${c.kind === 'corrida' || ['dor', 'avancar'].includes(prog.state) ? progressHTML(prog, stage, ack, c.kind !== 'corrida') : ''}
-    ${c.kind === 'descanso' ? '<div class="card"><p style="margin:0">Hoje é descanso completo. Se quiser se mexer, uma caminhada leve e curta.</p><div class="form-actions"><button class="btn" type="button" data-act="cardioForm">Registrar cardio mesmo assim</button></div></div>' : `
-    <section class="card timer-card" aria-label="Timer de intervalos">
+    ${c.kind !== 'descanso' && showTimer ? `
+    <section class="card timer-card" aria-label="Cronômetro de intervalos">
       <div id="cTimer" class="tm">${run ? '' : `
         <div class="tm-seg">${c.segs.length > 1 ? `${c.segs.filter(s => s.kind === 'trote').length} blocos de trote` : esc(c.segs[0].label)}</div>
         <div class="tm-big">${mmss(total)}</div>
         <div class="tm-bar" aria-hidden="true">${c.segs.map(s => `<i class="${s.kind}" style="flex:${s.secs}"></i>`).join('')}</div>
-        <p class="small muted">${c.segs.length > 1 ? 'A cada troca de bloco o app toca um bip e vibra quando o aparelho permite.' : 'O app avisa quando o tempo terminar.'}
-          ${'wakeLock' in navigator ? 'A tela fica ligada durante o timer.' : 'Deixe a tela ligada: com ela bloqueada, o som não toca (o tempo continua contando).'}</p>
-        <div class="row"><button class="btn solid" type="button" data-act="timerStart">Começar</button></div>`}</div>
-    </section>
-    <div class="form-actions"><button class="btn block" type="button" data-act="cardioForm">Registrar cardio sem o timer</button></div>`}
+        <p class="small muted">${c.segs.length > 1 ? 'Bip e vibração a cada troca de bloco.' : 'Bip ao terminar.'}
+          ${'wakeLock' in navigator ? 'A tela fica ligada.' : 'Deixe a tela ligada para ouvir o bip.'}</p>
+        <div class="row"><button class="btn solid" type="button" data-act="timerStart">Começar</button>
+          <button class="btn" type="button" data-act="timerHide">Fechar</button></div>`}</div>
+    </section>` : ''}
     <h2 class="section-title">Últimos cardios</h2>
-    <div class="card">${recs.length ? `<ul class="rows">${recs.slice(0, 8).map(r => `<li><div><b>${fmtShort(r.date)} · ${r.minutes} min de ${esc(r.type)}</b>
-      <span class="small muted">${[r.stage != null ? STAGES[r.stage]?.label + (r.completed ? ` (${{ sim: 'completa', parcial: 'parcial', nao: 'não completou' }[r.completed]})` : '') : '', r.effort, r.distanceKm ? String(r.distanceKm).replace('.', ',') + ' km' : '', r.painNextDay ? 'dor no dia seguinte: ' + painLabel(r.painNextDay).toLowerCase() : ''].filter(Boolean).join(' · ')}</span></div>
-      <button class="del x" data-del="cardio:${r.id}" aria-label="Apagar cardio de ${fmtShort(r.date)}" title="Apagar">✕</button></li>`).join('')}</ul>` : '<p class="empty">Nenhum cardio registrado ainda.</p>'}</div>
-    <details class="card adjust"><summary>Ajustar a etapa manualmente</summary>
-      <fieldset class="chipset" data-on="stagePick"><legend>Etapa atual da corrida</legend><div class="segr">
-        ${STAGES.map(s => `<label><input type="radio" name="stagePick" value="${s.n}" ${s.n === stage ? 'checked' : ''}><span>${s.label}</span></label>`).join('')}</div></fieldset>
-      <p class="small muted">Use só se a etapa salva não corresponder ao que você está fazendo.</p></details>`;
+    <div class="card">${recs.length ? `<ul class="rows">${recs.slice(0, 3).map(histRow).join('')}</ul>` : '<p class="empty">Nenhum cardio registrado ainda.</p>'}
+      <details class="more-hist"><summary>${recs.length > 3 ? `Ver todos (${recs.length})` : 'Mais opções'}</summary>
+        ${recs.length > 3 ? `<ul class="rows">${recs.slice(3, 40).map(histRow).join('')}</ul>` : ''}
+        <fieldset class="chipset" data-on="stagePick"><legend>Etapa atual da corrida</legend><div class="segr">
+          ${STAGES.map(s => `<label><input type="radio" name="stagePick" value="${s.n}" ${s.n === stage ? 'checked' : ''}><span>${s.label}</span></label>`).join('')}</div></fieldset>
+        <p class="small muted">Ajuste só se a etapa salva não corresponder ao que você está fazendo.</p></details></div>`;
   if (run) startTicking();
 }
 
@@ -143,8 +155,7 @@ export function painCardHTML(rec, today) {
   const when = rec.date === addDays(today, -1) ? 'de ontem' : `de ${DIAS[parseDate(rec.date).getDay()]}`;
   return `<div class="card pain-ask"><h3>Alguma dor da corrida ${when}?</h3>
     <fieldset class="chipset" data-on="painAnswer" data-id="${rec.id}"><legend class="sr">Dor no dia seguinte à corrida</legend><div class="opts wrap">
-      ${PAIN.map(([v, l]) => `<label class="chip"><input type="radio" name="pain-${rec.id}" value="${v}"><span>${l}</span></label>`).join('')}</div></fieldset>
-    <p class="small muted">Serve para decidir quando avançar de etapa na corrida.</p></div>`;
+      ${PAIN.map(([v, l]) => `<label class="chip"><input type="radio" name="pain-${rec.id}" value="${v}"><span>${l}</span></label>`).join('')}</div></fieldset></div>`;
 }
 export async function pendingPain(today = todayStr()) { return pendingPainCheck(await db.all('cardio'), today); }
 
@@ -184,6 +195,7 @@ async function saveCardio(el) {
   if (dist != null) rec.distanceKm = dist;
   await db.add('cardio', rec);
   if (T.run) { T.run = null; await saveRun(); wakeLock(false); }
+  V.timer = false;
   closeSheet(); toast('Cardio salvo.'); app.route();
   announceAchievements();
 }
@@ -200,7 +212,9 @@ on({
   async timerPause() { if (!T.run) return; T.run.pausedAt = Date.now(); await saveRun(); wakeLock(false); tick(); },
   async timerResume() { if (!T.run) return; unlockAudio(); T.run.pausedMs += Date.now() - T.run.pausedAt; T.run.pausedAt = null; await saveRun(); wakeLock(true); tick(); },
   async timerEnd() { if (!T.run) return; if (!T.run.pausedAt) T.run.pausedAt = Date.now(); await saveRun(); wakeLock(false); cardioForm(); },
-  async timerReset() { T.run = null; await saveRun(); app.route(); },
+  async timerReset() { T.run = null; V.timer = false; await saveRun(); app.route(); },
+  timerShow() { V.timer = true; app.route(); },
+  timerHide() { V.timer = false; app.route(); },
   async stageNext() { await setStage((await getStage()) + 1); toast('Etapa atualizada. Bom treino.'); app.route(); },
   async stageBack() { await setStage((await getStage()) - 1); toast('Voltou uma etapa.'); app.route(); },
   async stageRepeat(el) { await db.setSetting('runPainAck', el.dataset.date); toast('Combinado: repetir esta etapa.'); app.route(); }

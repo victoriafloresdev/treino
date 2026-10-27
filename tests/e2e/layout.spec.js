@@ -14,7 +14,7 @@ const SCREENS = [
   { name: 'sessao', hash: 'treino/inferior-a', open: true },
   { name: 'sessao-timer', hash: 'treino/inferior-a', open: true, timer: true },
   { name: 'cardio', hash: 'treino/cardio' },
-  { name: 'cardio-timer', hash: 'treino/cardio', run: async p => { await p.getByRole('button', { name: 'Começar' }).click().catch(() => {}); } },
+  { name: 'cardio-timer', hash: 'treino/cardio', run: async p => { await p.getByRole('button', { name: 'Usar cronômetro' }).click().catch(() => {}); await p.getByRole('button', { name: 'Começar' }).click().catch(() => {}); } },
   { name: 'cardio-registro', hash: 'treino/cardio', sheet: '[data-act="cardioForm"]', run: async p => { await p.locator('#sheet details.more > summary').click(); } },
   { name: 'comida-semana', hash: 'comida/semana' },
   { name: 'comida-trocas', hash: 'comida/trocas', run: async p => { await p.locator('#cK').fill('180'); await p.locator('#cP').fill('22'); } },

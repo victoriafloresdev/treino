@@ -26,6 +26,10 @@ test('timer de intervalos: blocos, pausa, fim e registro', async ({ page }) => {
   // daqui em diante o tempo só anda quando o teste manda
   await page.clock.pauseAt(new Date(QUA.getTime() + MIN));
   await expect(page.locator('main h2').first()).toHaveText('Corrida · Etapa 3 de 4');
+  // o cronômetro é opcional: só aparece quando pedido
+  await expect(page.locator('#cTimer')).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Registrar cardio' })).toBeVisible();
+  await page.getByRole('button', { name: 'Usar cronômetro' }).click();
   await expect(page.locator('#cTimer .tm-big')).toHaveText('30:00');
   await page.getByRole('button', { name: 'Começar' }).click();
   await expect(page.locator('.tm-seg')).toHaveText('Aquecimento caminhando');
@@ -96,8 +100,8 @@ test('com dor: oferece repetir ou voltar uma etapa', async ({ page }) => {
   await expect(page.locator('main h2').first()).toHaveText('Corrida · Etapa 2 de 4');
 
   // na etapa anterior não há dor registrada; volta para a 3 e escolhe repetir
-  await page.locator('details.adjust > summary').click();
-  await page.locator('details.adjust label:has(input[value="2"])').click();
+  await page.locator('details.more-hist > summary').click();
+  await page.locator('details.more-hist label:has(input[value="2"])').click();
   await page.getByRole('button', { name: 'Repetir esta etapa' }).click();
   await expect(page.locator('.prog.dor')).toContainText('Você escolheu repetir esta etapa');
 });
@@ -105,13 +109,16 @@ test('com dor: oferece repetir ou voltar uma etapa', async ({ page }) => {
 test('dia de caminhada e domingo', async ({ page }) => {
   await open(page, 'cardio', { time: new Date('2026-10-27T07:30:00') });
   await expect(page.locator('main h2').first()).toHaveText('Caminhada');
+  await page.getByRole('button', { name: 'Usar cronômetro' }).click();
   await expect(page.locator('#cTimer .tm-big')).toHaveText('30:00');
+  await page.getByRole('button', { name: 'Fechar' }).click();
+  await expect(page.locator('#cTimer')).toHaveCount(0);
   await page.goto('/index.html#treino/cardio');
   await expect(page.locator('main')).toContainText('Caminhada leve, 25–30 min');
   await page.clock.setFixedTime(new Date('2026-11-01T08:00:00'));
   await page.goto('/index.html#cardio');
   await page.reload();
-  await expect(page.locator('main')).toContainText('Hoje é descanso completo');
+  await expect(page.locator('main')).toContainText('Descanso completo');
 });
 
 test('sem etapa salva, continua da última corrida registrada (não pula etapa)', async ({ page }) => {
